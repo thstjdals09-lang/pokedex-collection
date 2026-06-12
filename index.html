@@ -394,9 +394,6 @@ body{font-family:'Nunito',sans-serif;background:var(--bg);color:var(--text);min-
       <button class="nav-item" onclick="goPage('browse');setLangFilter('ko')">
         <span class="nav-icon">🇰🇷</span><span data-i18n="lang_ko">한국판</span>
       </button>
-      <button class="nav-item" onclick="goPage('browse');setLangFilter('zh')">
-        <span class="nav-icon">🇨🇳</span><span data-i18n="lang_zh">중문판</span>
-      </button>
     </div>
     <div class="sidebar-bottom">
       <div class="sidebar-lang">
@@ -459,10 +456,6 @@ body{font-family:'Nunito',sans-serif;background:var(--bg);color:var(--text);min-
           <div class="lang-tag" onclick="setLangFilter('en')" data-lf="en">🇺🇸 <span data-i18n="lang_en">영어판</span></div>
           <div class="lang-tag" onclick="setLangFilter('ja')" data-lf="ja">🇯🇵 <span data-i18n="lang_ja">일본판</span></div>
           <div class="lang-tag" onclick="setLangFilter('ko')" data-lf="ko">🇰🇷 <span data-i18n="lang_ko">한국판</span></div>
-          <div class="lang-tag" onclick="setLangFilter('zh')" data-lf="zh">🇨🇳 <span data-i18n="lang_zh">중문판</span></div>
-          <div class="lang-tag" onclick="setLangFilter('de')" data-lf="de">🇩🇪 독일판</div>
-          <div class="lang-tag" onclick="setLangFilter('fr')" data-lf="fr">🇫🇷 프랑스판</div>
-          <div class="lang-tag" onclick="setLangFilter('pt')" data-lf="pt">🇵🇹 포르투갈판</div>
         </div>
         <div id="sets-wrap"></div>
       </div>
@@ -753,12 +746,12 @@ auth.onAuthStateChanged(async user => {
 });
 
 // ══════════════════════════════════════════
-// POKEMONTCG.IO
+// API — 영어/한국판: pokemontcg.io (무료)
+//       일본판:      TCGdex (무료 오픈소스)
 // ══════════════════════════════════════════
-const TCG = 'https://api.pokemontcg.io/v2';
-// ★ dev.pokemontcg.io 에서 무료 API 키 발급 후 아래에 입력하세요
-//   키 없어도 동작하지만 분당 요청 제한이 낮아요
-const TCG_KEY = '';
+const TCG     = 'https://api.pokemontcg.io/v2';
+const TCG_KEY = ''; // dev.pokemontcg.io 에서 무료 발급 (없어도 동작)
+const TCGDEX  = 'https://api.tcgdex.net/v2'; // 일본판 전용
 
 async function tcgGet(path){
   try{
@@ -769,10 +762,71 @@ async function tcgGet(path){
   } catch(e){ console.warn('tcgGet',e); return null; }
 }
 
+async function tcgdexGet(path){
+  try{
+    const r = await fetch(TCGDEX+path);
+    if(!r.ok) throw new Error(r.status);
+    return await r.json();
+  } catch(e){ console.warn('tcgdexGet',e); return null; }
+}
+
+// TCGdex 세트 → 내부 포맷으로 변환
+function normalizeTcgdexSet(s){
+  return {
+    id:          'ja_'+s.id,
+    _tcgdexId:   s.id,
+    name:        s.name,
+    series:      s.serie?.name || 'Japanese',
+    printedTotal: s.cardCount?.official || s.cardCount?.total || 0,
+    total:        s.cardCount?.total || 0,
+    releaseDate:  s.releaseDate || '',
+    _lang:        'ja',
+    images:{
+      logo:   s.logo   ? s.logo+'?auto=compress'   : null,
+      symbol: s.symbol ? s.symbol+'?auto=compress' : null,
+    }
+  };
+}
+
+// TCGdex 카드 → 내부 포맷으로 변환
+function normalizeTcgdexCard(c, setId){
+  return {
+    id:       setId+'_'+c.localId,
+    name:     c.name,
+    number:   c.localId,
+    rarity:   c.rarity || '',
+    supertype: c.category || 'Pokémon',
+    subtypes: c.stage ? [c.stage] : [],
+    hp:       c.hp ? String(c.hp) : '',
+    types:    c.types || [],
+    images:{
+      small: c.image ? c.image+'/low.webp' : '',
+      large: c.image ? c.image+'/high.webp' : '',
+    },
+    tcgplayer: null,
+    cardmarket: null,
+    artist: c.illustrator || '',
+    _lang: 'ja',
+  };
+}
+
 async function loadAllSets(){
   if(allSets.length) return;
-  const d = await tcgGet('/sets?orderBy=-releaseDate&pageSize=250');
-  allSets = d?.data?.length ? d.data : getBuiltinSets();
+
+  // 영어판 (pokemontcg.io)
+  const enData = await tcgGet('/sets?orderBy=-releaseDate&pageSize=250');
+  const enSets = enData?.data?.length ? enData.data.map(s=>({...s,_lang:'en'})) : [];
+
+  // 한국판 (pokemontcg.io — 영어판에서 ko 태그된 것들)
+  // pokemontcg.io는 한국판이 별도 없어서 빌트인으로 보완
+  const koSets = getBuiltinKoSets();
+
+  // 일본판 (TCGdex)
+  const jaData = await tcgdexGet('/ja/sets');
+  const jaSets = Array.isArray(jaData) ? jaData.map(normalizeTcgdexSet) : getBuiltinJaSets();
+
+  const combined = [...enSets, ...jaSets, ...koSets];
+  allSets = combined.length ? combined : getBuiltinSets();
 }
 
 // ══════════════════════════════════════════
@@ -808,13 +862,11 @@ function refreshCurrentPage(){
 // SETS GRID
 // ══════════════════════════════════════════
 function inferLang(s){
+  if(s._lang) return s._lang;
   const id=(s.id||'').toLowerCase(), nm=(s.name||'').toLowerCase();
+  if(id.startsWith('ja_')) return 'ja';
   if(id.includes('_ko')||nm.includes('korean')) return 'ko';
   if(id.includes('_ja')||id.includes('_jp')||nm.includes('japanese')) return 'ja';
-  if(id.includes('_zh')) return 'zh';
-  if(id.includes('_de')||nm.includes('german')) return 'de';
-  if(id.includes('_fr')||nm.includes('french')) return 'fr';
-  if(id.includes('_pt')) return 'pt';
   return 'en';
 }
 
@@ -856,8 +908,8 @@ function renderSetsGrid(){
       const owned  = Object.keys(userColl).filter(k=>k.startsWith(set.id+'_')).length;
       const pct    = set.total ? Math.round(owned/set.total*100) : 0;
       const lc     = inferLang(set);
-      const lbadge = {en:'en',ja:'ja',ko:'ko',zh:'zh',de:'de',fr:'fr',pt:'pt'}[lc]||'';
-      const llabel = {en:'ENG',ja:'JPN',ko:'KOR',zh:'CHN',de:'DEU',fr:'FRA',pt:'POR'}[lc]||lc.toUpperCase();
+      const lbadge = {en:'en',ja:'ja',ko:'ko'}[lc]||'';
+      const llabel = {en:'ENG',ja:'JPN',ko:'KOR'}[lc]||lc.toUpperCase();
       html+=`<div class="set-card${isFav?' favorited':''}" onclick="openSet('${set.id}')">
         <span class="set-star" onclick="event.stopPropagation();toggleFav('${set.id}')">${isFav?'⭐':'☆'}</span>
         <div class="set-logo">
@@ -912,13 +964,25 @@ async function openSet(setId){
 
   document.getElementById('cards-wrap').innerHTML=loadingHTML();
 
+  const isJa = currentSet._lang === 'ja';
   let page=1, all=[];
-  while(true){
-    const d=await tcgGet(`/cards?q=set.id:${setId}&orderBy=number&page=${page}&pageSize=250`);
-    if(!d?.data?.length) break;
-    all=all.concat(d.data);
-    if(all.length>=(d.totalCount||all.length)) break;
-    if(++page>10) break;
+
+  if(isJa && currentSet._tcgdexId){
+    // 일본판 — TCGdex
+    const d = await tcgdexGet('/ja/sets/'+currentSet._tcgdexId);
+    if(d?.cards?.length){
+      all = d.cards.map(c => normalizeTcgdexCard(c, currentSet.id));
+    }
+  } else {
+    // 영어/한국판 — pokemontcg.io
+    const qId = currentSet._origId || setId;
+    while(true){
+      const d=await tcgGet(`/cards?q=set.id:${qId}&orderBy=number&page=${page}&pageSize=250`);
+      if(!d?.data?.length) break;
+      all=all.concat(d.data);
+      if(all.length>=(d.totalCount||all.length)) break;
+      if(++page>10) break;
+    }
   }
   currentCards = all.length ? all : getBuiltinCards(setId);
 
@@ -1187,7 +1251,42 @@ function emptyHTML(icon,title,sub){ return `<div class="empty-state"><div class=
 // ══════════════════════════════════════════
 // BUILTIN SETS FALLBACK
 // ══════════════════════════════════════════
-function getBuiltinSets(){
+function getBuiltinKoSets(){
+  return [
+    {id:'ko_sv8',_origId:'sv8',_lang:'ko',name:'서지 스파크',series:'스칼렛 & 바이올렛',printedTotal:191,total:252,releaseDate:'2024/11/22',images:{logo:'https://images.pokemontcg.io/sv8/logo.png'}},
+    {id:'ko_sv7',_origId:'sv7',_lang:'ko',name:'스텔라 크라운',series:'스칼렛 & 바이올렛',printedTotal:142,total:175,releaseDate:'2024/09/27',images:{logo:'https://images.pokemontcg.io/sv7/logo.png'}},
+    {id:'ko_sv6',_origId:'sv6',_lang:'ko',name:'황혼의 가면',series:'스칼렛 & 바이올렛',printedTotal:162,total:226,releaseDate:'2024/06/07',images:{logo:'https://images.pokemontcg.io/sv6/logo.png'}},
+    {id:'ko_sv5',_origId:'sv5',_lang:'ko',name:'시간의 격동',series:'스칼렛 & 바이올렛',printedTotal:162,total:218,releaseDate:'2024/04/05',images:{logo:'https://images.pokemontcg.io/sv5/logo.png'}},
+    {id:'ko_sv4pt5',_origId:'sv4pt5',_lang:'ko',name:'팔데아의 운명',series:'스칼렛 & 바이올렛',printedTotal:91,total:245,releaseDate:'2024/02/16',images:{logo:'https://images.pokemontcg.io/sv4pt5/logo.png'}},
+    {id:'ko_sv4',_origId:'sv4',_lang:'ko',name:'패러독스 리프트',series:'스칼렛 & 바이올렛',printedTotal:182,total:266,releaseDate:'2023/11/24',images:{logo:'https://images.pokemontcg.io/sv4/logo.png'}},
+    {id:'ko_sv3pt5',_origId:'sv3pt5',_lang:'ko',name:'포켓몬 카드 151',series:'스칼렛 & 바이올렛',printedTotal:165,total:207,releaseDate:'2023/10/27',images:{logo:'https://images.pokemontcg.io/sv3pt5/logo.png'}},
+    {id:'ko_sv3',_origId:'sv3',_lang:'ko',name:'흑요석 불꽃',series:'스칼렛 & 바이올렛',printedTotal:197,total:230,releaseDate:'2023/09/01',images:{logo:'https://images.pokemontcg.io/sv3/logo.png'}},
+    {id:'ko_sv2',_origId:'sv2',_lang:'ko',name:'팔데아 진화',series:'스칼렛 & 바이올렛',printedTotal:193,total:279,releaseDate:'2023/06/30',images:{logo:'https://images.pokemontcg.io/sv2/logo.png'}},
+    {id:'ko_sv1',_origId:'sv1',_lang:'ko',name:'스칼렛 & 바이올렛 기본',series:'스칼렛 & 바이올렛',printedTotal:198,total:258,releaseDate:'2023/04/21',images:{logo:'https://images.pokemontcg.io/sv1/logo.png'}},
+    {id:'ko_swsh12pt5',_origId:'swsh12pt5',_lang:'ko',name:'크라운 제나스',series:'소드 & 실드',printedTotal:160,total:230,releaseDate:'2023/02/17',images:{logo:'https://images.pokemontcg.io/swsh12pt5/logo.png'}},
+    {id:'ko_swsh12',_origId:'swsh12',_lang:'ko',name:'실버 템페스트',series:'소드 & 실드',printedTotal:195,total:245,releaseDate:'2022/12/02',images:{logo:'https://images.pokemontcg.io/swsh12/logo.png'}},
+    {id:'ko_swsh11',_origId:'swsh11',_lang:'ko',name:'로스트 어비스',series:'소드 & 실드',printedTotal:196,total:246,releaseDate:'2022/09/23',images:{logo:'https://images.pokemontcg.io/swsh11/logo.png'}},
+  ];
+}
+
+function getBuiltinJaSets(){
+  return [
+    {id:'ja_sv8a',_tcgdexId:'sv8a',_lang:'ja',name:'テラスタルフェスex',series:'スカーレット&バイオレット',printedTotal:86,total:95,releaseDate:'2025/03/28',images:{logo:null}},
+    {id:'ja_sv8',_tcgdexId:'sv8',_lang:'ja',name:'超電ブレイカー',series:'スカーレット&バイオレット',printedTotal:98,total:115,releaseDate:'2024/11/01',images:{logo:null}},
+    {id:'ja_sv7',_tcgdexId:'sv7',_lang:'ja',name:'スターターセットex',series:'スカーレット&バイオレット',printedTotal:142,total:175,releaseDate:'2024/09/13',images:{logo:null}},
+    {id:'ja_sv6pt5',_tcgdexId:'sv6pt5',_lang:'ja',name:'変幻の仮面',series:'スカーレット&バイオレット',printedTotal:64,total:99,releaseDate:'2024/04/26',images:{logo:null}},
+    {id:'ja_sv6',_tcgdexId:'sv6',_lang:'ja',name:'ナイトワンダラー',series:'スカーレット&バイオレット',printedTotal:64,total:81,releaseDate:'2024/06/07',images:{logo:null}},
+    {id:'ja_sv5',_tcgdexId:'sv5',_lang:'ja',name:'クリムゾンヘイズ',series:'スカーレット&バイオレット',printedTotal:64,total:77,releaseDate:'2024/01/26',images:{logo:null}},
+    {id:'ja_sv4pt5',_tcgdexId:'sv4pt5',_lang:'ja',name:'レイジングサーフ',series:'スカーレット&バイオレット',printedTotal:60,total:70,releaseDate:'2023/09/22',images:{logo:null}},
+    {id:'ja_sv4',_tcgdexId:'sv4',_lang:'ja',name:'ワイルドフォース',series:'スカーレット&バイオレット',printedTotal:60,total:70,releaseDate:'2024/01/26',images:{logo:null}},
+    {id:'ja_sv3pt5',_tcgdexId:'sv3pt5',_lang:'ja',name:'151',series:'スカーレット&バイオレット',printedTotal:165,total:207,releaseDate:'2023/06/16',images:{logo:null}},
+    {id:'ja_sv3',_tcgdexId:'sv3',_lang:'ja',name:'黒炎の支配者',series:'スカーレット&バイオレット',printedTotal:98,total:108,releaseDate:'2023/07/28',images:{logo:null}},
+    {id:'ja_sv2',_tcgdexId:'sv2',_lang:'ja',name:'Clay Burst',series:'スカーレット&バイオレット',printedTotal:60,total:71,releaseDate:'2023/04/28',images:{logo:null}},
+    {id:'ja_sv1',_tcgdexId:'sv1',_lang:'ja',name:'スカーレットex',series:'スカーレット&バイオレット',printedTotal:78,total:90,releaseDate:'2023/01/20',images:{logo:null}},
+  ];
+}
+
+
   return [
     {id:'sv8',name:'Surging Sparks',series:'Scarlet & Violet',printedTotal:191,total:252,releaseDate:'2024/11/08',images:{logo:'https://images.pokemontcg.io/sv8/logo.png'}},
     {id:'sv7',name:'Stellar Crown',series:'Scarlet & Violet',printedTotal:142,total:175,releaseDate:'2024/09/13',images:{logo:'https://images.pokemontcg.io/sv7/logo.png'}},
