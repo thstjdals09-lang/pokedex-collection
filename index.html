@@ -735,7 +735,10 @@ auth.onAuthStateChanged(async user => {
     document.getElementById('login-screen').style.display='none';
     document.getElementById('app').style.display='block';
     setLang(LANG);
-    goPage('dashboard');
+    // 새로고침 시 이전 페이지 복원 (hash 기반)
+    const hash = location.hash.replace('#','');
+    const validPages = ['dashboard','browse','collection'];
+    goPage(validPages.includes(hash) ? hash : 'dashboard');
   } else {
     currentUser=null;
     if(userRef){ userRef.off(); userRef=null; }
@@ -773,17 +776,17 @@ async function tcgdexGet(path){
 // TCGdex 세트 → 내부 포맷으로 변환
 function normalizeTcgdexSet(s){
   return {
-    id:          'ja_'+s.id,
-    _tcgdexId:   s.id,
-    name:        s.name,
-    series:      s.serie?.name || 'Japanese',
+    id:           'ja_'+s.id,
+    _tcgdexId:    s.id,
+    name:         s.name,
+    series:       s.serie?.name || 'Japanese',
     printedTotal: s.cardCount?.official || s.cardCount?.total || 0,
     total:        s.cardCount?.total || 0,
     releaseDate:  s.releaseDate || '',
     _lang:        'ja',
     images:{
-      logo:   s.logo   ? s.logo+'?auto=compress'   : null,
-      symbol: s.symbol ? s.symbol+'?auto=compress' : null,
+      logo:   s.logo   ? s.logo+'.png'   : null,
+      symbol: s.symbol ? s.symbol+'.png' : null,
     }
   };
 }
@@ -791,22 +794,22 @@ function normalizeTcgdexSet(s){
 // TCGdex 카드 → 내부 포맷으로 변환
 function normalizeTcgdexCard(c, setId){
   return {
-    id:       setId+'_'+c.localId,
-    name:     c.name,
-    number:   c.localId,
-    rarity:   c.rarity || '',
+    id:        setId+'_'+c.localId,
+    name:      c.name || c.localId,
+    number:    c.localId,
+    rarity:    c.rarity || '',
     supertype: c.category || 'Pokémon',
-    subtypes: c.stage ? [c.stage] : [],
-    hp:       c.hp ? String(c.hp) : '',
-    types:    c.types || [],
+    subtypes:  c.stage ? [c.stage] : [],
+    hp:        c.hp ? String(c.hp) : '',
+    types:     c.types || [],
     images:{
-      small: c.image ? c.image+'/low.webp' : '',
+      small: c.image ? c.image+'/low.webp'  : '',
       large: c.image ? c.image+'/high.webp' : '',
     },
-    tcgplayer: null,
+    tcgplayer:  null,
     cardmarket: null,
-    artist: c.illustrator || '',
-    _lang: 'ja',
+    artist:     c.illustrator || '',
+    _lang:      'ja',
   };
 }
 
@@ -815,27 +818,38 @@ async function loadAllSets(){
 
   // 영어판 (pokemontcg.io)
   const enData = await tcgGet('/sets?orderBy=-releaseDate&pageSize=250');
-  const enSets = enData?.data?.length ? enData.data.map(s=>({...s,_lang:'en'})) : [];
+  const enSets = enData?.data?.length
+    ? enData.data.map(s=>({...s, _lang:'en'}))
+    : getBuiltinSets().filter(s=>s._lang==='en'||!s._lang);
 
-  // 한국판 (pokemontcg.io — 영어판에서 ko 태그된 것들)
-  // pokemontcg.io는 한국판이 별도 없어서 빌트인으로 보완
+  // 한국판 — 빌트인 (pokemontcg.io는 한국판 미지원)
   const koSets = getBuiltinKoSets();
 
-  // 일본판 (TCGdex)
+  // 일본판 (TCGdex) — 언어코드 없이 전체 세트 조회 후 ja 필터
+  // TCGdex URL: https://api.tcgdex.net/v2/ja/sets
   const jaData = await tcgdexGet('/ja/sets');
-  const jaSets = Array.isArray(jaData) ? jaData.map(normalizeTcgdexSet) : getBuiltinJaSets();
+  const jaSets = Array.isArray(jaData) && jaData.length > 0
+    ? jaData.map(normalizeTcgdexSet)
+    : getBuiltinJaSets();
 
-  const combined = [...enSets, ...jaSets, ...koSets];
-  allSets = combined.length ? combined : getBuiltinSets();
+  allSets = [...enSets, ...jaSets, ...koSets];
 }
 
 // ══════════════════════════════════════════
 // NAVIGATION
 // ══════════════════════════════════════════
 const PAGES = ['dashboard','browse','cardlist','collection'];
-const SERIES_ORDER = ['Scarlet & Violet','Sword & Shield','Sun & Moon','XY',
+const SERIES_ORDER = [
+  // 영어
+  'Scarlet & Violet','Sword & Shield','Sun & Moon','XY',
   'Black & White','HeartGold & SoulSilver','Platinum','Diamond & Pearl',
-  'EX','e-Card','Neo','Gym','Base'];
+  'EX','e-Card','Neo','Gym','Base',
+  // 일본어
+  'スカーレット&バイオレット','ソード&シールド','サン&ムーン',
+  'XY','ブラック&ホワイト',
+  // 한국어
+  '스칼렛 & 바이올렛','소드 & 실드','썬 & 문',
+];
 
 function goPage(page){
   PAGES.forEach(p => document.getElementById('page-'+p).style.display = p===page?'block':'none');
@@ -845,6 +859,8 @@ function goPage(page){
   const tm={dashboard:'nav_home',browse:'nav_browse',cardlist:'nav_browse',collection:'nav_coll'};
   document.getElementById('page-title').textContent = t(tm[page]||'nav_home');
   document.getElementById('sidebar').classList.remove('open');
+  // URL 해시 저장 — 새로고침해도 현재 페이지 유지
+  if(page !== 'cardlist') history.replaceState(null,'','#'+page);
   if(page==='dashboard')  renderDashboard();
   if(page==='browse')     renderSetsGrid();
   if(page==='collection') renderCollection();
@@ -887,49 +903,73 @@ function renderSetsGrid(){
     document.getElementById('sets-wrap').innerHTML=emptyHTML('📭','해당 언어 팩 없음','');
     return;
   }
-  const bySeries={};
-  sets.forEach(s=>{ const k=s.series||'Other'; (bySeries[k]||(bySeries[k]=[])).push(s); });
-  const keys=Object.keys(bySeries).sort((a,b)=>{
-    const ai=SERIES_ORDER.indexOf(a),bi=SERIES_ORDER.indexOf(b);
-    if(ai<0&&bi<0) return a.localeCompare(b);
-    return (ai<0?999:ai)-(bi<0?999:bi);
+
+  // 전체 탭이면 언어별로 먼저 묶고, 그 안에서 시리즈별로 그룹핑
+  const langOrder = ['en','ja','ko'];
+  const langLabel = {en:'🇺🇸 영어판 (English)',ja:'🇯🇵 일본판 (Japanese)',ko:'🇰🇷 한국판 (Korean)'};
+
+  let html = '';
+
+  const langsToShow = langFilter === 'all' ? langOrder : [langFilter];
+
+  langsToShow.forEach(lang => {
+    const langSets = sets.filter(s=>inferLang(s)===lang);
+    if(!langSets.length) return;
+
+    // 전체 탭이면 언어 구분선 표시
+    if(langFilter === 'all'){
+      html += `<div style="margin-top:28px;margin-bottom:4px;display:flex;align-items:center;gap:10px">
+        <div style="font-size:16px;font-weight:900;color:var(--text)">${langLabel[lang]}</div>
+        <div style="flex:1;height:1px;background:var(--border)"></div>
+        <div style="font-size:12px;color:var(--text3)">${langSets.length}세트</div>
+      </div>`;
+    }
+
+    // 시리즈별 그룹핑
+    const bySeries={};
+    langSets.forEach(s=>{ const k=s.series||'Other'; (bySeries[k]||(bySeries[k]=[])).push(s); });
+    const keys=Object.keys(bySeries).sort((a,b)=>{
+      const ai=SERIES_ORDER.indexOf(a),bi=SERIES_ORDER.indexOf(b);
+      if(ai<0&&bi<0) return a.localeCompare(b);
+      return (ai<0?999:ai)-(bi<0?999:bi);
+    });
+
+    keys.forEach(series=>{
+      const items=bySeries[series];
+      html+=`<div>
+        <div class="section-header" style="margin-top:18px;margin-bottom:10px">
+          <div class="section-title" style="font-size:13px;color:var(--text2)">${series}</div>
+          <div class="section-subtitle">${items.length}세트</div>
+        </div><div class="sets-grid">`;
+      items.forEach(set=>{
+        const isFav  = userFavs.includes(set.id);
+        const owned  = Object.keys(userColl).filter(k=>k.startsWith(set.id+'_')).length;
+        const pct    = set.total ? Math.round(owned/set.total*100) : 0;
+        const lc     = inferLang(set);
+        const lbadge = {en:'en',ja:'ja',ko:'ko'}[lc]||'';
+        const llabel = {en:'ENG',ja:'JPN',ko:'KOR'}[lc]||lc.toUpperCase();
+        html+=`<div class="set-card${isFav?' favorited':''}" onclick="openSet('${set.id}')">
+          <span class="set-star" onclick="event.stopPropagation();toggleFav('${set.id}')">${isFav?'⭐':'☆'}</span>
+          <div class="set-logo">
+            ${set.images?.logo
+              ?`<img src="${set.images.logo}" alt="${set.name}" onerror="this.style.display='none'">`
+              :'<div class="no-logo">📦</div>'}
+          </div>
+          <div class="set-name">${set.name}</div>
+          <div class="set-meta">
+            <span class="set-badge ${lbadge}">${llabel}</span>
+            <span class="set-badge">${set.printedTotal||set.total||'?'}종</span>
+            ${set.releaseDate?`<span class="set-badge">${set.releaseDate.slice(0,7)}</span>`:''}
+          </div>
+          ${owned>0?`<div class="prog-wrap"><div class="prog-bar" style="width:${pct}%"></div></div>
+          <div class="prog-text">${owned}/${set.total||'?'} (${pct}%)</div>`:''}
+        </div>`;
+      });
+      html+=`</div></div>`;
+    });
   });
 
-  let html='';
-  keys.forEach(series=>{
-    const items=bySeries[series];
-    html+=`<div>
-      <div class="section-header" style="margin-top:22px;margin-bottom:10px">
-        <div class="section-title" style="font-size:14px">${series}</div>
-        <div class="section-subtitle">${items.length}세트</div>
-      </div><div class="sets-grid">`;
-    items.forEach(set=>{
-      const isFav  = userFavs.includes(set.id);
-      const owned  = Object.keys(userColl).filter(k=>k.startsWith(set.id+'_')).length;
-      const pct    = set.total ? Math.round(owned/set.total*100) : 0;
-      const lc     = inferLang(set);
-      const lbadge = {en:'en',ja:'ja',ko:'ko'}[lc]||'';
-      const llabel = {en:'ENG',ja:'JPN',ko:'KOR'}[lc]||lc.toUpperCase();
-      html+=`<div class="set-card${isFav?' favorited':''}" onclick="openSet('${set.id}')">
-        <span class="set-star" onclick="event.stopPropagation();toggleFav('${set.id}')">${isFav?'⭐':'☆'}</span>
-        <div class="set-logo">
-          ${set.images?.logo
-            ?`<img src="${set.images.logo}" alt="${set.name}" onerror="this.style.display='none'">`
-            :'<div class="no-logo">📦</div>'}
-        </div>
-        <div class="set-name">${set.name}</div>
-        <div class="set-meta">
-          <span class="set-badge ${lbadge}">${llabel}</span>
-          <span class="set-badge">${set.printedTotal||set.total||'?'}종</span>
-          ${set.releaseDate?`<span class="set-badge">${set.releaseDate.slice(0,7)}</span>`:''}
-        </div>
-        ${owned>0?`<div class="prog-wrap"><div class="prog-bar" style="width:${pct}%"></div></div>
-        <div class="prog-text">${owned}/${set.total||'?'} (${pct}%)</div>`:''}
-      </div>`;
-    });
-    html+=`</div></div>`;
-  });
-  document.getElementById('sets-wrap').innerHTML=html;
+  document.getElementById('sets-wrap').innerHTML = html || emptyHTML('📭','팩 없음','');
 }
 
 function toggleFav(setId){
