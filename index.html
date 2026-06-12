@@ -1,0 +1,1245 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PokéDex Collection</title>
+
+<!-- Firebase SDK (compat version - CDN) -->
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
+
+<script>
+// ══ Firebase 설정 (하드코딩 — 사용자는 그냥 회원가입만 하면 됨) ══
+firebase.initializeApp({
+  apiKey: "AIzaSyC1dLu8Y7b49g24E_xkRNPgvO_D_lxfFFY",
+  authDomain: "pokedex-collection.firebaseapp.com",
+  databaseURL: "https://pokedex-collection-default-rtdb.firebaseio.com",
+  projectId: "pokedex-collection",
+  storageBucket: "pokedex-collection.firebasestorage.app",
+  messagingSenderId: "1059009251459",
+  appId: "1:1059009251459:web:34a84bd838c37a4a83f3b6"
+});
+const auth = firebase.auth();
+const db   = firebase.database();
+</script>
+
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=DM+Mono:wght@400;500&display=swap');
+:root{
+  --bg:#0d0f14;--surface:#161921;--surface2:#1e2230;--border:#2a2f40;
+  --accent:#ffcb05;--accent2:#3d7dca;--accent3:#cc2244;
+  --text:#f0f2f8;--text2:#8892a4;--text3:#5a6275;
+  --success:#4ade80;--danger:#f87171;
+  --radius:12px;--radius-lg:20px;--shadow:0 8px 32px rgba(0,0,0,.4);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Nunito',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden}
+
+/* ── LOADING SPLASH ── */
+#splash{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:16px;z-index:9999}
+#splash.hide{display:none}
+.splash-logo{font-size:28px;font-weight:900}
+.splash-logo span{color:var(--accent)}
+.spinner{width:36px;height:36px;border:3px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ── LOGIN ── */
+#login-screen{display:none;align-items:center;justify-content:center;min-height:100vh;
+  background:radial-gradient(ellipse 80% 60% at 50% 0%,#1a2a5e44,transparent),
+             radial-gradient(ellipse 60% 40% at 80% 80%,#5a1a2e33,transparent),var(--bg)}
+.login-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);
+  padding:44px 36px;width:420px;box-shadow:var(--shadow)}
+.login-logo{text-align:center;margin-bottom:28px}
+.login-title{font-size:26px;font-weight:900;letter-spacing:-.5px}
+.login-title span{color:var(--accent)}
+.login-sub{font-size:13px;color:var(--text2);margin-top:4px}
+.lang-switcher{display:flex;gap:6px;margin-bottom:24px;background:var(--surface2);border-radius:10px;padding:4px}
+.lang-btn{flex:1;padding:7px;border:none;background:none;border-radius:8px;color:var(--text2);
+  font-family:inherit;font-size:13px;font-weight:700;cursor:pointer;transition:all .15s}
+.lang-btn.active{background:var(--accent);color:#111}
+.form-group{margin-bottom:14px}
+.form-group label{display:block;font-size:11px;font-weight:700;color:var(--text2);
+  text-transform:uppercase;letter-spacing:.08em;margin-bottom:7px}
+.form-group input{width:100%;padding:11px 14px;background:var(--surface2);border:1px solid var(--border);
+  border-radius:var(--radius);color:var(--text);font-family:inherit;font-size:15px;outline:none;transition:border-color .15s}
+.form-group input:focus{border-color:var(--accent)}
+.btn-primary{width:100%;padding:13px;background:var(--accent);border:none;border-radius:var(--radius);
+  color:#111;font-family:inherit;font-size:15px;font-weight:800;cursor:pointer;
+  transition:opacity .15s,transform .1s;margin-top:4px}
+.btn-primary:hover{opacity:.9;transform:translateY(-1px)}
+.btn-primary:disabled{opacity:.5;cursor:not-allowed;transform:none}
+.google-btn{width:100%;padding:12px;background:var(--surface2);border:1px solid var(--border);
+  border-radius:var(--radius);color:var(--text);font-family:inherit;font-size:14px;font-weight:700;
+  cursor:pointer;transition:all .15s;display:flex;align-items:center;justify-content:center;gap:10px;margin-top:10px}
+.google-btn:hover{border-color:var(--accent2);background:#3d7dca11}
+.divider{display:flex;align-items:center;gap:12px;margin:14px 0;color:var(--text3);font-size:12px}
+.divider::before,.divider::after{content:'';flex:1;height:1px;background:var(--border)}
+.err-msg{background:#f8717122;border:1px solid #f8717166;border-radius:8px;padding:9px 13px;
+  font-size:13px;color:var(--danger);margin-bottom:12px;display:none}
+.login-switch{text-align:center;margin-top:16px;font-size:13px;color:var(--text2)}
+.login-switch a{color:var(--accent);cursor:pointer;font-weight:700}
+
+/* ── APP ── */
+#app{display:none;min-height:100vh}
+.sidebar{position:fixed;left:0;top:0;bottom:0;width:240px;background:var(--surface);
+  border-right:1px solid var(--border);display:flex;flex-direction:column;z-index:100;
+  padding:24px 0;transition:transform .3s}
+.sidebar-logo{padding:0 20px 22px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px}
+.logo-text{font-size:18px;font-weight:900;letter-spacing:-.5px}
+.logo-text span{color:var(--accent)}
+.sidebar-nav{flex:1;padding:14px 12px;display:flex;flex-direction:column;gap:2px;overflow-y:auto}
+.nav-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:var(--radius);
+  color:var(--text2);font-size:14px;font-weight:700;cursor:pointer;transition:all .15s;
+  border:none;background:none;text-align:left;width:100%;font-family:inherit}
+.nav-item:hover{background:var(--surface2);color:var(--text)}
+.nav-item.active{background:#3d7dca22;color:var(--accent)}
+.nav-icon{font-size:18px;flex-shrink:0}
+.nav-label{font-size:10px;font-weight:800;color:var(--text3);text-transform:uppercase;
+  letter-spacing:.12em;padding:14px 12px 5px}
+.sidebar-bottom{padding:14px 12px;border-top:1px solid var(--border)}
+.user-info{display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:var(--radius)}
+.user-avatar{width:36px;height:36px;background:linear-gradient(135deg,var(--accent),var(--accent2));
+  border-radius:50%;display:flex;align-items:center;justify-content:center;
+  font-size:14px;font-weight:900;color:#111;flex-shrink:0;overflow:hidden}
+.user-avatar img{width:100%;height:100%;object-fit:cover}
+.user-name{font-size:13px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:140px}
+.user-email{font-size:11px;color:var(--text2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:140px}
+.sidebar-lang{display:flex;gap:4px;padding:0 12px;margin-top:8px}
+.sidebar-lang .lang-btn{font-size:11px;padding:5px 2px}
+.main-content{margin-left:240px;min-height:100vh;display:flex;flex-direction:column}
+.topbar{position:sticky;top:0;background:var(--bg);border-bottom:1px solid var(--border);
+  padding:14px 28px;display:flex;align-items:center;gap:14px;z-index:50}
+.topbar h1{font-size:19px;font-weight:900}
+.topbar-right{margin-left:auto;display:flex;align-items:center;gap:10px}
+.search-box{display:flex;align-items:center;gap:8px;background:var(--surface2);
+  border:1px solid var(--border);border-radius:10px;padding:8px 13px}
+.search-box input{background:none;border:none;outline:none;color:var(--text);
+  font-family:inherit;font-size:14px;width:190px}
+.search-box input::placeholder{color:var(--text3)}
+.page-content{padding:28px;flex:1}
+.hamburger{display:none;background:none;border:none;color:var(--text);font-size:24px;cursor:pointer;padding:4px}
+
+/* ── COMMON ── */
+.section-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px}
+.section-title{font-size:17px;font-weight:900}
+.section-subtitle{font-size:13px;color:var(--text2);margin-top:2px}
+.btn-outline{padding:8px 15px;background:none;border:1px solid var(--border);border-radius:var(--radius);
+  color:var(--text2);font-family:inherit;font-size:13px;font-weight:700;cursor:pointer;transition:all .15s}
+.btn-outline:hover{border-color:var(--accent);color:var(--accent)}
+.lang-filter{display:flex;gap:6px;margin-bottom:20px;flex-wrap:wrap}
+.lang-tag{display:flex;align-items:center;gap:5px;padding:6px 13px;background:var(--surface2);
+  border:1px solid var(--border);border-radius:20px;font-size:13px;font-weight:700;
+  cursor:pointer;transition:all .15s;color:var(--text2)}
+.lang-tag.active{background:#3d7dca22;border-color:var(--accent2);color:var(--text)}
+
+/* ── SETS GRID ── */
+.sets-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:13px}
+.set-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);
+  padding:17px 13px;cursor:pointer;transition:all .2s;position:relative;overflow:hidden}
+.set-card:hover{border-color:var(--accent2);transform:translateY(-2px);box-shadow:var(--shadow)}
+.set-card.favorited{border-color:var(--accent);background:#ffcb0508}
+.set-star{position:absolute;top:8px;right:9px;font-size:16px;cursor:pointer;line-height:1;z-index:2}
+.set-logo{height:44px;display:flex;align-items:center;justify-content:center;margin-bottom:9px}
+.set-logo img{max-height:44px;max-width:100%;object-fit:contain;filter:drop-shadow(0 2px 6px rgba(0,0,0,.3))}
+.no-logo{font-size:26px}
+.set-name{font-size:12px;font-weight:800;text-align:center;line-height:1.3;margin-bottom:7px}
+.set-meta{display:flex;justify-content:center;gap:4px;flex-wrap:wrap}
+.set-badge{font-size:10px;font-weight:700;padding:2px 7px;border-radius:20px;background:var(--surface2);color:var(--text2)}
+.set-badge.en{background:#1d4ed8;color:#fff}
+.set-badge.ja{background:#dc2626;color:#fff}
+.set-badge.ko{background:#16a34a;color:#fff}
+.set-badge.zh{background:#d97706;color:#fff}
+.set-badge.de{background:#4b5563;color:#fff}
+.set-badge.fr{background:#7c3aed;color:#fff}
+.prog-wrap{margin-top:9px;background:var(--surface2);border-radius:4px;height:4px;overflow:hidden}
+.prog-bar{height:100%;background:linear-gradient(90deg,var(--accent2),var(--accent));border-radius:4px;transition:width .4s}
+.prog-text{font-size:10px;color:var(--text3);text-align:center;margin-top:3px}
+
+/* ── CARD LIST ── */
+.back-btn{display:flex;align-items:center;gap:6px;padding:8px 13px;background:var(--surface2);
+  border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-family:inherit;
+  font-size:13px;font-weight:700;cursor:pointer;transition:all .15s;margin-bottom:16px;width:fit-content}
+.back-btn:hover{border-color:var(--accent);color:var(--accent)}
+.set-info-bar{display:flex;align-items:center;gap:14px;padding:16px 20px;background:var(--surface);
+  border:1px solid var(--border);border-radius:var(--radius-lg);margin-bottom:18px;flex-wrap:wrap}
+.set-info-logo{height:48px;max-width:120px;object-fit:contain;flex-shrink:0}
+.set-info-name{font-size:19px;font-weight:900}
+.set-info-series{font-size:12px;color:var(--text2);margin-top:1px}
+.set-info-stats{display:flex;gap:18px;margin-left:auto}
+.s-stat{text-align:center}
+.s-stat-num{font-size:19px;font-weight:900;color:var(--accent)}
+.s-stat-lbl{font-size:10px;color:var(--text2);text-transform:uppercase;letter-spacing:.06em}
+.filter-bar{display:flex;gap:7px;margin-bottom:16px;flex-wrap:wrap;align-items:center}
+.filter-sel{padding:7px 11px;background:var(--surface2);border:1px solid var(--border);
+  border-radius:var(--radius);color:var(--text);font-family:inherit;font-size:13px;outline:none;cursor:pointer}
+.fchip{padding:6px 12px;background:var(--surface2);border:1px solid var(--border);border-radius:20px;
+  font-size:12px;font-weight:700;cursor:pointer;transition:all .15s;color:var(--text2);font-family:inherit}
+.fchip.active{background:#ffcb0522;border-color:var(--accent);color:var(--accent)}
+
+/* ── CARD GRID ── */
+.card-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(145px,1fr));gap:11px}
+.ccard{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);
+  overflow:hidden;cursor:pointer;transition:all .2s;position:relative}
+.ccard:hover{transform:translateY(-3px);box-shadow:0 8px 24px rgba(0,0,0,.5);border-color:var(--accent2)}
+.ccard.owned{border-color:var(--success)}
+.ccard.owned::after{content:'';position:absolute;inset:0;background:var(--success);opacity:.05;pointer-events:none}
+.cimg{position:relative;aspect-ratio:.717;background:var(--surface2);overflow:hidden}
+.cimg img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .3s}
+.ccard:hover .cimg img{transform:scale(1.05)}
+.no-img{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:30px;color:var(--text3)}
+.owned-badge{position:absolute;top:5px;right:5px;background:var(--success);color:#000;
+  font-size:9px;font-weight:900;padding:2px 6px;border-radius:20px;z-index:2}
+.qty-badge{position:absolute;top:5px;left:5px;background:var(--accent);color:#111;
+  font-size:10px;font-weight:900;padding:2px 7px;border-radius:20px;z-index:2}
+.cinfo{padding:8px 8px 6px}
+.cnum{font-size:10px;color:var(--text3);font-family:'DM Mono',monospace;margin-bottom:1px}
+.cname{font-size:12px;font-weight:800;line-height:1.3;margin-bottom:3px}
+.cprice{font-size:11px;font-weight:700;color:var(--accent);font-family:'DM Mono',monospace}
+.crarity{font-size:10px;color:var(--text3);margin-top:1px}
+.cactions{display:flex;gap:3px;padding:0 6px 8px}
+.cbtn{flex:1;padding:5px;background:var(--surface2);border:1px solid var(--border);border-radius:6px;
+  color:var(--text);font-family:inherit;font-size:15px;font-weight:900;cursor:pointer;transition:all .15s}
+.cbtn:hover{background:var(--accent);color:#111;border-color:var(--accent)}
+.cqty{flex:1;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:900;
+  background:var(--surface2);border-radius:6px;font-family:'DM Mono',monospace}
+
+/* rarity bar */
+.rbar{width:4px;height:100%;position:absolute;left:0;top:0}
+.rc-HyperRare .rbar{background:linear-gradient(180deg,#f59e0b,#fde68a)}
+.rc-UltraRare .rbar{background:linear-gradient(180deg,#7c3aed,#db2777)}
+.rc-DoubleRare .rbar{background:#7c3aed}
+.rc-SpecialIllustrationRare .rbar,.rc-IllustrationRare .rbar{background:linear-gradient(180deg,#0ea5e9,#38bdf8)}
+.rc-Rare .rbar{background:#3b82f6}
+.rc-Uncommon .rbar{background:#6366f1}
+.rc-Common .rbar{background:var(--text3)}
+
+/* ── MODAL ── */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);
+  z-index:1000;align-items:center;justify-content:center;padding:20px}
+.modal-overlay.open{display:flex}
+.modal{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);
+  width:100%;max-width:500px;max-height:90vh;overflow-y:auto;box-shadow:var(--shadow)}
+.modal-top{padding:20px 20px 0;display:flex;gap:14px}
+.modal-img{width:108px;flex-shrink:0;border-radius:8px;overflow:hidden;background:var(--surface2)}
+.modal-img img{width:100%;display:block}
+.no-img-lg{aspect-ratio:.717;display:flex;align-items:center;justify-content:center;font-size:34px;color:var(--text3)}
+.modal-info{flex:1}
+.modal-num{font-size:11px;color:var(--text3);font-family:'DM Mono',monospace;margin-bottom:3px}
+.modal-name{font-size:18px;font-weight:900;margin-bottom:7px;line-height:1.2}
+.modal-badges{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:8px}
+.mbadge{font-size:11px;font-weight:700;padding:3px 9px;border-radius:20px;
+  background:var(--surface2);border:1px solid var(--border);color:var(--text2)}
+.modal-section{padding:14px 20px;border-top:1px solid var(--border)}
+.modal-section-title{font-size:11px;font-weight:700;color:var(--text2);
+  text-transform:uppercase;letter-spacing:.08em;margin-bottom:9px}
+.price-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.pcell{background:var(--surface2);border-radius:8px;padding:7px;text-align:center}
+.pcell-label{font-size:10px;color:var(--text3);margin-bottom:2px}
+.pcell-val{font-size:13px;font-weight:900;font-family:'DM Mono',monospace}
+.pcell-val.mkt{color:var(--accent)}
+.own-controls{display:flex;align-items:center;gap:12px}
+.own-btn{width:42px;height:42px;background:var(--surface2);border:1px solid var(--border);
+  border-radius:var(--radius);color:var(--text);font-size:20px;cursor:pointer;
+  transition:all .15s;font-family:inherit;display:flex;align-items:center;justify-content:center}
+.own-btn:hover{background:var(--accent);color:#111;border-color:var(--accent)}
+.own-count{font-size:30px;font-weight:900;min-width:54px;text-align:center;
+  font-family:'DM Mono',monospace;color:var(--accent)}
+.modal-footer{padding:13px 20px;border-top:1px solid var(--border)}
+.modal-footer button{width:100%;padding:11px;background:var(--surface2);border:1px solid var(--border);
+  border-radius:var(--radius);color:var(--text);font-family:inherit;font-size:14px;font-weight:700;cursor:pointer;transition:all .15s}
+.modal-footer button:hover{background:var(--accent);color:#111;border-color:var(--accent)}
+
+/* ── DASHBOARD ── */
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:13px;margin-bottom:26px}
+.stat-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:18px}
+.stat-icon{font-size:24px;margin-bottom:9px}
+.stat-num{font-size:26px;font-weight:900;font-family:'DM Mono',monospace}
+.stat-lbl{font-size:12px;color:var(--text2);margin-top:3px;font-weight:700}
+.my-packs-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:12px}
+.my-pack{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);
+  padding:14px;cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:12px}
+.my-pack:hover{border-color:var(--accent2);transform:translateY(-2px)}
+.mp-logo{height:38px;width:72px;object-fit:contain;flex-shrink:0}
+.mp-placeholder{width:38px;height:38px;background:var(--surface2);border-radius:50%;
+  display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0}
+.mp-info{flex:1;min-width:0}
+.mp-name{font-size:13px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:3px}
+.mp-series{font-size:11px;color:var(--text2);margin-bottom:4px}
+
+/* ── LOADING / EMPTY ── */
+.loading-state{display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding:60px 20px;gap:12px;color:var(--text2);font-size:14px}
+.empty-state{text-align:center;padding:60px 20px;color:var(--text2)}
+.empty-icon{font-size:46px;margin-bottom:10px}
+.empty-title{font-size:17px;font-weight:700;margin-bottom:5px;color:var(--text)}
+.empty-sub{font-size:13px}
+
+/* ── TOAST ── */
+.toast{position:fixed;bottom:22px;right:22px;background:var(--surface);border:1px solid var(--border);
+  border-radius:var(--radius);padding:10px 16px;font-size:13px;font-weight:700;z-index:9999;
+  transform:translateY(60px);opacity:0;transition:all .25s;box-shadow:var(--shadow);max-width:280px}
+.toast.show{transform:translateY(0);opacity:1}
+.toast.success{border-color:var(--success);color:var(--success)}
+.toast.error{border-color:var(--danger);color:var(--danger)}
+.toast.info{border-color:var(--accent);color:var(--accent)}
+
+/* ── SYNC INDICATOR ── */
+.sync-dot{width:8px;height:8px;border-radius:50%;background:var(--success);display:inline-block;margin-left:6px}
+.sync-dot.saving{background:var(--accent);animation:pulse .8s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+
+/* ── RESPONSIVE ── */
+@media(max-width:768px){
+  .sidebar{transform:translateX(-100%)}
+  .sidebar.open{transform:translateX(0)}
+  .main-content{margin-left:0}
+  .page-content{padding:14px}
+  .topbar{padding:11px 14px}
+  .card-grid{grid-template-columns:repeat(auto-fill,minmax(115px,1fr))}
+  .sets-grid{grid-template-columns:repeat(auto-fill,minmax(138px,1fr))}
+  .hamburger{display:block}
+  .login-card{width:100%;margin:14px;padding:28px 20px}
+  .search-box input{width:110px}
+  .set-info-stats{margin-left:0}
+}
+</style>
+</head>
+<body>
+
+<!-- SPLASH -->
+<div id="splash">
+  <div class="splash-logo">Poké<span>Dex</span></div>
+  <div class="spinner"></div>
+</div>
+
+<!-- LOGIN -->
+<div id="login-screen">
+  <div class="login-card">
+    <div class="login-logo">
+      <svg width="52" height="52" viewBox="0 0 64 64" style="display:block;margin:0 auto 11px">
+        <circle cx="32" cy="32" r="30" fill="#cc2244"/>
+        <rect x="2" y="29" width="60" height="6" fill="#111"/>
+        <circle cx="32" cy="32" r="10" fill="#fff" stroke="#111" stroke-width="3"/>
+        <circle cx="32" cy="32" r="5" fill="#cc2244" stroke="#111" stroke-width="2"/>
+        <path d="M2,32 A30,30 0 0,1 62,32" fill="#fff"/>
+      </svg>
+      <div class="login-title">Poké<span>Dex</span></div>
+      <div class="login-sub" id="login-sub">포켓몬 카드 컬렉션 매니저</div>
+    </div>
+    <div class="lang-switcher">
+      <button class="lang-btn active" onclick="setLang('ko')">한국어</button>
+      <button class="lang-btn" onclick="setLang('en')">English</button>
+      <button class="lang-btn" onclick="setLang('ja')">日本語</button>
+      <button class="lang-btn" onclick="setLang('zh')">中文</button>
+    </div>
+    <div class="err-msg" id="auth-err"></div>
+    <div class="form-group">
+      <label id="lbl-email">이메일</label>
+      <input type="email" id="inp-email" placeholder="trainer@pokemon.com">
+    </div>
+    <div class="form-group">
+      <label id="lbl-pw">비밀번호</label>
+      <input type="password" id="inp-pw" placeholder="••••••••" onkeydown="if(event.key==='Enter')doEmailAuth()">
+    </div>
+    <button class="btn-primary" id="btn-auth" onclick="doEmailAuth()">로그인</button>
+    <div class="divider" id="div-or">또는</div>
+    <button class="google-btn" onclick="doGoogleLogin()">
+      <svg width="18" height="18" viewBox="0 0 18 18">
+        <path fill="#4285F4" d="M16.51 8H8.98v3h4.3c-.18 1-.74 1.48-1.6 2.04v2.01h2.6a7.8 7.8 0 0 0 2.38-5.88c0-.57-.05-.66-.15-1.18z"/>
+        <path fill="#34A853" d="M8.98 17c2.16 0 3.97-.72 5.3-1.94l-2.6-2a4.8 4.8 0 0 1-7.18-2.54H1.83v2.07A8 8 0 0 0 8.98 17z"/>
+        <path fill="#FBBC05" d="M4.5 10.52a4.8 4.8 0 0 1 0-3.04V5.41H1.83a8 8 0 0 0 0 7.18l2.67-2.07z"/>
+        <path fill="#EA4335" d="M8.98 4.18c1.17 0 2.23.4 3.06 1.2l2.3-2.3A8 8 0 0 0 1.83 5.4L4.5 7.49a4.77 4.77 0 0 1 4.48-3.3z"/>
+      </svg>
+      <span id="google-btn-text">Google로 로그인</span>
+    </button>
+    <div class="login-switch">
+      <span id="switch-txt">계정이 없으신가요?</span>
+      <a onclick="toggleMode()" id="switch-link">회원가입</a>
+    </div>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app">
+  <nav class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+      <svg width="24" height="24" viewBox="0 0 64 64">
+        <circle cx="32" cy="32" r="30" fill="#cc2244"/>
+        <rect x="2" y="29" width="60" height="6" fill="#111"/>
+        <circle cx="32" cy="32" r="10" fill="#fff" stroke="#111" stroke-width="3"/>
+        <circle cx="32" cy="32" r="5" fill="#cc2244" stroke="#111" stroke-width="2"/>
+        <path d="M2,32 A30,30 0 0,1 62,32" fill="#fff"/>
+      </svg>
+      <div class="logo-text">Poké<span>Dex</span></div>
+    </div>
+    <div class="sidebar-nav">
+      <button class="nav-item active" onclick="goPage('dashboard')" id="nav-dashboard">
+        <span class="nav-icon">🏠</span><span data-i18n="nav_home">대시보드</span>
+      </button>
+      <button class="nav-item" onclick="goPage('browse')" id="nav-browse">
+        <span class="nav-icon">🔍</span><span data-i18n="nav_browse">팩 탐색</span>
+      </button>
+      <button class="nav-item" onclick="goPage('collection')" id="nav-collection">
+        <span class="nav-icon">📦</span><span data-i18n="nav_coll">내 컬렉션</span>
+      </button>
+      <div class="nav-label" data-i18n="nav_lang">언어별</div>
+      <button class="nav-item" onclick="goPage('browse');setLangFilter('en')">
+        <span class="nav-icon">🇺🇸</span><span data-i18n="lang_en">영어판</span>
+      </button>
+      <button class="nav-item" onclick="goPage('browse');setLangFilter('ja')">
+        <span class="nav-icon">🇯🇵</span><span data-i18n="lang_ja">일본판</span>
+      </button>
+      <button class="nav-item" onclick="goPage('browse');setLangFilter('ko')">
+        <span class="nav-icon">🇰🇷</span><span data-i18n="lang_ko">한국판</span>
+      </button>
+      <button class="nav-item" onclick="goPage('browse');setLangFilter('zh')">
+        <span class="nav-icon">🇨🇳</span><span data-i18n="lang_zh">중문판</span>
+      </button>
+    </div>
+    <div class="sidebar-bottom">
+      <div class="sidebar-lang">
+        <button class="lang-btn active" onclick="setLang('ko')">KO</button>
+        <button class="lang-btn" onclick="setLang('en')">EN</button>
+        <button class="lang-btn" onclick="setLang('ja')">JA</button>
+        <button class="lang-btn" onclick="setLang('zh')">ZH</button>
+      </div>
+      <div class="user-info" style="margin-top:6px">
+        <div class="user-avatar" id="u-avatar">T</div>
+        <div style="min-width:0">
+          <div class="user-name" id="u-name">Trainer</div>
+          <div class="user-email" id="u-email">-</div>
+        </div>
+        <span class="sync-dot" id="sync-dot" title="저장됨"></span>
+      </div>
+      <button class="nav-item" onclick="doLogout()" style="margin-top:4px">
+        <span class="nav-icon">🚪</span><span data-i18n="nav_logout">로그아웃</span>
+      </button>
+    </div>
+  </nav>
+
+  <div class="main-content">
+    <div class="topbar">
+      <button class="hamburger" onclick="document.getElementById('sidebar').classList.toggle('open')">☰</button>
+      <h1 id="page-title">대시보드</h1>
+      <div class="topbar-right">
+        <div class="search-box">
+          <span>🔍</span>
+          <input type="text" id="search-inp" placeholder="검색..." oninput="onSearch(this.value)">
+        </div>
+      </div>
+    </div>
+
+    <div class="page-content">
+
+      <!-- DASHBOARD -->
+      <div id="page-dashboard">
+        <div class="stats-grid" id="dash-stats"></div>
+        <div class="section-header">
+          <div>
+            <div class="section-title" data-i18n="dash_packs">내 컬렉션 팩</div>
+            <div class="section-subtitle" data-i18n="dash_packs_sub">즐겨찾기한 팩의 수집 현황</div>
+          </div>
+          <button class="btn-outline" onclick="goPage('browse')" data-i18n="add_pack">팩 추가 +</button>
+        </div>
+        <div id="dash-fav-packs"></div>
+      </div>
+
+      <!-- BROWSE -->
+      <div id="page-browse" style="display:none">
+        <div class="section-header" style="margin-bottom:12px">
+          <div>
+            <div class="section-title" data-i18n="browse_title">확장팩 탐색</div>
+            <div class="section-subtitle" data-i18n="browse_sub">언어·시리즈별 팩 선택</div>
+          </div>
+        </div>
+        <div class="lang-filter" id="lang-filter-bar">
+          <div class="lang-tag active" onclick="setLangFilter('all')" data-lf="all">🌍 <span data-i18n="lang_all">전체</span></div>
+          <div class="lang-tag" onclick="setLangFilter('en')" data-lf="en">🇺🇸 <span data-i18n="lang_en">영어판</span></div>
+          <div class="lang-tag" onclick="setLangFilter('ja')" data-lf="ja">🇯🇵 <span data-i18n="lang_ja">일본판</span></div>
+          <div class="lang-tag" onclick="setLangFilter('ko')" data-lf="ko">🇰🇷 <span data-i18n="lang_ko">한국판</span></div>
+          <div class="lang-tag" onclick="setLangFilter('zh')" data-lf="zh">🇨🇳 <span data-i18n="lang_zh">중문판</span></div>
+          <div class="lang-tag" onclick="setLangFilter('de')" data-lf="de">🇩🇪 독일판</div>
+          <div class="lang-tag" onclick="setLangFilter('fr')" data-lf="fr">🇫🇷 프랑스판</div>
+          <div class="lang-tag" onclick="setLangFilter('pt')" data-lf="pt">🇵🇹 포르투갈판</div>
+        </div>
+        <div id="sets-wrap"></div>
+      </div>
+
+      <!-- CARD LIST -->
+      <div id="page-cardlist" style="display:none">
+        <button class="back-btn" onclick="goPage('browse')">← <span data-i18n="back">뒤로</span></button>
+        <div id="set-info-bar"></div>
+        <div class="filter-bar">
+          <select class="filter-sel" id="rarity-sel" onchange="applyFilters()">
+            <option value="ALL" data-i18n="all_rarity">전체 레어도</option>
+          </select>
+          <button class="fchip active" onclick="setOwnedF('ALL')" data-of="ALL" data-i18n="f_all">전체</button>
+          <button class="fchip" onclick="setOwnedF('OWNED')" data-of="OWNED" data-i18n="f_owned">보유</button>
+          <button class="fchip" onclick="setOwnedF('MISSING')" data-of="MISSING" data-i18n="f_missing">미보유</button>
+        </div>
+        <div id="cards-wrap"></div>
+      </div>
+
+      <!-- MY COLLECTION -->
+      <div id="page-collection" style="display:none">
+        <div class="section-header">
+          <div>
+            <div class="section-title" data-i18n="nav_coll">내 컬렉션</div>
+            <div class="section-subtitle" id="coll-sub"></div>
+          </div>
+        </div>
+        <div id="coll-wrap"></div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modal" onclick="if(event.target===this)closeModal()">
+  <div class="modal">
+    <div class="modal-top" id="modal-top"></div>
+    <div id="modal-prices"></div>
+    <div class="modal-section">
+      <div class="modal-section-title" data-i18n="own_qty">보유 수량</div>
+      <div class="own-controls">
+        <button class="own-btn" id="own-minus">−</button>
+        <div class="own-count" id="own-count">0</div>
+        <button class="own-btn" id="own-plus">+</button>
+      </div>
+    </div>
+    <div class="modal-footer"><button onclick="closeModal()" data-i18n="close">닫기</button></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ══════════════════════════════════════════
+// I18N
+// ══════════════════════════════════════════
+const I18N = {
+  ko:{
+    nav_home:'대시보드',nav_browse:'팩 탐색',nav_coll:'내 컬렉션',
+    nav_lang:'언어별',nav_logout:'로그아웃',
+    lang_all:'전체',lang_en:'영어판',lang_ja:'일본판',lang_ko:'한국판',lang_zh:'중문판',
+    browse_title:'확장팩 탐색',browse_sub:'언어·시리즈별 팩 선택',
+    dash_packs:'내 컬렉션 팩',dash_packs_sub:'즐겨찾기한 팩의 수집 현황',add_pack:'팩 추가 +',
+    all_rarity:'전체 레어도',f_all:'전체',f_owned:'보유',f_missing:'미보유',
+    back:'뒤로',close:'닫기',own_qty:'보유 수량',
+    stat_total:'총 보유',stat_unique:'종류',stat_packs:'등록 팩',stat_val:'추정가치(USD)',
+    empty_packs:'아직 팩이 없어요',empty_sub:'팩 탐색에서 ⭐를 눌러 추가하세요',
+    price_tcg:'시세 (USD · TCGPlayer)',price_cm:'시세 (EUR · Cardmarket)',
+    market:'시장가',low:'최저',collected:'보유',total_c:'전체',no_price:'가격 정보 없음',
+    fav_add:'즐겨찾기 추가 ⭐',fav_rm:'즐겨찾기 제거',
+    login_sub:'포켓몬 카드 컬렉션 매니저',lbl_email:'이메일',lbl_pw:'비밀번호',
+    login:'로그인',signup:'회원가입',google_login:'Google로 로그인',
+    to_signup:'계정이 없으신가요?',to_login:'이미 계정이 있으신가요?',
+    link_signup:'회원가입',link_login:'로그인',or:'또는',loading:'불러오는 중...',
+    err_no_user:'등록되지 않은 이메일입니다',err_wrong_pw:'비밀번호가 틀렸습니다',
+    err_email_used:'이미 사용 중인 이메일입니다',err_weak_pw:'비밀번호는 6자 이상이어야 합니다',
+    err_invalid:'이메일 또는 비밀번호가 올바르지 않습니다',
+  },
+  en:{
+    nav_home:'Dashboard',nav_browse:'Browse Packs',nav_coll:'My Collection',
+    nav_lang:'By Language',nav_logout:'Logout',
+    lang_all:'All',lang_en:'English',lang_ja:'Japanese',lang_ko:'Korean',lang_zh:'Chinese',
+    browse_title:'Browse Expansions',browse_sub:'Filter by language & series',
+    dash_packs:'My Saved Packs',dash_packs_sub:'Progress for saved packs',add_pack:'Add Pack +',
+    all_rarity:'All Rarities',f_all:'All',f_owned:'Owned',f_missing:'Missing',
+    back:'Back',close:'Close',own_qty:'Quantity Owned',
+    stat_total:'Total Owned',stat_unique:'Unique Cards',stat_packs:'Saved Packs',stat_val:'Est. Value (USD)',
+    empty_packs:'No packs saved yet',empty_sub:'Star a pack in Browse to add it here',
+    price_tcg:'Market Price (USD · TCGPlayer)',price_cm:'Market Price (EUR · Cardmarket)',
+    market:'Market',low:'Low',collected:'Owned',total_c:'Total',no_price:'No price data',
+    fav_add:'Added to favorites ⭐',fav_rm:'Removed from favorites',
+    login_sub:'Pokémon Card Collection Manager',lbl_email:'Email',lbl_pw:'Password',
+    login:'Sign In',signup:'Sign Up',google_login:'Sign in with Google',
+    to_signup:"Don't have an account?",to_login:'Already have an account?',
+    link_signup:'Sign Up',link_login:'Sign In',or:'or',loading:'Loading...',
+    err_no_user:'Email not found',err_wrong_pw:'Wrong password',
+    err_email_used:'Email already in use',err_weak_pw:'Password must be at least 6 characters',
+    err_invalid:'Invalid email or password',
+  },
+  ja:{
+    nav_home:'ダッシュボード',nav_browse:'パック一覧',nav_coll:'コレクション',
+    nav_lang:'言語別',nav_logout:'ログアウト',
+    lang_all:'全て',lang_en:'英語版',lang_ja:'日本語版',lang_ko:'韓国語版',lang_zh:'中国語版',
+    browse_title:'拡張パック一覧',browse_sub:'言語・シリーズでフィルター',
+    dash_packs:'コレクションパック',dash_packs_sub:'お気に入りパックの収集進捗',add_pack:'パック追加 +',
+    all_rarity:'全レアリティ',f_all:'全て',f_owned:'所持中',f_missing:'未所持',
+    back:'戻る',close:'閉じる',own_qty:'所持数',
+    stat_total:'総所持数',stat_unique:'所持種類',stat_packs:'登録パック',stat_val:'推定価値(USD)',
+    empty_packs:'パックが未登録',empty_sub:'パック一覧で⭐を押して追加',
+    price_tcg:'市場価格 (USD)',price_cm:'市場価格 (EUR)',
+    market:'市場価',low:'最安',collected:'所持',total_c:'全カード',no_price:'価格情報なし',
+    fav_add:'お気に入りに追加 ⭐',fav_rm:'お気に入りから削除',
+    login_sub:'ポケモンカードコレクション管理',lbl_email:'メール',lbl_pw:'パスワード',
+    login:'ログイン',signup:'新規登録',google_login:'Googleでログイン',
+    to_signup:'アカウントをお持ちでないですか？',to_login:'すでにアカウントをお持ちですか？',
+    link_signup:'新規登録',link_login:'ログイン',or:'または',loading:'読み込み中...',
+    err_no_user:'登録されていないメールです',err_wrong_pw:'パスワードが間違っています',
+    err_email_used:'すでに使用中のメールです',err_weak_pw:'パスワードは6文字以上必要です',
+    err_invalid:'メールまたはパスワードが正しくありません',
+  },
+  zh:{
+    nav_home:'仪表板',nav_browse:'浏览卡包',nav_coll:'我的收藏',
+    nav_lang:'按语言',nav_logout:'退出',
+    lang_all:'全部',lang_en:'英版',lang_ja:'日版',lang_ko:'韩版',lang_zh:'中文版',
+    browse_title:'浏览扩展包',browse_sub:'按语言和系列筛选',
+    dash_packs:'我的收藏包',dash_packs_sub:'已收藏卡包的收集进度',add_pack:'添加卡包 +',
+    all_rarity:'全部稀有度',f_all:'全部',f_owned:'已拥有',f_missing:'未拥有',
+    back:'返回',close:'关闭',own_qty:'拥有数量',
+    stat_total:'总拥有量',stat_unique:'卡牌种类',stat_packs:'已注册包',stat_val:'估值(USD)',
+    empty_packs:'还没有添加卡包',empty_sub:'在浏览页面点击⭐添加',
+    price_tcg:'市场价格 (USD)',price_cm:'市场价格 (EUR)',
+    market:'市场价',low:'最低',collected:'已有',total_c:'全部',no_price:'无价格数据',
+    fav_add:'已添加收藏 ⭐',fav_rm:'已取消收藏',
+    login_sub:'宝可梦卡牌收藏管理器',lbl_email:'邮箱',lbl_pw:'密码',
+    login:'登录',signup:'注册',google_login:'使用Google登录',
+    to_signup:'没有账号？',to_login:'已有账号？',
+    link_signup:'注册',link_login:'登录',or:'或',loading:'加载中...',
+    err_no_user:'未注册的邮箱',err_wrong_pw:'密码错误',
+    err_email_used:'邮箱已被使用',err_weak_pw:'密码至少需要6个字符',
+    err_invalid:'邮箱或密码不正确',
+  }
+};
+let LANG = localStorage.getItem('pdx_lang')||'ko';
+const t = k => (I18N[LANG]?.[k]) ?? I18N.en[k] ?? k;
+
+function setLang(l){
+  LANG = l;
+  localStorage.setItem('pdx_lang', l);
+  document.querySelectorAll('[data-i18n]').forEach(el=>{ el.textContent=t(el.getAttribute('data-i18n')); });
+  document.getElementById('login-sub').textContent = t('login_sub');
+  document.getElementById('lbl-email').textContent = t('lbl_email');
+  document.getElementById('lbl-pw').textContent = t('lbl_pw');
+  document.getElementById('div-or').textContent = t('or');
+  document.getElementById('google-btn-text').textContent = t('google_login');
+  document.getElementById('search-inp').placeholder = {ko:'검색...',ja:'検索...',zh:'搜索...',en:'Search...'}[l]||'Search...';
+  updateAuthUI();
+  document.querySelectorAll('.lang-btn').forEach(b=>{
+    const m={'한국어':'ko','English':'en','日本語':'ja','中文':'zh','KO':'ko','EN':'en','JA':'ja','ZH':'zh'};
+    const mapped = m[b.textContent.trim()];
+    if(mapped) b.classList.toggle('active', mapped===l);
+  });
+}
+
+// ══════════════════════════════════════════
+// AUTH
+// ══════════════════════════════════════════
+let isSignup = false;
+
+function updateAuthUI(){
+  document.getElementById('btn-auth').textContent = isSignup ? t('signup') : t('login');
+  document.getElementById('switch-txt').textContent = isSignup ? t('to_login') : t('to_signup');
+  document.getElementById('switch-link').textContent = isSignup ? t('link_login') : t('link_signup');
+}
+function toggleMode(){ isSignup=!isSignup; updateAuthUI(); hideErr(); }
+function hideErr(){ document.getElementById('auth-err').style.display='none'; }
+function showErr(msg){ const e=document.getElementById('auth-err'); e.textContent=msg; e.style.display='block'; }
+
+const ERR_MAP = {
+  'auth/user-not-found':'err_no_user','auth/wrong-password':'err_wrong_pw',
+  'auth/email-already-in-use':'err_email_used','auth/weak-password':'err_weak_pw',
+  'auth/invalid-credential':'err_invalid','auth/invalid-email':'err_invalid',
+};
+
+async function doEmailAuth(){
+  const email = document.getElementById('inp-email').value.trim();
+  const pw    = document.getElementById('inp-pw').value;
+  if(!email||!pw){ showErr(t('err_invalid')); return; }
+  const btn = document.getElementById('btn-auth');
+  btn.disabled = true; btn.textContent = '...';
+  try{
+    if(isSignup) await auth.createUserWithEmailAndPassword(email, pw);
+    else         await auth.signInWithEmailAndPassword(email, pw);
+  } catch(e){
+    showErr(t(ERR_MAP[e.code]||'err_invalid'));
+    btn.disabled=false; updateAuthUI();
+  }
+}
+
+async function doGoogleLogin(){
+  try{
+    const provider = new firebase.auth.GoogleAuthProvider();
+    await auth.signInWithPopup(provider);
+  } catch(e){ showErr(e.message); }
+}
+
+function doLogout(){ auth.signOut(); }
+
+// ══════════════════════════════════════════
+// APP STATE
+// ══════════════════════════════════════════
+let currentUser   = null;
+let allSets       = [];
+let currentSet    = null;
+let currentCards  = [];
+let userColl      = {};   // { "setId_cardId": qty }
+let userFavs      = [];   // [ setId, ... ]
+let langFilter    = 'all';
+let ownedFilter   = 'ALL';
+let rarityFilter  = 'ALL';
+let saveTimer     = null;
+let userRef       = null;
+
+// ══════════════════════════════════════════
+// FIREBASE REALTIME DB
+// ══════════════════════════════════════════
+function initUserRef(uid){
+  userRef = db.ref('users/' + uid);
+  // 실시간 동기화 — 다른 기기에서 변경돼도 즉시 반영
+  userRef.on('value', snap => {
+    const d = snap.val() || {};
+    userColl = d.collection || {};
+    userFavs = d.favorites  || [];
+    // 현재 열려있는 페이지 갱신
+    refreshCurrentPage();
+  });
+}
+
+function scheduleSave(){
+  setSyncDot('saving');
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(()=>saveNow(), 1000);
+}
+
+async function saveNow(){
+  if(!userRef) return;
+  try{
+    await userRef.update({ collection: userColl, favorites: userFavs });
+    setSyncDot('saved');
+  } catch(e){ showToast('저장 실패: '+e.message,'error'); setSyncDot('saved'); }
+}
+
+function setSyncDot(state){
+  const d = document.getElementById('sync-dot');
+  if(!d) return;
+  d.classList.toggle('saving', state==='saving');
+}
+
+// ══════════════════════════════════════════
+// AUTH STATE LISTENER
+// ══════════════════════════════════════════
+auth.onAuthStateChanged(async user => {
+  document.getElementById('splash').classList.add('hide');
+  if(user){
+    currentUser = user;
+    // 아바타
+    const av = document.getElementById('u-avatar');
+    if(user.photoURL) av.innerHTML=`<img src="${user.photoURL}">`;
+    else av.textContent=(user.displayName||user.email||'T')[0].toUpperCase();
+    document.getElementById('u-name').textContent  = user.displayName || user.email.split('@')[0];
+    document.getElementById('u-email').textContent = user.email;
+    // DB 연결
+    initUserRef(user.uid);
+    // 팩 로드
+    await loadAllSets();
+    // UI
+    document.getElementById('login-screen').style.display='none';
+    document.getElementById('app').style.display='block';
+    setLang(LANG);
+    goPage('dashboard');
+  } else {
+    currentUser=null;
+    if(userRef){ userRef.off(); userRef=null; }
+    document.getElementById('app').style.display='none';
+    document.getElementById('login-screen').style.display='flex';
+    setLang(LANG);
+  }
+});
+
+// ══════════════════════════════════════════
+// POKEMONTCG.IO
+// ══════════════════════════════════════════
+const TCG = 'https://api.pokemontcg.io/v2';
+// ★ dev.pokemontcg.io 에서 무료 API 키 발급 후 아래에 입력하세요
+//   키 없어도 동작하지만 분당 요청 제한이 낮아요
+const TCG_KEY = '';
+
+async function tcgGet(path){
+  try{
+    const h = TCG_KEY ? {'X-Api-Key':TCG_KEY} : {};
+    const r = await fetch(TCG+path, {headers:h});
+    if(!r.ok) throw new Error(r.status);
+    return await r.json();
+  } catch(e){ console.warn('tcgGet',e); return null; }
+}
+
+async function loadAllSets(){
+  if(allSets.length) return;
+  const d = await tcgGet('/sets?orderBy=-releaseDate&pageSize=250');
+  allSets = d?.data?.length ? d.data : getBuiltinSets();
+}
+
+// ══════════════════════════════════════════
+// NAVIGATION
+// ══════════════════════════════════════════
+const PAGES = ['dashboard','browse','cardlist','collection'];
+const SERIES_ORDER = ['Scarlet & Violet','Sword & Shield','Sun & Moon','XY',
+  'Black & White','HeartGold & SoulSilver','Platinum','Diamond & Pearl',
+  'EX','e-Card','Neo','Gym','Base'];
+
+function goPage(page){
+  PAGES.forEach(p => document.getElementById('page-'+p).style.display = p===page?'block':'none');
+  ['dashboard','browse','collection'].forEach(n => document.getElementById('nav-'+n)?.classList.remove('active'));
+  const nm={dashboard:'nav-dashboard',browse:'nav-browse',collection:'nav-collection'};
+  if(nm[page]) document.getElementById(nm[page])?.classList.add('active');
+  const tm={dashboard:'nav_home',browse:'nav_browse',cardlist:'nav_browse',collection:'nav_coll'};
+  document.getElementById('page-title').textContent = t(tm[page]||'nav_home');
+  document.getElementById('sidebar').classList.remove('open');
+  if(page==='dashboard')  renderDashboard();
+  if(page==='browse')     renderSetsGrid();
+  if(page==='collection') renderCollection();
+}
+
+function refreshCurrentPage(){
+  const visible = PAGES.find(p => document.getElementById('page-'+p)?.style.display!=='none');
+  if(visible==='dashboard')  renderDashboard();
+  if(visible==='browse')     renderSetsGrid();
+  if(visible==='cardlist')   renderCards();
+  if(visible==='collection') renderCollection();
+}
+
+// ══════════════════════════════════════════
+// SETS GRID
+// ══════════════════════════════════════════
+function inferLang(s){
+  const id=(s.id||'').toLowerCase(), nm=(s.name||'').toLowerCase();
+  if(id.includes('_ko')||nm.includes('korean')) return 'ko';
+  if(id.includes('_ja')||id.includes('_jp')||nm.includes('japanese')) return 'ja';
+  if(id.includes('_zh')) return 'zh';
+  if(id.includes('_de')||nm.includes('german')) return 'de';
+  if(id.includes('_fr')||nm.includes('french')) return 'fr';
+  if(id.includes('_pt')) return 'pt';
+  return 'en';
+}
+
+function setLangFilter(lf){
+  langFilter=lf;
+  document.querySelectorAll('[data-lf]').forEach(el=>el.classList.toggle('active',el.dataset.lf===lf));
+  renderSetsGrid();
+}
+
+function renderSetsGrid(){
+  let sets = allSets;
+  const q = document.getElementById('search-inp').value.toLowerCase();
+  if(langFilter!=='all') sets=sets.filter(s=>inferLang(s)===langFilter);
+  if(q && document.getElementById('page-browse').style.display!=='none')
+    sets=sets.filter(s=>s.name.toLowerCase().includes(q)||(s.series||'').toLowerCase().includes(q));
+
+  if(!sets.length){
+    document.getElementById('sets-wrap').innerHTML=emptyHTML('📭','해당 언어 팩 없음','');
+    return;
+  }
+  const bySeries={};
+  sets.forEach(s=>{ const k=s.series||'Other'; (bySeries[k]||(bySeries[k]=[])).push(s); });
+  const keys=Object.keys(bySeries).sort((a,b)=>{
+    const ai=SERIES_ORDER.indexOf(a),bi=SERIES_ORDER.indexOf(b);
+    if(ai<0&&bi<0) return a.localeCompare(b);
+    return (ai<0?999:ai)-(bi<0?999:bi);
+  });
+
+  let html='';
+  keys.forEach(series=>{
+    const items=bySeries[series];
+    html+=`<div>
+      <div class="section-header" style="margin-top:22px;margin-bottom:10px">
+        <div class="section-title" style="font-size:14px">${series}</div>
+        <div class="section-subtitle">${items.length}세트</div>
+      </div><div class="sets-grid">`;
+    items.forEach(set=>{
+      const isFav  = userFavs.includes(set.id);
+      const owned  = Object.keys(userColl).filter(k=>k.startsWith(set.id+'_')).length;
+      const pct    = set.total ? Math.round(owned/set.total*100) : 0;
+      const lc     = inferLang(set);
+      const lbadge = {en:'en',ja:'ja',ko:'ko',zh:'zh',de:'de',fr:'fr',pt:'pt'}[lc]||'';
+      const llabel = {en:'ENG',ja:'JPN',ko:'KOR',zh:'CHN',de:'DEU',fr:'FRA',pt:'POR'}[lc]||lc.toUpperCase();
+      html+=`<div class="set-card${isFav?' favorited':''}" onclick="openSet('${set.id}')">
+        <span class="set-star" onclick="event.stopPropagation();toggleFav('${set.id}')">${isFav?'⭐':'☆'}</span>
+        <div class="set-logo">
+          ${set.images?.logo
+            ?`<img src="${set.images.logo}" alt="${set.name}" onerror="this.style.display='none'">`
+            :'<div class="no-logo">📦</div>'}
+        </div>
+        <div class="set-name">${set.name}</div>
+        <div class="set-meta">
+          <span class="set-badge ${lbadge}">${llabel}</span>
+          <span class="set-badge">${set.printedTotal||set.total||'?'}종</span>
+          ${set.releaseDate?`<span class="set-badge">${set.releaseDate.slice(0,7)}</span>`:''}
+        </div>
+        ${owned>0?`<div class="prog-wrap"><div class="prog-bar" style="width:${pct}%"></div></div>
+        <div class="prog-text">${owned}/${set.total||'?'} (${pct}%)</div>`:''}
+      </div>`;
+    });
+    html+=`</div></div>`;
+  });
+  document.getElementById('sets-wrap').innerHTML=html;
+}
+
+function toggleFav(setId){
+  const idx=userFavs.indexOf(setId);
+  if(idx>=0){ userFavs.splice(idx,1); showToast(t('fav_rm'),'info'); }
+  else       { userFavs.push(setId);  showToast(t('fav_add'),'success'); }
+  scheduleSave();
+  renderSetsGrid();
+}
+
+// ══════════════════════════════════════════
+// OPEN SET → CARD LIST
+// ══════════════════════════════════════════
+async function openSet(setId){
+  currentSet  = allSets.find(s=>s.id===setId)||{id:setId,name:setId};
+  ownedFilter = 'ALL'; rarityFilter='ALL';
+  goPage('cardlist');
+
+  const owned = Object.keys(userColl).filter(k=>k.startsWith(setId+'_')).length;
+  document.getElementById('set-info-bar').innerHTML=`
+    <div class="set-info-bar">
+      ${currentSet.images?.logo?`<img class="set-info-logo" src="${currentSet.images.logo}" onerror="this.style.display='none'">`:''}
+      <div>
+        <div class="set-info-name">${currentSet.name}</div>
+        <div class="set-info-series">${currentSet.series||''} ${currentSet.releaseDate?'· '+currentSet.releaseDate.slice(0,7):''}</div>
+      </div>
+      <div class="set-info-stats">
+        <div class="s-stat"><div class="s-stat-num" id="owned-num">${owned}</div><div class="s-stat-lbl">${t('collected')}</div></div>
+        <div class="s-stat"><div class="s-stat-num">${currentSet.total||'?'}</div><div class="s-stat-lbl">${t('total_c')}</div></div>
+      </div>
+    </div>`;
+
+  document.getElementById('cards-wrap').innerHTML=loadingHTML();
+
+  let page=1, all=[];
+  while(true){
+    const d=await tcgGet(`/cards?q=set.id:${setId}&orderBy=number&page=${page}&pageSize=250`);
+    if(!d?.data?.length) break;
+    all=all.concat(d.data);
+    if(all.length>=(d.totalCount||all.length)) break;
+    if(++page>10) break;
+  }
+  currentCards = all.length ? all : getBuiltinCards(setId);
+
+  const rarities=[...new Set(currentCards.map(c=>c.rarity||'Unknown'))];
+  const sel=document.getElementById('rarity-sel');
+  sel.innerHTML=`<option value="ALL">${t('all_rarity')}</option>`;
+  rarities.forEach(r=>{ const o=document.createElement('option'); o.value=r; o.textContent=r; sel.appendChild(o); });
+  renderCards();
+}
+
+function applyFilters(){ rarityFilter=document.getElementById('rarity-sel').value; renderCards(); }
+
+function setOwnedF(f){
+  ownedFilter=f;
+  document.querySelectorAll('[data-of]').forEach(el=>el.classList.toggle('active',el.dataset.of===f));
+  renderCards();
+}
+
+function renderCards(){
+  let cards=currentCards;
+  const q=document.getElementById('search-inp').value.toLowerCase();
+  if(rarityFilter!=='ALL') cards=cards.filter(c=>c.rarity===rarityFilter);
+  if(ownedFilter==='OWNED')   cards=cards.filter(c=>(userColl[(currentSet?.id||'')+'_'+c.id]||0)>0);
+  if(ownedFilter==='MISSING') cards=cards.filter(c=>!(userColl[(currentSet?.id||'')+'_'+c.id]||0));
+  if(q) cards=cards.filter(c=>c.name.toLowerCase().includes(q)||(c.number||'').includes(q));
+
+  if(!cards.length){ document.getElementById('cards-wrap').innerHTML=emptyHTML('🃏','카드 없음',''); return; }
+  document.getElementById('cards-wrap').innerHTML=`<div class="card-grid">${cards.map(c=>cardHTML(c)).join('')}</div>`;
+}
+
+function cardHTML(card){
+  const key=(currentSet?.id||'')+'_'+card.id;
+  const qty=userColl[key]||0;
+  const img=card.images?.small||'';
+  const price=getPrice(card);
+  const rc=rarityClass(card.rarity);
+  return `<div class="ccard${qty>0?' owned':''} rc-${rc}" onclick="openCardModal('${card.id}')">
+    <div class="rbar"></div>
+    <div class="cimg">
+      ${img?`<img src="${img}" alt="${card.name}" loading="lazy">`:'<div class="no-img">🃏</div>'}
+      ${qty>0?'<div class="owned-badge">✓</div>':''}
+      ${qty>1?`<div class="qty-badge">×${qty}</div>`:''}
+    </div>
+    <div class="cinfo">
+      <div class="cnum">#${card.number||'?'}</div>
+      <div class="cname">${card.name}</div>
+      <div class="cprice">${price?'$'+price.toFixed(2):'-'}</div>
+      <div class="crarity">${card.rarity||''}</div>
+    </div>
+    <div class="cactions">
+      <button class="cbtn" onclick="event.stopPropagation();changeQty('${card.id}',-1)">−</button>
+      <div class="cqty" id="cqty-${card.id.replace(/[^a-z0-9]/gi,'_')}">${qty}</div>
+      <button class="cbtn" onclick="event.stopPropagation();changeQty('${card.id}',1)">+</button>
+    </div>
+  </div>`;
+}
+
+function getPrice(card){
+  const p=card.tcgplayer?.prices;
+  if(!p) return null;
+  return p.holofoil?.market||p.normal?.market||p.reverseHolofoil?.market||p['1stEditionHolofoil']?.market||null;
+}
+
+function rarityClass(r){
+  if(!r) return 'Common';
+  const l=r.toLowerCase();
+  if(l.includes('hyper')||l.includes('secret')) return 'HyperRare';
+  if(l.includes('special illustration'))        return 'SpecialIllustrationRare';
+  if(l.includes('illustration'))                return 'IllustrationRare';
+  if(l.includes('ultra'))                       return 'UltraRare';
+  if(l.includes('double'))                      return 'DoubleRare';
+  if(l.includes('rare'))                        return 'Rare';
+  if(l.includes('uncommon'))                    return 'Uncommon';
+  return 'Common';
+}
+
+function changeQty(cardId, delta){
+  const key=(currentSet?.id||'')+'_'+cardId;
+  const nv=Math.max(0,(userColl[key]||0)+delta);
+  if(nv===0) delete userColl[key]; else userColl[key]=nv;
+  scheduleSave();
+  // DOM 부분 업데이트 (전체 re-render 없이)
+  const safeId=cardId.replace(/[^a-z0-9]/gi,'_');
+  const qel=document.getElementById('cqty-'+safeId);
+  if(qel){ qel.textContent=nv; qel.closest('.ccard')?.classList.toggle('owned',nv>0); }
+  // 헤더 owned 카운트
+  const oc=Object.keys(userColl).filter(k=>k.startsWith((currentSet?.id||'')+'_')).length;
+  const os=document.getElementById('owned-num');
+  if(os) os.textContent=oc;
+  // 모달 카운트
+  if(document.getElementById('modal').classList.contains('open'))
+    document.getElementById('own-count').textContent=nv;
+}
+
+// ══════════════════════════════════════════
+// CARD MODAL
+// ══════════════════════════════════════════
+function openCardModal(cardId){
+  const card=currentCards.find(c=>c.id===cardId);
+  if(!card) return;
+  const key=(currentSet?.id||'')+'_'+card.id;
+  const qty=userColl[key]||0;
+  const img=card.images?.large||card.images?.small||'';
+
+  document.getElementById('modal-top').innerHTML=`
+    <div class="modal-img">
+      ${img?`<img src="${img}" alt="${card.name}">`:'<div class="no-img-lg">🃏</div>'}
+    </div>
+    <div class="modal-info">
+      <div class="modal-num">#${card.number||'?'} · ${currentSet?.name||''}</div>
+      <div class="modal-name">${card.name}</div>
+      <div class="modal-badges">
+        <span class="mbadge">${card.rarity||'Common'}</span>
+        ${card.supertype?`<span class="mbadge">${card.supertype}</span>`:''}
+        ${(card.subtypes||[]).map(s=>`<span class="mbadge">${s}</span>`).join('')}
+        ${card.hp?`<span class="mbadge">HP ${card.hp}</span>`:''}
+        ${(card.types||[]).map(tp=>`<span class="mbadge" style="background:#${typeColor(tp)}22;border-color:#${typeColor(tp)}66;color:#${typeColor(tp)}">${tp}</span>`).join('')}
+      </div>
+      ${card.artist?`<div style="font-size:11px;color:var(--text3)">🎨 ${card.artist}</div>`:''}
+    </div>`;
+
+  let ph='';
+  const tcp=card.tcgplayer, cm=card.cardmarket;
+  if(tcp?.prices && Object.keys(tcp.prices).length){
+    ph+=`<div class="modal-section"><div class="modal-section-title">${t('price_tcg')}</div><div class="price-grid">`;
+    const vName={normal:'일반',holofoil:'홀로',reverseHolofoil:'역홀로','1stEditionHolofoil':'1st홀로','1stEditionNormal':'1st일반'};
+    Object.entries(tcp.prices).forEach(([v,p])=>{
+      if(!p) return;
+      ph+=`<div class="pcell">
+        <div class="pcell-label">${vName[v]||v}</div>
+        ${p.market?`<div class="pcell-val mkt">$${p.market.toFixed(2)}</div>`:''}
+        ${p.low?`<div style="font-size:10px;color:var(--text3)">${t('low')} $${p.low.toFixed(2)}</div>`:''}
+      </div>`;
+    });
+    ph+=`</div>${tcp.updatedAt?`<div style="font-size:10px;color:var(--text3);margin-top:5px">Updated: ${tcp.updatedAt}</div>`:''}</div>`;
+  }
+  if(cm?.prices){
+    const cp=cm.prices;
+    ph+=`<div class="modal-section"><div class="modal-section-title">${t('price_cm')}</div><div class="price-grid">`;
+    if(cp.averageSellPrice) ph+=`<div class="pcell"><div class="pcell-label">${t('market')}</div><div class="pcell-val mkt">€${cp.averageSellPrice.toFixed(2)}</div></div>`;
+    if(cp.lowPrice)         ph+=`<div class="pcell"><div class="pcell-label">${t('low')}</div><div class="pcell-val">€${cp.lowPrice.toFixed(2)}</div></div>`;
+    if(cp.avg7)             ph+=`<div class="pcell"><div class="pcell-label">7일 평균</div><div class="pcell-val">€${cp.avg7.toFixed(2)}</div></div>`;
+    ph+=`</div></div>`;
+  }
+  if(!ph) ph=`<div class="modal-section" style="color:var(--text3);font-size:13px;padding-bottom:16px">${t('no_price')}</div>`;
+  document.getElementById('modal-prices').innerHTML=ph;
+
+  document.getElementById('own-count').textContent=qty;
+  document.getElementById('own-minus').onclick=()=>changeQty(cardId,-1);
+  document.getElementById('own-plus').onclick=()=>changeQty(cardId, 1);
+  document.getElementById('modal').classList.add('open');
+  document.body.style.overflow='hidden';
+}
+function closeModal(){
+  document.getElementById('modal').classList.remove('open');
+  document.body.style.overflow='';
+}
+function typeColor(tp){
+  return {Fire:'ef4444',Water:'3b82f6',Grass:'22c55e',Electric:'eab308',Psychic:'a855f7',
+    Dark:'6b7280',Dragon:'6366f1',Fighting:'f97316',Metal:'94a3b8',Fairy:'ec4899',
+    Colorless:'9ca3af',Lightning:'eab308'}[tp]||'8892a4';
+}
+
+// ══════════════════════════════════════════
+// DASHBOARD
+// ══════════════════════════════════════════
+function renderDashboard(){
+  const totalQty = Object.values(userColl).reduce((s,v)=>s+v,0);
+  const unique   = Object.keys(userColl).length;
+  let estVal=0;
+  currentCards.forEach(c=>{ const p=getPrice(c); if(p&&userColl[(currentSet?.id||'')+'_'+c.id]) estVal+=p*(userColl[(currentSet?.id||'')+'_'+c.id]||0); });
+
+  document.getElementById('dash-stats').innerHTML=`
+    <div class="stat-card"><div class="stat-icon">🃏</div><div class="stat-num">${totalQty}</div><div class="stat-lbl">${t('stat_total')}</div></div>
+    <div class="stat-card"><div class="stat-icon">✨</div><div class="stat-num">${unique}</div><div class="stat-lbl">${t('stat_unique')}</div></div>
+    <div class="stat-card"><div class="stat-icon">📦</div><div class="stat-num">${userFavs.length}</div><div class="stat-lbl">${t('stat_packs')}</div></div>
+    <div class="stat-card"><div class="stat-icon">💰</div><div class="stat-num">$${estVal.toFixed(0)}</div><div class="stat-lbl">${t('stat_val')}</div></div>`;
+
+  if(!userFavs.length){
+    document.getElementById('dash-fav-packs').innerHTML=emptyHTML('📦',t('empty_packs'),t('empty_sub'));
+    return;
+  }
+  document.getElementById('dash-fav-packs').innerHTML=`<div class="my-packs-grid">${
+    userFavs.map(sid=>{
+      const set=allSets.find(s=>s.id===sid);
+      if(!set) return '';
+      const oc=Object.keys(userColl).filter(k=>k.startsWith(sid+'_')).length;
+      const pct=set.total?Math.round(oc/set.total*100):0;
+      return `<div class="my-pack" onclick="openSet('${sid}')">
+        ${set.images?.logo?`<img class="mp-logo" src="${set.images.logo}" onerror="this.style.display='none'">`:'<div class="mp-placeholder">📦</div>'}
+        <div class="mp-info">
+          <div class="mp-name">${set.name}</div>
+          <div class="mp-series">${set.series||''}</div>
+          <div class="prog-wrap"><div class="prog-bar" style="width:${pct}%"></div></div>
+          <div class="prog-text">${oc}/${set.total||'?'} (${pct}%)</div>
+        </div>
+      </div>`;
+    }).join('')
+  }</div>`;
+}
+
+// ══════════════════════════════════════════
+// MY COLLECTION
+// ══════════════════════════════════════════
+function renderCollection(){
+  const keys=Object.keys(userColl);
+  if(!keys.length){
+    document.getElementById('coll-wrap').innerHTML=emptyHTML('🃏','컬렉션이 비어있어요','팩 탐색에서 카드를 추가하세요');
+    document.getElementById('coll-sub').textContent='';
+    return;
+  }
+  const total=Object.values(userColl).reduce((s,v)=>s+v,0);
+  document.getElementById('coll-sub').textContent=`총 ${total}장 · ${keys.length}종류`;
+
+  const bySeries={};
+  keys.forEach(k=>{
+    const idx=k.indexOf('_'), sid=k.substring(0,idx), cid=k.substring(idx+1);
+    const set=allSets.find(s=>s.id===sid);
+    const series=set?.series||sid;
+    if(!bySeries[series]) bySeries[series]={set,items:[]};
+    bySeries[series].items.push({sid,cid,qty:userColl[k]});
+  });
+
+  let html='';
+  Object.entries(bySeries).forEach(([series,{set,items}])=>{
+    const tot=items.reduce((s,i)=>s+i.qty,0);
+    html+=`<div style="margin-bottom:24px">
+      <div class="section-header" style="margin-bottom:10px">
+        <div class="section-title" style="font-size:14px;display:flex;align-items:center;gap:8px">
+          ${set?.images?.logo?`<img src="${set.images.logo}" style="height:26px;object-fit:contain">`:'📦'}
+          ${set?.name||series}
+        </div>
+        <div class="section-subtitle">${tot}장</div>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(86px,1fr));gap:7px">
+        ${items.sort((a,b)=>a.cid.localeCompare(b.cid)).map(({cid,qty})=>`
+          <div style="background:var(--surface);border:1px solid var(--border);border-radius:9px;padding:9px;text-align:center">
+            <div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--text3)">${cid.split('-').pop()}</div>
+            <div style="font-size:17px;font-weight:900;color:var(--accent)">×${qty}</div>
+          </div>`).join('')}
+      </div>
+    </div>`;
+  });
+  document.getElementById('coll-wrap').innerHTML=html;
+}
+
+// ══════════════════════════════════════════
+// SEARCH
+// ══════════════════════════════════════════
+function onSearch(v){
+  if(document.getElementById('page-browse').style.display!=='none')   renderSetsGrid();
+  if(document.getElementById('page-cardlist').style.display!=='none') renderCards();
+}
+
+// ══════════════════════════════════════════
+// HELPERS
+// ══════════════════════════════════════════
+function showToast(msg,type='info'){
+  const el=document.getElementById('toast');
+  el.textContent=msg; el.className='toast '+type+' show';
+  setTimeout(()=>el.classList.remove('show'),2600);
+}
+function loadingHTML(){ return `<div class="loading-state"><div class="spinner"></div><span>${t('loading')}</span></div>`; }
+function emptyHTML(icon,title,sub){ return `<div class="empty-state"><div class="empty-icon">${icon}</div><div class="empty-title">${title}</div><div class="empty-sub">${sub}</div></div>`; }
+
+// ══════════════════════════════════════════
+// BUILTIN SETS FALLBACK
+// ══════════════════════════════════════════
+function getBuiltinSets(){
+  return [
+    {id:'sv8',name:'Surging Sparks',series:'Scarlet & Violet',printedTotal:191,total:252,releaseDate:'2024/11/08',images:{logo:'https://images.pokemontcg.io/sv8/logo.png'}},
+    {id:'sv7',name:'Stellar Crown',series:'Scarlet & Violet',printedTotal:142,total:175,releaseDate:'2024/09/13',images:{logo:'https://images.pokemontcg.io/sv7/logo.png'}},
+    {id:'sv6pt5',name:'Shrouded Fable',series:'Scarlet & Violet',printedTotal:64,total:99,releaseDate:'2024/08/02',images:{logo:'https://images.pokemontcg.io/sv6pt5/logo.png'}},
+    {id:'sv6',name:'Twilight Masquerade',series:'Scarlet & Violet',printedTotal:162,total:226,releaseDate:'2024/05/24',images:{logo:'https://images.pokemontcg.io/sv6/logo.png'}},
+    {id:'sv5',name:'Temporal Forces',series:'Scarlet & Violet',printedTotal:162,total:218,releaseDate:'2024/03/22',images:{logo:'https://images.pokemontcg.io/sv5/logo.png'}},
+    {id:'sv4pt5',name:'Paldean Fates',series:'Scarlet & Violet',printedTotal:91,total:245,releaseDate:'2024/01/26',images:{logo:'https://images.pokemontcg.io/sv4pt5/logo.png'}},
+    {id:'sv4',name:'Paradox Rift',series:'Scarlet & Violet',printedTotal:182,total:266,releaseDate:'2023/11/03',images:{logo:'https://images.pokemontcg.io/sv4/logo.png'}},
+    {id:'sv3pt5',name:'Pokemon 151',series:'Scarlet & Violet',printedTotal:165,total:207,releaseDate:'2023/09/22',images:{logo:'https://images.pokemontcg.io/sv3pt5/logo.png'}},
+    {id:'sv3',name:'Obsidian Flames',series:'Scarlet & Violet',printedTotal:197,total:230,releaseDate:'2023/08/11',images:{logo:'https://images.pokemontcg.io/sv3/logo.png'}},
+    {id:'sv2',name:'Paldea Evolved',series:'Scarlet & Violet',printedTotal:193,total:279,releaseDate:'2023/06/09',images:{logo:'https://images.pokemontcg.io/sv2/logo.png'}},
+    {id:'sv1',name:'Scarlet & Violet Base',series:'Scarlet & Violet',printedTotal:198,total:258,releaseDate:'2023/03/31',images:{logo:'https://images.pokemontcg.io/sv1/logo.png'}},
+    {id:'swsh12pt5',name:'Crown Zenith',series:'Sword & Shield',printedTotal:160,total:230,releaseDate:'2023/01/20',images:{logo:'https://images.pokemontcg.io/swsh12pt5/logo.png'}},
+    {id:'swsh12',name:'Silver Tempest',series:'Sword & Shield',printedTotal:195,total:245,releaseDate:'2022/11/11',images:{logo:'https://images.pokemontcg.io/swsh12/logo.png'}},
+    {id:'swsh11',name:'Lost Origin',series:'Sword & Shield',printedTotal:196,total:246,releaseDate:'2022/09/09',images:{logo:'https://images.pokemontcg.io/swsh11/logo.png'}},
+    {id:'swsh10',name:'Astral Radiance',series:'Sword & Shield',printedTotal:189,total:246,releaseDate:'2022/05/27',images:{logo:'https://images.pokemontcg.io/swsh10/logo.png'}},
+    {id:'swsh9',name:'Brilliant Stars',series:'Sword & Shield',printedTotal:172,total:216,releaseDate:'2022/02/25',images:{logo:'https://images.pokemontcg.io/swsh9/logo.png'}},
+    {id:'swsh8',name:'Fusion Strike',series:'Sword & Shield',printedTotal:264,total:284,releaseDate:'2021/11/12',images:{logo:'https://images.pokemontcg.io/swsh8/logo.png'}},
+    {id:'swsh7',name:'Evolving Skies',series:'Sword & Shield',printedTotal:203,total:237,releaseDate:'2021/08/27',images:{logo:'https://images.pokemontcg.io/swsh7/logo.png'}},
+    {id:'swsh6',name:'Chilling Reign',series:'Sword & Shield',printedTotal:198,total:233,releaseDate:'2021/06/18',images:{logo:'https://images.pokemontcg.io/swsh6/logo.png'}},
+    {id:'swsh5',name:'Battle Styles',series:'Sword & Shield',printedTotal:163,total:183,releaseDate:'2021/03/19',images:{logo:'https://images.pokemontcg.io/swsh5/logo.png'}},
+    {id:'swsh4',name:'Vivid Voltage',series:'Sword & Shield',printedTotal:185,total:203,releaseDate:'2020/11/13',images:{logo:'https://images.pokemontcg.io/swsh4/logo.png'}},
+    {id:'swsh3',name:'Darkness Ablaze',series:'Sword & Shield',printedTotal:185,total:201,releaseDate:'2020/08/14',images:{logo:'https://images.pokemontcg.io/swsh3/logo.png'}},
+    {id:'swsh2',name:'Rebel Clash',series:'Sword & Shield',printedTotal:192,total:209,releaseDate:'2020/05/01',images:{logo:'https://images.pokemontcg.io/swsh2/logo.png'}},
+    {id:'swsh1',name:'Sword & Shield',series:'Sword & Shield',printedTotal:202,total:216,releaseDate:'2020/02/07',images:{logo:'https://images.pokemontcg.io/swsh1/logo.png'}},
+    {id:'sm12',name:'Cosmic Eclipse',series:'Sun & Moon',printedTotal:236,total:272,releaseDate:'2019/11/01',images:{logo:'https://images.pokemontcg.io/sm12/logo.png'}},
+    {id:'sm11',name:'Unified Minds',series:'Sun & Moon',printedTotal:236,total:260,releaseDate:'2019/08/02',images:{logo:'https://images.pokemontcg.io/sm11/logo.png'}},
+    {id:'sm10',name:'Unbroken Bonds',series:'Sun & Moon',printedTotal:214,total:234,releaseDate:'2019/05/03',images:{logo:'https://images.pokemontcg.io/sm10/logo.png'}},
+    {id:'sm9',name:'Team Up',series:'Sun & Moon',printedTotal:181,total:198,releaseDate:'2019/02/01',images:{logo:'https://images.pokemontcg.io/sm9/logo.png'}},
+    {id:'xy12',name:'Evolutions',series:'XY',printedTotal:108,total:113,releaseDate:'2016/11/02',images:{logo:'https://images.pokemontcg.io/xy12/logo.png'}},
+    {id:'xy11',name:'Steam Siege',series:'XY',printedTotal:114,total:116,releaseDate:'2016/08/03',images:{logo:'https://images.pokemontcg.io/xy11/logo.png'}},
+    {id:'xy1',name:'XY Base Set',series:'XY',printedTotal:146,total:146,releaseDate:'2014/02/05',images:{logo:'https://images.pokemontcg.io/xy1/logo.png'}},
+  ];
+}
+function getBuiltinCards(setId){
+  const names=['Charizard ex','Pikachu','Mewtwo ex','Gengar ex','Eevee','Snorlax','Mew ex','Gardevoir ex','Rayquaza ex','Lugia ex'];
+  const rarities=['Common','Uncommon','Rare Holo','Double Rare','Ultra Rare','Illustration Rare','Special Illustration Rare','Hyper Rare','Common','Uncommon'];
+  return names.map((name,i)=>({
+    id:`${setId}-${i+1}`,name,number:String(i+1).padStart(3,'0'),rarity:rarities[i],
+    supertype:'Pokémon',subtypes:[['Basic','Stage 1','Stage 2'][i%3]],
+    hp:String((i+1)*20+80),
+    types:[['Fire','Water','Grass','Electric','Psychic','Dark','Dragon','Fighting','Metal','Colorless'][i%10]],
+    images:{small:`https://images.pokemontcg.io/${setId}/${i+1}.png`},
+    tcgplayer:{prices:{holofoil:{market:+((i+1)*3.5).toFixed(2),low:+((i+1)*2).toFixed(2),high:+((i+1)*8).toFixed(2)}}},
+    cardmarket:null,artist:'Demo Artist',
+  }));
+}
+
+// ══════════════════════════════════════════
+// INIT
+// ══════════════════════════════════════════
+window.addEventListener('DOMContentLoaded', ()=>{ setLang(LANG); updateAuthUI(); });
+</script>
+</body>
+</html>
