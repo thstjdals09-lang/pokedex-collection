@@ -13,135 +13,158 @@
   --g400:#9ca3af;--g500:#6b7280;--g600:#4b5563;--g700:#374151;--g900:#111827;
   --sh:0 1px 3px rgba(0,0,0,.1),0 1px 2px rgba(0,0,0,.06);
   --sh-lg:0 10px 15px rgba(0,0,0,.1),0 4px 6px rgba(0,0,0,.05);
-  --sh-xl:0 20px 25px rgba(0,0,0,.1),0 10px 10px rgba(0,0,0,.04);
-  --r:10px;--rl:16px;--rxl:24px
+  --sh-xl:0 20px 25px rgba(0,0,0,.12),0 10px 10px rgba(0,0,0,.04);
+  --r:10px;--rl:16px;--rxl:22px
 }
-body{font-family:'Noto Sans KR',-apple-system,sans-serif;background:var(--g100);color:var(--g900);min-height:100vh;line-height:1.5}
+body{font-family:'Noto Sans KR',-apple-system,sans-serif;background:var(--g100);color:var(--g900);min-height:100vh}
 
 /* HEADER */
-header{background:linear-gradient(135deg,#dc2626,#b91c1c);color:#fff;padding:0 20px;height:60px;display:flex;align-items:center;gap:12px;box-shadow:0 2px 10px rgba(0,0,0,.25);position:sticky;top:0;z-index:100}
-.pokeball{width:36px;height:36px;flex-shrink:0}
-.h-title{font-size:18px;font-weight:800;letter-spacing:-.3px}
-.h-sub{font-size:12px;opacity:.75;margin-left:auto}
+header{background:linear-gradient(135deg,#dc2626,#b91c1c);color:#fff;padding:0 20px;height:58px;display:flex;align-items:center;gap:12px;box-shadow:0 2px 10px rgba(0,0,0,.25);position:sticky;top:0;z-index:200}
+.pokeball{width:34px;height:34px;flex-shrink:0}
+.h-title{font-size:17px;font-weight:800;letter-spacing:-.3px}
 
 /* TABS */
-.tabs{background:#fff;display:flex;border-bottom:2px solid var(--g200);position:sticky;top:60px;z-index:99}
-.tab-btn{padding:13px 22px;font-size:14px;font-weight:600;color:var(--g500);background:none;border:none;border-bottom:3px solid transparent;cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:7px;margin-bottom:-2px;font-family:inherit}
+.tabs{background:#fff;display:flex;border-bottom:2px solid var(--g200);position:sticky;top:58px;z-index:199}
+.tab-btn{padding:12px 20px;font-size:14px;font-weight:600;color:var(--g500);background:none;border:none;border-bottom:3px solid transparent;cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:7px;margin-bottom:-2px;font-family:inherit}
 .tab-btn:hover{color:var(--blue)}
 .tab-btn.active{color:var(--blue);border-bottom-color:var(--blue)}
-.badge{background:var(--red);color:#fff;font-size:11px;font-weight:700;padding:1px 7px;border-radius:10px;min-width:20px;text-align:center}
+.tab-badge{background:var(--red);color:#fff;font-size:11px;font-weight:700;padding:1px 7px;border-radius:10px;min-width:20px;text-align:center}
 
 /* PANELS */
 .panel{display:none}.panel.active{display:block}
 
-/* SEARCH CONTROLS */
-.search-box{background:#fff;padding:16px 20px;border-bottom:1px solid var(--g200);display:flex;flex-direction:column;gap:11px}
-.lang-row{display:flex;gap:7px;flex-wrap:wrap}
-.lang-chip{padding:7px 15px;font-size:13px;font-weight:600;border:2px solid var(--g200);border-radius:20px;cursor:pointer;background:#fff;color:var(--g600);transition:all .15s;font-family:inherit}
+/* LANG + SEARCH */
+.top-controls{background:#fff;padding:14px 18px;border-bottom:1px solid var(--g200);display:flex;flex-direction:column;gap:10px;position:sticky;top:104px;z-index:100}
+.lang-row{display:flex;gap:7px}
+.lang-chip{padding:7px 14px;font-size:13px;font-weight:700;border:2px solid var(--g200);border-radius:20px;cursor:pointer;background:#fff;color:var(--g600);transition:all .15s;font-family:inherit}
 .lang-chip:hover{border-color:var(--blue);color:var(--blue)}
 .lang-chip.active{background:var(--blue);border-color:var(--blue);color:#fff}
-.search-row{display:flex;gap:8px}
-.search-input{flex:1;padding:10px 15px;font-size:15px;font-family:inherit;border:2px solid var(--g200);border-radius:var(--r);outline:none;transition:border-color .15s;color:var(--g900)}
+.search-row{display:flex;gap:7px}
+.search-input{flex:1;padding:9px 14px;font-size:15px;font-family:inherit;border:2px solid var(--g200);border-radius:var(--r);outline:none;transition:border-color .15s;color:var(--g900)}
 .search-input:focus{border-color:var(--blue)}
 .search-input::placeholder{color:var(--g400)}
 
 /* BUTTONS */
-.btn{display:inline-flex;align-items:center;justify-content:center;gap:5px;padding:10px 18px;font-size:14px;font-weight:600;font-family:inherit;border:none;border-radius:var(--r);cursor:pointer;transition:all .15s;white-space:nowrap}
-.btn-blue{background:var(--blue);color:#fff}.btn-blue:hover{background:#1e40af}.btn-blue:active{transform:scale(.97)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:5px;padding:9px 17px;font-size:14px;font-weight:600;font-family:inherit;border:none;border-radius:var(--r);cursor:pointer;transition:all .15s;white-space:nowrap;line-height:1}
+.btn-blue{background:var(--blue);color:#fff}.btn-blue:hover{background:#1e40af}
 .btn-gray{background:var(--g100);color:var(--g700)}.btn-gray:hover{background:var(--g200)}
 .btn-red{background:#fee2e2;color:var(--red)}.btn-red:hover{background:#fecaca}
-.btn-green{background:#dcfce7;color:var(--green)}.btn-green:hover{background:#bbf7d0}
-.btn-sm{padding:6px 12px;font-size:12px}
-.btn-icon{padding:8px;border-radius:8px}
+.btn-sm{padding:6px 11px;font-size:12px}
+
+/* SERIES ACCORDION */
+.series-section{background:#fff;border-bottom:2px solid var(--g200)}
+.series-section-title{padding:11px 18px;font-size:12px;font-weight:700;color:var(--g400);text-transform:uppercase;letter-spacing:.5px;border-bottom:1px solid var(--g100);display:flex;align-items:center;justify-content:space-between}
+.series-loading{padding:28px 18px;text-align:center;color:var(--g400);font-size:13px;display:flex;flex-direction:column;align-items:center;gap:10px}
+.series-error{padding:18px;background:#fef2f2;color:var(--red);font-size:13px;margin:10px 18px;border-radius:var(--r)}
+
+.series-group{border-bottom:1px solid var(--g100)}
+.series-group:last-child{border-bottom:none}
+.series-group-hd{padding:11px 18px;display:flex;align-items:center;gap:9px;cursor:pointer;transition:background .15s;user-select:none}
+.series-group-hd:hover{background:var(--g50)}
+.series-arrow{font-size:10px;color:var(--g400);transition:transform .2s;flex-shrink:0;width:14px}
+.series-arrow.open{transform:rotate(90deg)}
+.series-gname{font-size:14px;font-weight:700;flex:1;color:var(--g900)}
+.series-gcnt{font-size:11px;color:var(--g400);font-weight:500}
+.series-sets{padding:6px 18px 12px 40px;display:flex;flex-wrap:wrap;gap:6px}
+.series-sets.collapsed{display:none}
+.set-chip{padding:5px 13px;background:var(--g100);border:1.5px solid var(--g200);border-radius:14px;font-size:12px;font-weight:600;color:var(--g700);cursor:pointer;transition:all .15s;font-family:inherit}
+.set-chip:hover{background:#eff6ff;border-color:var(--blue);color:var(--blue)}
+.set-chip.active{background:var(--blue);border-color:var(--blue);color:#fff}
+
+/* CARDS SECTION */
+.cards-section{min-height:200px}
+.set-header{padding:12px 18px;background:#fff;border-bottom:1px solid var(--g200);display:flex;align-items:center;gap:10px}
+.set-header-name{font-size:15px;font-weight:800}
+.set-header-cnt{font-size:13px;color:var(--g400)}
+.set-header-close{margin-left:auto;padding:5px 9px;font-size:12px}
 
 /* CARD GRID */
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(155px,1fr));gap:14px;padding:18px 20px}
-@media(max-width:480px){.grid{grid-template-columns:repeat(2,1fr);gap:10px;padding:12px}}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:13px;padding:16px 18px}
+@media(max-width:430px){.grid{grid-template-columns:repeat(2,1fr);gap:9px;padding:12px}}
 .card-item{background:#fff;border-radius:var(--rl);overflow:hidden;box-shadow:var(--sh);cursor:pointer;transition:transform .2s,box-shadow .2s;position:relative}
 .card-item:hover{transform:translateY(-3px) scale(1.01);box-shadow:var(--sh-xl)}
 .card-img-wrap{width:100%;aspect-ratio:2.5/3.5;background:linear-gradient(135deg,var(--g100),var(--g200));display:flex;align-items:center;justify-content:center;overflow:hidden;position:relative}
 .card-img{width:100%;height:100%;object-fit:contain;transition:transform .3s}
 .card-item:hover .card-img{transform:scale(1.04)}
-.no-img{display:flex;flex-direction:column;align-items:center;gap:6px;color:var(--g400);font-size:11px}
-.card-info{padding:9px 11px 11px}
-.card-name{font-size:13px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:2px}
-.card-set{font-size:11px;color:var(--g500);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:5px}
-.card-price{font-size:13px;font-weight:700;color:var(--green)}
-.qty-badge{position:absolute;top:7px;right:7px;background:var(--blue);color:#fff;font-size:11px;font-weight:700;width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center}
-.lang-badge{position:absolute;top:7px;left:7px;background:rgba(0,0,0,.55);color:#fff;font-size:10px;font-weight:700;padding:2px 6px;border-radius:4px}
+.no-img{display:flex;flex-direction:column;align-items:center;gap:5px;color:var(--g400);font-size:11px}
+.card-info{padding:8px 10px 10px}
+.card-name{font-size:12px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:2px}
+.card-number{font-size:11px;color:var(--g400);margin-bottom:3px}
+.card-price{font-size:12px;font-weight:700;color:var(--green)}
+.qty-badge{position:absolute;top:6px;right:6px;background:var(--blue);color:#fff;font-size:11px;font-weight:700;width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center}
+.lang-badge{position:absolute;top:6px;left:6px;background:rgba(0,0,0,.55);color:#fff;font-size:9px;font-weight:700;padding:2px 5px;border-radius:4px}
 
 /* LOADING / EMPTY */
-.loading{padding:60px;display:flex;flex-direction:column;align-items:center;gap:14px;color:var(--g400)}
-.spinner{width:44px;height:44px;border:4px solid var(--g200);border-top-color:var(--blue);border-radius:50%;animation:spin .8s linear infinite}
+.loading{padding:50px 18px;display:flex;flex-direction:column;align-items:center;gap:12px;color:var(--g400)}
+.spinner{width:40px;height:40px;border:4px solid var(--g200);border-top-color:var(--blue);border-radius:50%;animation:spin .8s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
-.empty{padding:56px 20px;text-align:center;color:var(--g400)}
-.empty-icon{font-size:60px;margin-bottom:14px}
-.empty h3{font-size:17px;font-weight:700;color:var(--g600);margin-bottom:6px}
+.empty{padding:50px 18px;text-align:center;color:var(--g400)}
+.empty-icon{font-size:54px;margin-bottom:12px}
+.empty h3{font-size:16px;font-weight:700;color:var(--g600);margin-bottom:5px}
 .empty p{font-size:13px}
 
 /* STATS */
-.stats-bar{background:#fff;border-bottom:1px solid var(--g200);padding:14px 20px;display:flex;gap:28px;overflow-x:auto}
+.stats-bar{background:#fff;border-bottom:1px solid var(--g200);padding:13px 18px;display:flex;gap:24px;overflow-x:auto}
 .stat-v{font-size:22px;font-weight:800;color:var(--blue);line-height:1}
 .stat-l{font-size:11px;color:var(--g400);margin-top:2px;font-weight:500}
-.coll-controls{background:#fff;border-bottom:1px solid var(--g200);padding:11px 20px;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
-.sort-sel{padding:7px 11px;font-size:13px;font-family:inherit;border:1px solid var(--g300);border-radius:8px;outline:none;cursor:pointer;color:var(--g700);background:#fff}
+.coll-ctrl{background:#fff;border-bottom:1px solid var(--g200);padding:10px 18px;display:flex;gap:7px;align-items:center;flex-wrap:wrap}
+.sort-sel{padding:6px 10px;font-size:13px;font-family:inherit;border:1px solid var(--g300);border-radius:8px;outline:none;cursor:pointer;color:var(--g700);background:#fff}
 
 /* MODAL */
-.overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;z-index:1000;padding:16px;backdrop-filter:blur(4px);animation:fi .15s ease}
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;z-index:1000;padding:16px;backdrop-filter:blur(3px);animation:fi .15s}
 @keyframes fi{from{opacity:0}to{opacity:1}}
-.modal{background:#fff;border-radius:var(--rxl);width:100%;max-width:460px;max-height:90vh;overflow-y:auto;box-shadow:var(--sh-xl);animation:su .2s ease}
-@keyframes su{from{transform:translateY(18px);opacity:0}to{transform:translateY(0);opacity:1}}
-.modal-head{padding:18px 22px;border-bottom:1px solid var(--g200);display:flex;align-items:center;justify-content:space-between}
-.modal-title{font-size:17px;font-weight:800}
-.close-btn{width:30px;height:30px;border-radius:50%;border:none;background:var(--g100);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:15px;color:var(--g500);transition:background .15s}
+.modal{background:#fff;border-radius:var(--rxl);width:100%;max-width:450px;max-height:90vh;overflow-y:auto;box-shadow:var(--sh-xl);animation:su .2s}
+@keyframes su{from{transform:translateY(16px);opacity:0}to{transform:translateY(0);opacity:1}}
+.modal-head{padding:17px 20px;border-bottom:1px solid var(--g200);display:flex;align-items:center;justify-content:space-between}
+.modal-title{font-size:16px;font-weight:800}
+.close-btn{width:28px;height:28px;border-radius:50%;border:none;background:var(--g100);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px;color:var(--g500)}
 .close-btn:hover{background:var(--g200)}
-.modal-body{padding:22px}
-.modal-foot{padding:14px 22px;border-top:1px solid var(--g200);display:flex;gap:8px;justify-content:flex-end}
+.modal-body{padding:20px}
+.modal-foot{padding:13px 20px;border-top:1px solid var(--g200);display:flex;gap:7px;justify-content:flex-end}
 
-/* MODAL CARD PREVIEW */
-.m-preview{display:flex;gap:14px;margin-bottom:18px}
-.m-card-img{width:110px;height:154px;border-radius:var(--r);object-fit:contain;background:var(--g100);flex-shrink:0}
-.m-card-info h3{font-size:17px;font-weight:800;margin-bottom:3px}
-.m-card-info .m-set{font-size:12px;color:var(--g500);margin-bottom:8px}
-.chips{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:8px}
-.chip{display:inline-flex;align-items:center;padding:3px 9px;border-radius:11px;font-size:11px;font-weight:600}
+/* ADD PREVIEW */
+.m-preview{display:flex;gap:13px;margin-bottom:16px}
+.m-card-img{width:100px;height:140px;border-radius:var(--r);object-fit:contain;background:var(--g100);flex-shrink:0}
+.m-card-info h3{font-size:16px;font-weight:800;margin-bottom:3px}
+.m-set{font-size:12px;color:var(--g500);margin-bottom:7px}
+.chips{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:7px}
+.chip{display:inline-flex;align-items:center;padding:3px 8px;border-radius:10px;font-size:11px;font-weight:600}
 .chip-blue{background:#dbeafe;color:#1d4ed8}
 .chip-green{background:#dcfce7;color:#16a34a}
 .chip-yellow{background:#fef9c3;color:#a16207}
 .chip-gray{background:var(--g100);color:var(--g600)}
-.price-tag{display:inline-flex;align-items:center;gap:4px;background:#dcfce7;color:var(--green);font-size:12px;font-weight:700;padding:4px 9px;border-radius:6px;margin-bottom:5px}
-.price-range{font-size:11px;color:var(--g400)}
+.price-tag{background:#dcfce7;color:var(--green);font-size:12px;font-weight:700;padding:3px 8px;border-radius:6px;display:inline-block;margin-bottom:4px}
 
 /* FORM */
-.form-g{margin-bottom:14px}
+.form-g{margin-bottom:13px}
 label{display:block;font-size:13px;font-weight:600;color:var(--g700);margin-bottom:5px}
-.form-ctrl{width:100%;padding:9px 13px;font-size:14px;font-family:inherit;border:2px solid var(--g200);border-radius:var(--r);outline:none;transition:border-color .15s;color:var(--g900);background:#fff}
+.form-ctrl{width:100%;padding:9px 12px;font-size:14px;font-family:inherit;border:2px solid var(--g200);border-radius:var(--r);outline:none;transition:border-color .15s;color:var(--g900);background:#fff}
 .form-ctrl:focus{border-color:var(--blue)}
 textarea.form-ctrl{resize:vertical}
 .qty-ctrl{display:flex;align-items:center;border:2px solid var(--g200);border-radius:var(--r);overflow:hidden;width:fit-content}
-.qty-btn{width:36px;height:36px;border:none;background:var(--g100);font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--g700);transition:background .15s;font-family:inherit}
+.qty-btn{width:34px;height:34px;border:none;background:var(--g100);font-size:19px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--g700);transition:background .15s;font-family:inherit}
 .qty-btn:hover{background:var(--g200)}
-.qty-val{width:46px;text-align:center;font-size:15px;font-weight:700;border:none;border-left:2px solid var(--g200);border-right:2px solid var(--g200);padding:7px 0;outline:none;color:var(--g900);font-family:inherit}
+.qty-val{width:44px;text-align:center;font-size:15px;font-weight:700;border:none;border-left:2px solid var(--g200);border-right:2px solid var(--g200);padding:6px 0;outline:none;color:var(--g900);font-family:inherit}
 
 /* UPLOAD */
-.upload-area{border:2px dashed var(--g300);border-radius:var(--r);padding:18px;text-align:center;cursor:pointer;transition:all .15s;color:var(--g500)}
+.upload-area{border:2px dashed var(--g300);border-radius:var(--r);padding:16px;text-align:center;cursor:pointer;transition:all .15s;color:var(--g500)}
 .upload-area:hover{border-color:var(--blue);color:var(--blue);background:#eff6ff}
 .upload-area.has-img{border-color:var(--green);background:#f0fdf4}
-.upload-prev{width:100%;max-height:180px;object-fit:contain;border-radius:8px;margin-bottom:7px}
+.upload-prev{width:100%;max-height:160px;object-fit:contain;border-radius:8px;margin-bottom:6px}
 
 /* DETAIL */
-.detail-img{width:100%;max-width:200px;margin:0 auto 14px;display:block;border-radius:var(--r)}
-.price-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin:10px 0}
-.p-cell{background:var(--g50);padding:9px 11px;border-radius:8px}
-.p-cell-l{font-size:11px;color:var(--g400);font-weight:500;margin-bottom:2px}
-.p-cell-v{font-size:14px;font-weight:700}
-.divider{height:1px;background:var(--g200);margin:14px 0}
-.sec-title{font-size:11px;font-weight:700;color:var(--g400);text-transform:uppercase;letter-spacing:.5px;margin-bottom:7px}
-.note-box{background:var(--g50);padding:10px 12px;border-radius:8px;font-size:13px;color:var(--g700);margin-bottom:12px}
+.detail-img{width:100%;max-width:190px;margin:0 auto 13px;display:block;border-radius:var(--r)}
+.price-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin:8px 0}
+.p-cell{background:var(--g50);padding:8px 10px;border-radius:8px}
+.p-cell-l{font-size:10px;color:var(--g400);font-weight:500;margin-bottom:2px}
+.p-cell-v{font-size:13px;font-weight:700}
+.divider{height:1px;background:var(--g200);margin:13px 0}
+.sec-title{font-size:11px;font-weight:700;color:var(--g400);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px}
+.note-box{background:var(--g50);padding:9px 11px;border-radius:8px;font-size:13px;color:var(--g700);margin-bottom:10px}
 
 /* TOAST */
-.toast-wrap{position:fixed;bottom:20px;right:20px;z-index:2000;display:flex;flex-direction:column;gap:7px;pointer-events:none}
-.toast{background:var(--g900);color:#fff;padding:11px 18px;border-radius:var(--r);font-size:13px;font-weight:500;box-shadow:var(--sh-lg);animation:ti .3s ease,to .3s ease 2.7s forwards;max-width:300px}
+.toast-wrap{position:fixed;bottom:18px;right:18px;z-index:2000;display:flex;flex-direction:column;gap:6px;pointer-events:none}
+.toast{background:var(--g900);color:#fff;padding:10px 16px;border-radius:var(--r);font-size:13px;font-weight:500;box-shadow:var(--sh-lg);animation:ti .3s ease,to .3s ease 2.7s forwards;max-width:280px}
 .toast-ok{background:#166534}.toast-err{background:#991b1b}
 @keyframes ti{from{transform:translateX(110%);opacity:0}to{transform:translateX(0);opacity:1}}
 @keyframes to{from{transform:translateX(0);opacity:1}to{transform:translateX(110%);opacity:0}}
@@ -161,50 +184,85 @@ textarea.form-ctrl{resize:vertical}
     <circle cx="50" cy="50" r="6" fill="#e5e7eb"/>
   </svg>
   <div class="h-title">포켓몬 카드 컬렉션</div>
-  <div class="h-sub" id="h-sub">컬렉션을 관리하세요</div>
 </header>
 
 <nav class="tabs">
-  <button class="tab-btn active" onclick="switchTab('search')" id="tab-search">
-    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+  <button class="tab-btn active" onclick="switchTab('explore')" id="tab-explore">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg>
+    시리즈 탐색
+  </button>
+  <button class="tab-btn" onclick="switchTab('search')" id="tab-search">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
     카드 검색
   </button>
   <button class="tab-btn" onclick="switchTab('coll')" id="tab-coll">
-    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 11H5m14 0a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-6a2 2 0 0 1 2-2m14 0V9a2 2 0 0 0-2-2M5 11V9a2 2 0 0 1 2-2m0 0V5a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v2M7 7h10"/></svg>
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 11H5m14 0a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-6a2 2 0 0 1 2-2m14 0V9a2 2 0 0 0-2-2M5 11V9a2 2 0 0 1 2-2m0 0V5a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v2M7 7h10"/></svg>
     내 컬렉션
-    <span class="badge" id="coll-badge">0</span>
+    <span class="tab-badge" id="coll-badge">0</span>
   </button>
 </nav>
 
-<!-- SEARCH PANEL -->
-<div class="panel active" id="panel-search">
-  <div class="search-box">
+<!-- ═══════════ EXPLORE TAB ═══════════ -->
+<div class="panel active" id="panel-explore">
+  <!-- Language selector (sticky under tabs) -->
+  <div class="top-controls" id="explore-lang-bar">
     <div class="lang-row">
-      <button class="lang-chip active" onclick="setLang('ko')" id="lang-ko">🇰🇷 한국판</button>
-      <button class="lang-chip" onclick="setLang('ja')" id="lang-ja">🇯🇵 일본판</button>
-      <button class="lang-chip" onclick="setLang('en')" id="lang-en">🇺🇸 영문판</button>
+      <button class="lang-chip active" onclick="setLang('ko','explore')" id="elang-ko">🇰🇷 한국판</button>
+      <button class="lang-chip" onclick="setLang('ja','explore')" id="elang-ja">🇯🇵 일본판</button>
+      <button class="lang-chip" onclick="setLang('en','explore')" id="elang-en">🇺🇸 영문판</button>
+    </div>
+  </div>
+
+  <!-- Series accordion -->
+  <div class="series-section" id="series-section">
+    <div class="series-section-title">
+      <span>시리즈 목록</span>
+      <span id="series-total-label" class="text-muted"></span>
+    </div>
+    <div id="series-body">
+      <div class="series-loading"><div class="spinner"></div><span>시리즈 불러오는 중...</span></div>
+    </div>
+  </div>
+
+  <!-- Cards area (shown when set selected) -->
+  <div class="cards-section" id="cards-section">
+    <div class="empty" style="padding:36px 18px">
+      <div class="empty-icon">👆</div>
+      <h3>세트를 선택하세요</h3>
+      <p>위 시리즈 목록에서 세트를 클릭하면<br>카드 목록이 여기에 표시됩니다</p>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ SEARCH TAB ═══════════ -->
+<div class="panel" id="panel-search">
+  <div class="top-controls">
+    <div class="lang-row">
+      <button class="lang-chip active" onclick="setLang('ko','search')" id="slang-ko">🇰🇷 한국판</button>
+      <button class="lang-chip" onclick="setLang('ja','search')" id="slang-ja">🇯🇵 일본판</button>
+      <button class="lang-chip" onclick="setLang('en','search')" id="slang-en">🇺🇸 영문판</button>
     </div>
     <div class="search-row">
       <input type="text" class="search-input" id="search-input" placeholder="카드 이름으로 검색..." onkeydown="if(event.key==='Enter')doSearch()">
       <button class="btn btn-blue" onclick="doSearch()">
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
         검색
       </button>
     </div>
   </div>
   <div id="search-content">
-    <div class="empty"><div class="empty-icon">🔍</div><h3>카드를 검색해보세요</h3><p>카드 이름을 입력하고 검색 버튼을 눌러주세요</p></div>
+    <div class="empty"><div class="empty-icon">🔍</div><h3>카드를 검색해보세요</h3><p>카드 이름을 입력하고 검색 버튼을 누르세요</p></div>
   </div>
 </div>
 
-<!-- COLLECTION PANEL -->
+<!-- ═══════════ COLLECTION TAB ═══════════ -->
 <div class="panel" id="panel-coll">
   <div class="stats-bar">
     <div><div class="stat-v" id="st-total">0</div><div class="stat-l">총 카드 수</div></div>
     <div><div class="stat-v" id="st-unique">0</div><div class="stat-l">종류</div></div>
-    <div><div class="stat-v" id="st-val">-</div><div class="stat-l">예상 시세(달러)</div></div>
+    <div><div class="stat-v" id="st-val">-</div><div class="stat-l">예상 시세(USD)</div></div>
   </div>
-  <div class="coll-controls">
+  <div class="coll-ctrl">
     <select class="sort-sel" onchange="renderColl()">
       <option value="date-d">최근 추가순</option>
       <option value="date-a">오래된순</option>
@@ -213,24 +271,21 @@ textarea.form-ctrl{resize:vertical}
       <option value="price-d">가격 높은순</option>
       <option value="qty-d">수량 많은순</option>
     </select>
-    <div style="margin-left:auto;display:flex;gap:7px">
+    <div style="margin-left:auto;display:flex;gap:6px">
       <button class="btn btn-gray btn-sm" onclick="exportColl()">📤 내보내기</button>
       <button class="btn btn-gray btn-sm" onclick="document.getElementById('import-file').click()">📥 가져오기</button>
       <input type="file" id="import-file" accept=".json" class="hidden" onchange="importColl(this)">
     </div>
   </div>
   <div id="coll-content">
-    <div class="empty"><div class="empty-icon">📦</div><h3>컬렉션이 비어있어요</h3><p>카드를 검색해서 추가해보세요!</p></div>
+    <div class="empty"><div class="empty-icon">📦</div><h3>컬렉션이 비어있어요</h3><p>시리즈를 탐색하거나 검색해서 카드를 추가하세요!</p></div>
   </div>
 </div>
 
-<!-- ADD MODAL -->
+<!-- ═══════════ ADD MODAL ═══════════ -->
 <div class="overlay hidden" id="add-modal" onclick="if(event.target===this)closeAdd()">
   <div class="modal">
-    <div class="modal-head">
-      <div class="modal-title">컬렉션에 추가</div>
-      <button class="close-btn" onclick="closeAdd()">✕</button>
-    </div>
+    <div class="modal-head"><div class="modal-title">컬렉션에 추가</div><button class="close-btn" onclick="closeAdd()">✕</button></div>
     <div class="modal-body">
       <div class="m-preview" id="add-preview"></div>
       <div class="form-g">
@@ -259,12 +314,12 @@ textarea.form-ctrl{resize:vertical}
         <label>커스텀 이미지 <span class="text-muted">(선택)</span></label>
         <div class="upload-area" id="upload-area" onclick="document.getElementById('img-file').click()">
           <div id="upload-ph">
-            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin:0 auto 7px;display:block;opacity:.35"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin:0 auto 6px;display:block;opacity:.35"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
             <div style="font-size:13px">클릭하여 이미지 업로드</div>
             <div class="text-muted" style="margin-top:3px">JPG · PNG · WEBP</div>
           </div>
           <img id="upload-prev" class="upload-prev hidden">
-          <div id="upload-clear" class="hidden" style="margin-top:7px">
+          <div id="upload-clear" class="hidden" style="margin-top:6px">
             <button class="btn btn-gray btn-sm" onclick="clearImg(event)">이미지 제거</button>
           </div>
         </div>
@@ -278,13 +333,10 @@ textarea.form-ctrl{resize:vertical}
   </div>
 </div>
 
-<!-- DETAIL MODAL -->
+<!-- ═══════════ DETAIL MODAL ═══════════ -->
 <div class="overlay hidden" id="detail-modal" onclick="if(event.target===this)closeDetail()">
   <div class="modal">
-    <div class="modal-head">
-      <div class="modal-title" id="detail-title">카드 상세</div>
-      <button class="close-btn" onclick="closeDetail()">✕</button>
-    </div>
+    <div class="modal-head"><div class="modal-title" id="detail-title">카드 상세</div><button class="close-btn" onclick="closeDetail()">✕</button></div>
     <div class="modal-body" id="detail-body"></div>
     <div class="modal-foot" id="detail-foot"></div>
   </div>
@@ -294,25 +346,41 @@ textarea.form-ctrl{resize:vertical}
 <div class="toast-wrap" id="toast-wrap"></div>
 
 <script>
-// ── STATE ──────────────────────────────────────────────────
-const SK = 'pkm_coll_v2';
-let lang = 'ko';
+'use strict';
+
+// ═══════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════
+const COLL_KEY = 'pkm_coll_v3';
+
+let exploreLang = 'ko';   // language for series explorer
+let searchLang  = 'ko';   // language for search tab
+
+let seriesCache = {};     // {lang: [{id,name,sets:[...]}]}
+let setCardCache = {};    // {'ko:swsh1': [cards]}
+let activeSetChip = null; // currently selected set chip element
+let activeSetId   = null;
+
 let searchResults = [];
-let collection = load();
+let collection = loadColl();
 let pendCard = null;
-let pendImg = null;
+let pendImg  = null;
 let detailId = null;
 
-// ── STORAGE ────────────────────────────────────────────────
-function load() {
-  try { return JSON.parse(localStorage.getItem(SK) || '[]'); } catch { return []; }
+// ═══════════════════════════════════════════════
+// STORAGE
+// ═══════════════════════════════════════════════
+function loadColl() {
+  try { return JSON.parse(localStorage.getItem(COLL_KEY) || '[]'); } catch { return []; }
 }
-function save() {
-  try { localStorage.setItem(SK, JSON.stringify(collection)); }
-  catch { toast('저장 공간이 부족합니다. 커스텀 이미지를 줄여보세요.', 'err'); }
+function saveColl() {
+  try { localStorage.setItem(COLL_KEY, JSON.stringify(collection)); }
+  catch { toast('저장 공간 부족 — 커스텀 이미지를 줄여보세요', 'err'); }
 }
 
-// ── TABS ───────────────────────────────────────────────────
+// ═══════════════════════════════════════════════
+// TABS
+// ═══════════════════════════════════════════════
 function switchTab(t) {
   document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
@@ -321,130 +389,338 @@ function switchTab(t) {
   if (t === 'coll') renderColl();
 }
 
-// ── LANGUAGE ───────────────────────────────────────────────
-function setLang(l) {
-  lang = l;
-  document.querySelectorAll('.lang-chip').forEach(c => c.classList.remove('active'));
-  document.getElementById('lang-' + l).classList.add('active');
-  const ph = {ko:'한국어 이름으로 검색...',ja:'일본어 이름으로 검색...',en:'영어 이름으로 검색...'};
-  document.getElementById('search-input').placeholder = ph[l];
+// ═══════════════════════════════════════════════
+// LANGUAGE
+// ═══════════════════════════════════════════════
+function setLang(lang, context) {
+  if (context === 'explore') {
+    exploreLang = lang;
+    document.querySelectorAll('[id^="elang-"]').forEach(c => c.classList.remove('active'));
+    document.getElementById('elang-' + lang).classList.add('active');
+    // Clear current set selection
+    activeSetChip = null; activeSetId = null;
+    document.getElementById('cards-section').innerHTML = `<div class="empty" style="padding:36px 18px"><div class="empty-icon">👆</div><h3>세트를 선택하세요</h3><p>위 시리즈 목록에서 세트를 클릭하면<br>카드 목록이 여기에 표시됩니다</p></div>`;
+    loadSeries(lang);
+  } else {
+    searchLang = lang;
+    document.querySelectorAll('[id^="slang-"]').forEach(c => c.classList.remove('active'));
+    document.getElementById('slang-' + lang).classList.add('active');
+    const ph = {ko:'한국어 카드 이름...',ja:'일본어 카드 이름...',en:'영어 카드 이름...'};
+    document.getElementById('search-input').placeholder = ph[lang];
+  }
 }
 
-// ── API ────────────────────────────────────────────────────
-async function searchTCGdex(l, q) {
-  const url = `https://api.tcgdex.net/v2/${l}/cards?name=${encodeURIComponent(q)}`;
-  const res = await fetch(url);
-  if (!res.ok) throw new Error(`TCGdex ${res.status}`);
-  const data = await res.json();
-  const arr = Array.isArray(data) ? data : [];
-  const ql = q.toLowerCase();
-  return arr
-    .filter(c => !q || c.name.toLowerCase().includes(ql))
-    .slice(0, 48)
-    .map(c => ({
-      id: `td_${l}_${c.id}`,
-      apiId: c.id,
-      name: c.name,
-      localId: c.localId || '',
-      image: c.image ? c.image + '/high.webp' : null,
-      set: c.set?.name || '',
-      setId: c.set?.id || '',
-      lang: l,
-      src: 'tcgdex',
-      prices: null,
-    }));
+// ═══════════════════════════════════════════════
+// API HELPERS
+// ═══════════════════════════════════════════════
+async function apiFetch(url) {
+  const r = await fetch(url);
+  if (!r.ok) throw new Error(`HTTP ${r.status}: ${url}`);
+  return r.json();
 }
 
-async function searchPTCG(q) {
-  const url = `https://api.pokemontcg.io/v2/cards?q=name:*${encodeURIComponent(q)}*&pageSize=30&orderBy=name`;
-  const res = await fetch(url);
-  if (!res.ok) throw new Error(`PTCG ${res.status}`);
-  const data = await res.json();
-  return (data.data || []).map(c => ({
-    id: `ptcg_${c.id}`,
-    apiId: c.id,
-    name: c.name,
-    number: c.number || '',
-    image: c.images?.large || c.images?.small || null,
-    set: c.set?.name || '',
-    setId: c.set?.id || '',
-    lang: 'en',
-    src: 'ptcg',
-    prices: getPrices(c),
-  }));
-}
-
-function getPrices(c) {
+function getPrices(card) {
   const out = {};
-  const tcg = c.tcgplayer?.prices;
+  const tcg = card.tcgplayer?.prices;
   if (tcg) {
-    for (const t of ['normal','holofoil','reverseHolofoil','1stEditionNormal','1stEditionHolofoil']) {
+    for (const t of ['normal','holofoil','reverseHolofoil','1stEditionNormal','1stEditionHolofoil','unlimitedHolofoil']) {
       if (tcg[t]?.market) {
-        out.market = tcg[t].market;
-        out.low = tcg[t].low;
-        out.high = tcg[t].high;
-        out.type = t;
-        out.src = 'TCGPlayer';
-        out.cur = 'USD';
-        break;
+        out.market = tcg[t].market; out.low = tcg[t].low; out.high = tcg[t].high;
+        out.type = t; out.src = 'TCGPlayer'; out.cur = 'USD'; break;
       }
     }
   }
-  const cm = c.cardmarket?.prices;
+  const cm = card.cardmarket?.prices;
   if (cm?.averageSellPrice) {
-    out.cmAvg = cm.averageSellPrice;
-    out.cmLow = cm.lowPrice;
+    out.cmAvg = cm.averageSellPrice; out.cmLow = cm.lowPrice;
     if (!out.market) { out.market = cm.averageSellPrice; out.cur = 'EUR'; out.src = 'Cardmarket'; }
   }
   return Object.keys(out).length ? out : null;
 }
 
-async function fetchPriceFor(card) {
-  if (card.src === 'ptcg') {
-    try {
-      const r = await fetch(`https://api.pokemontcg.io/v2/cards/${card.apiId}`);
-      if (!r.ok) return null;
-      const d = await r.json();
-      return getPrices(d.data);
-    } catch { return null; }
+// ═══════════════════════════════════════════════
+// SERIES LOADING (TCGdex for ko/ja, PTCG for en)
+// ═══════════════════════════════════════════════
+async function loadSeries(lang) {
+  // Use cache if available
+  if (seriesCache[lang]) { renderSeriesAccordion(seriesCache[lang]); return; }
+
+  document.getElementById('series-body').innerHTML =
+    '<div class="series-loading"><div class="spinner"></div><span>시리즈 불러오는 중...</span></div>';
+  document.getElementById('series-total-label').textContent = '';
+
+  try {
+    let groups;
+    if (lang === 'en') {
+      groups = await loadPTCGSeries();
+    } else {
+      groups = await loadTCGdexSeries(lang);
+    }
+    seriesCache[lang] = groups;
+    renderSeriesAccordion(groups);
+  } catch (e) {
+    document.getElementById('series-body').innerHTML =
+      `<div class="series-error">⚠️ 시리즈를 불러올 수 없습니다<br><small>${e.message}</small></div>`;
   }
-  // TCGdex card: try pokemontcg.io with same ID (set codes often match)
-  const ids = [card.apiId, card.apiId.replace(/-0+(\d)/, '-$1')];
-  for (const id of [...new Set(ids)]) {
-    try {
-      const r = await fetch(`https://api.pokemontcg.io/v2/cards/${id}`);
-      if (r.ok) { const d = await r.json(); const p = getPrices(d.data); if (p) return p; }
-    } catch {}
-  }
-  // Fallback: search by English name (user may need to enter English name separately)
-  return null;
 }
 
-// ── SEARCH ─────────────────────────────────────────────────
+async function loadTCGdexSeries(lang) {
+  // GET /v2/{lang}/sets → group by serie
+  const sets = await apiFetch(`https://api.tcgdex.net/v2/${lang}/sets`);
+  if (!Array.isArray(sets)) throw new Error('Invalid response');
+
+  // Group by serie id
+  const map = new Map();
+  sets.forEach(s => {
+    const sid   = s.serie?.id   || 'other';
+    const sname = s.serie?.name || '기타';
+    if (!map.has(sid)) map.set(sid, { id: sid, name: sname, sets: [], maxDate: '' });
+    const grp = map.get(sid);
+    grp.sets.push({ id: s.id, name: s.name, count: s.cardCount?.official || s.cardCount?.total || '?' });
+    if (s.releaseDate && s.releaseDate > grp.maxDate) grp.maxDate = s.releaseDate;
+  });
+
+  // Sort: newest series first, sets within series by release date (oldest→newest)
+  const groups = [...map.values()].sort((a, b) => (b.maxDate||'').localeCompare(a.maxDate||''));
+  groups.forEach(g => {
+    const matching = sets.filter(s => (s.serie?.id||'other') === g.id);
+    matching.sort((a,b) => (a.releaseDate||'').localeCompare(b.releaseDate||''));
+    g.sets = matching.map(s => ({ id: s.id, name: s.name, count: s.cardCount?.official || s.cardCount?.total || '?' }));
+  });
+  return groups;
+}
+
+async function loadPTCGSeries() {
+  // pokemontcg.io sets
+  const data = await apiFetch('https://api.pokemontcg.io/v2/sets?orderBy=-releaseDate&pageSize=500');
+  const sets  = data.data || [];
+
+  const map = new Map();
+  sets.forEach(s => {
+    const sname = s.series || '기타';
+    if (!map.has(sname)) map.set(sname, { id: sname, name: sname, sets: [], maxDate: '' });
+    const grp = map.get(sname);
+    grp.sets.push({ id: s.id, name: s.name, count: s.total || '?' });
+    if (s.releaseDate && s.releaseDate > grp.maxDate) grp.maxDate = s.releaseDate;
+  });
+
+  const groups = [...map.values()].sort((a, b) => (b.maxDate||'').localeCompare(a.maxDate||''));
+  groups.forEach(g => {
+    // Within each series, order oldest→newest
+    g.sets.sort((a, b) => {
+      const sa = sets.find(x => x.id === a.id);
+      const sb = sets.find(x => x.id === b.id);
+      return ((sa?.releaseDate||'') < (sb?.releaseDate||'') ? -1 : 1);
+    });
+  });
+  return groups;
+}
+
+// ═══════════════════════════════════════════════
+// RENDER SERIES ACCORDION
+// ═══════════════════════════════════════════════
+function renderSeriesAccordion(groups) {
+  const totalSets = groups.reduce((s, g) => s + g.sets.length, 0);
+  document.getElementById('series-total-label').textContent = `${groups.length}개 시리즈 · ${totalSets}개 세트`;
+
+  let html = '';
+  groups.forEach((g, gi) => {
+    const open = gi === 0; // first series open by default
+    html += `<div class="series-group">
+      <div class="series-group-hd" onclick="toggleSeries('${esc(g.id)}')">
+        <span class="series-arrow${open?' open':''}" id="arr-${esc(g.id)}">▶</span>
+        <span class="series-gname">${esc(g.name)}</span>
+        <span class="series-gcnt">${g.sets.length}세트</span>
+      </div>
+      <div class="series-sets${open?'':' collapsed'}" id="sets-${esc(g.id)}">
+        ${g.sets.map(s => `<button class="set-chip" id="chip-${esc(s.id)}" onclick="selectSet('${esc(s.id)}','${esc(s.name)}',this)">${esc(s.name)}</button>`).join('')}
+      </div>
+    </div>`;
+  });
+  document.getElementById('series-body').innerHTML = html;
+}
+
+function toggleSeries(id) {
+  const sets = document.getElementById('sets-' + id);
+  const arr  = document.getElementById('arr-'  + id);
+  if (!sets) return;
+  sets.classList.toggle('collapsed');
+  arr.classList.toggle('open');
+}
+
+// ═══════════════════════════════════════════════
+// LOAD SET CARDS
+// ═══════════════════════════════════════════════
+async function selectSet(setId, setName, chipEl) {
+  // Toggle active chip
+  if (activeSetChip) activeSetChip.classList.remove('active');
+  chipEl.classList.add('active');
+  activeSetChip = chipEl;
+  activeSetId = setId;
+
+  const sect = document.getElementById('cards-section');
+  sect.innerHTML = '<div class="loading"><div class="spinner"></div><div>카드 불러오는 중...</div></div>';
+  sect.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+  const cacheKey = `${exploreLang}:${setId}`;
+  if (setCardCache[cacheKey]) {
+    renderSetCards(setCardCache[cacheKey], setName, sect);
+    return;
+  }
+
+  try {
+    let cards;
+    if (exploreLang === 'en') {
+      cards = await loadPTCGSetCards(setId);
+    } else {
+      cards = await loadTCGdexSetCards(exploreLang, setId);
+    }
+    setCardCache[cacheKey] = cards;
+    renderSetCards(cards, setName, sect);
+  } catch (e) {
+    sect.innerHTML = `<div class="empty"><div class="empty-icon">⚠️</div><h3>불러오기 실패</h3><p>${e.message}</p></div>`;
+  }
+}
+
+async function loadTCGdexSetCards(lang, setId) {
+  const data = await apiFetch(`https://api.tcgdex.net/v2/${lang}/sets/${setId}`);
+  const raw  = data.cards || [];
+  return raw.map(c => ({
+    id:     `td_${lang}_${c.id}`,
+    apiId:  c.id,
+    name:   c.name,
+    number: c.localId || '',
+    image:  c.image ? `${c.image}/high.webp` : null,
+    imageLow: c.image ? `${c.image}/low.webp` : null,
+    set:    data.name || '',
+    setId:  setId,
+    lang:   lang,
+    src:    'tcgdex',
+    prices: null,
+  }));
+}
+
+async function loadPTCGSetCards(setId) {
+  // May need multiple pages for large sets
+  let page = 1;
+  const all = [];
+  while (true) {
+    const data = await apiFetch(
+      `https://api.pokemontcg.io/v2/cards?q=set.id:${setId}&pageSize=250&orderBy=number&page=${page}`
+    );
+    const cards = data.data || [];
+    all.push(...cards);
+    if (all.length >= (data.totalCount || all.length) || cards.length < 250) break;
+    page++;
+  }
+  return all.map(c => ({
+    id:     `ptcg_${c.id}`,
+    apiId:  c.id,
+    name:   c.name,
+    number: c.number || '',
+    image:  c.images?.large || c.images?.small || null,
+    set:    c.set?.name || '',
+    setId:  c.set?.id   || '',
+    lang:   'en',
+    src:    'ptcg',
+    prices: getPrices(c),
+  }));
+}
+
+function renderSetCards(cards, setName, sect) {
+  if (!cards.length) {
+    sect.innerHTML = '<div class="empty"><div class="empty-icon">🃏</div><h3>카드가 없습니다</h3><p>이 세트에 카드 정보가 없습니다</p></div>';
+    return;
+  }
+  const lbl = {ko:'한국',ja:'일본',en:'영문'}[exploreLang] || exploreLang;
+  let html = `<div class="set-header">
+    <div>
+      <div class="set-header-name">${esc(setName)}</div>
+      <div class="set-header-cnt">${cards.length}장 · ${lbl}판</div>
+    </div>
+    <button class="btn btn-gray btn-sm set-header-close" onclick="clearSetView()">✕ 닫기</button>
+  </div><div class="grid">`;
+
+  cards.forEach((card, i) => {
+    const owned = collection.find(c => c.id === card.id);
+    const priceStr = card.prices?.market
+      ? `${card.prices.cur==='USD'?'$':'€'}${card.prices.market.toFixed(2)}`
+      : '';
+    html += `<div class="card-item" onclick="openAdd(${i},'explore')">
+      <div class="card-img-wrap">
+        ${card.image
+          ? `<img class="card-img" src="${card.image}" alt="${esc(card.name)}" loading="lazy" onerror="this.parentNode.innerHTML=noImg()">`
+          : noImg()}
+        ${owned ? `<div class="qty-badge">${owned.quantity}</div>` : ''}
+      </div>
+      <div class="card-info">
+        <div class="card-name">${esc(card.name)}</div>
+        ${card.number ? `<div class="card-number">No. ${esc(card.number)}</div>` : ''}
+        ${priceStr ? `<div class="card-price">${priceStr}</div>` : ''}
+      </div>
+    </div>`;
+  });
+  html += '</div>';
+  sect.innerHTML = html;
+
+  // Store cards for openAdd reference
+  window._setCards = cards;
+}
+
+function clearSetView() {
+  if (activeSetChip) activeSetChip.classList.remove('active');
+  activeSetChip = null; activeSetId = null;
+  document.getElementById('cards-section').innerHTML = `<div class="empty" style="padding:36px 18px"><div class="empty-icon">👆</div><h3>세트를 선택하세요</h3><p>위 시리즈 목록에서 세트를 클릭하면<br>카드 목록이 여기에 표시됩니다</p></div>`;
+}
+
+// ═══════════════════════════════════════════════
+// SEARCH
+// ═══════════════════════════════════════════════
 async function doSearch() {
   const q = document.getElementById('search-input').value.trim();
   if (!q) { toast('검색어를 입력해주세요', 'err'); return; }
   const cont = document.getElementById('search-content');
   cont.innerHTML = '<div class="loading"><div class="spinner"></div><div>검색 중...</div></div>';
   try {
-    searchResults = lang === 'en' ? await searchPTCG(q) : await searchTCGdex(lang, q);
-    renderSearch(cont);
+    if (searchLang === 'en') {
+      const data = await apiFetch(`https://api.pokemontcg.io/v2/cards?q=name:*${encodeURIComponent(q)}*&pageSize=36&orderBy=name`);
+      searchResults = (data.data || []).map(c => ({
+        id: `ptcg_${c.id}`, apiId: c.id, name: c.name, number: c.number||'',
+        image: c.images?.large || c.images?.small || null,
+        set: c.set?.name||'', setId: c.set?.id||'',
+        lang: 'en', src: 'ptcg', prices: getPrices(c),
+      }));
+    } else {
+      const data = await apiFetch(`https://api.tcgdex.net/v2/${searchLang}/cards?name=${encodeURIComponent(q)}`);
+      const arr = Array.isArray(data) ? data : [];
+      const ql = q.toLowerCase();
+      searchResults = arr
+        .filter(c => c.name && c.name.toLowerCase().includes(ql))
+        .slice(0, 48)
+        .map(c => ({
+          id: `td_${searchLang}_${c.id}`, apiId: c.id, name: c.name, number: c.localId||'',
+          image: c.image ? c.image+'/high.webp' : null,
+          set: c.set?.name||'', setId: c.set?.id||'',
+          lang: searchLang, src: 'tcgdex', prices: null,
+        }));
+    }
+    renderSearchResults(cont);
   } catch (e) {
-    cont.innerHTML = `<div class="empty"><div class="empty-icon">⚠️</div><h3>검색 오류</h3><p>잠시 후 다시 시도해주세요</p><p class="text-muted" style="margin-top:6px">${e.message}</p></div>`;
+    cont.innerHTML = `<div class="empty"><div class="empty-icon">⚠️</div><h3>검색 오류</h3><p>${e.message}</p></div>`;
   }
 }
 
-function renderSearch(cont) {
+function renderSearchResults(cont) {
   if (!searchResults.length) {
     cont.innerHTML = '<div class="empty"><div class="empty-icon">🔎</div><h3>검색 결과 없음</h3><p>다른 키워드로 검색해보세요</p></div>';
     return;
   }
-  let html = `<div style="padding:12px 20px 0;font-size:13px;color:var(--g400);font-weight:500">${searchResults.length}개 카드</div><div class="grid">`;
+  let html = `<div style="padding:11px 18px 0;font-size:13px;color:var(--g400);font-weight:500">${searchResults.length}개 카드</div><div class="grid">`;
   searchResults.forEach((card, i) => {
     const owned = collection.find(c => c.id === card.id);
-    const lbl = {ko:'한국',ja:'일본',en:'영문'}[card.lang] || card.lang;
-    const priceStr = card.prices?.market ? `${card.prices.cur==='USD'?'$':'€'}${card.prices.market.toFixed(2)}` : '';
-    html += `<div class="card-item" onclick="openAdd(${i})">
+    const lbl = {ko:'한국',ja:'일본',en:'영문'}[card.lang]||card.lang;
+    const prStr = card.prices?.market ? `${card.prices.cur==='USD'?'$':'€'}${card.prices.market.toFixed(2)}` : '';
+    html += `<div class="card-item" onclick="openAdd(${i},'search')">
       <div class="card-img-wrap">
         ${card.image ? `<img class="card-img" src="${card.image}" alt="${esc(card.name)}" loading="lazy" onerror="this.parentNode.innerHTML=noImg()">` : noImg()}
         <div class="lang-badge">${lbl}</div>
@@ -452,8 +728,8 @@ function renderSearch(cont) {
       </div>
       <div class="card-info">
         <div class="card-name">${esc(card.name)}</div>
-        <div class="card-set">${esc(card.set||'세트 미상')}</div>
-        ${priceStr ? `<div class="card-price">${priceStr}</div>` : ''}
+        <div class="card-number">${esc(card.set||'')}</div>
+        ${prStr ? `<div class="card-price">${prStr}</div>` : ''}
       </div>
     </div>`;
   });
@@ -461,14 +737,14 @@ function renderSearch(cont) {
   cont.innerHTML = html;
 }
 
-function noImg() {
-  return `<div class="no-img"><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg><span>이미지 없음</span></div>`;
-}
+// ═══════════════════════════════════════════════
+// ADD MODAL
+// ═══════════════════════════════════════════════
+function openAdd(idx, context) {
+  const card = context === 'explore' ? window._setCards[idx] : searchResults[idx];
+  if (!card) return;
+  pendCard = card; pendImg = null;
 
-// ── ADD MODAL ──────────────────────────────────────────────
-function openAdd(idx) {
-  pendCard = searchResults[idx];
-  pendImg = null;
   document.getElementById('add-qty').value = 1;
   document.getElementById('add-cond').value = 'near-mint';
   document.getElementById('add-note').value = '';
@@ -478,23 +754,24 @@ function openAdd(idx) {
   document.getElementById('upload-area').classList.remove('has-img');
   document.getElementById('img-file').value = '';
 
-  const c = pendCard;
-  const owned = collection.find(x => x.id === c.id);
-  const lbl = {ko:'한국판',ja:'일본판',en:'영문판'}[c.lang] || c.lang;
-  const pHtml = c.prices?.market
-    ? `<div class="price-tag">💰 ${c.prices.cur==='USD'?'$':'€'}${c.prices.market.toFixed(2)} <span style="font-weight:400;opacity:.7">${c.prices.src||''}</span></div>${c.prices.low&&c.prices.high?`<div class="price-range">$${c.prices.low.toFixed(2)} ~ $${c.prices.high.toFixed(2)}</div>`:''}`
-    : `<div class="text-muted">시세 정보 없음</div>`;
+  const owned = collection.find(c => c.id === card.id);
+  const lbl   = {ko:'한국판',ja:'일본판',en:'영문판'}[card.lang]||card.lang;
+  const prHtml = card.prices?.market
+    ? `<div class="price-tag">💰 ${card.prices.cur==='USD'?'$':'€'}${card.prices.market.toFixed(2)} <span style="font-weight:400;opacity:.7">${card.prices.src||''}</span></div>${card.prices.low&&card.prices.high?`<div class="text-muted" style="margin-top:2px">$${card.prices.low.toFixed(2)} ~ $${card.prices.high.toFixed(2)}</div>`:''}`
+    : '<div class="text-muted">시세 정보 없음</div>';
+
   document.getElementById('add-preview').innerHTML = `
-    <img class="m-card-img" src="${c.image||''}" alt="${esc(c.name)}" onerror="this.style.background='var(--g100)';this.src=''">
+    <img class="m-card-img" src="${card.image||''}" alt="${esc(card.name)}" onerror="this.style.background='var(--g100)';this.src=''">
     <div class="m-card-info">
-      <h3>${esc(c.name)}</h3>
-      <div class="m-set">${esc(c.set||'세트 미상')}</div>
+      <h3>${esc(card.name)}</h3>
+      <div class="m-set">${esc(card.set||'세트 미상')} ${card.number?'· No.'+esc(card.number):''}</div>
       <div class="chips">
         <span class="chip chip-blue">${lbl}</span>
         ${owned ? `<span class="chip chip-green">보유 ${owned.quantity}장</span>` : ''}
       </div>
-      ${pHtml}
+      ${prHtml}
     </div>`;
+
   document.getElementById('add-modal').classList.remove('hidden');
 }
 
@@ -506,13 +783,11 @@ function adjQty(d) {
 }
 
 async function handleImg(input) {
-  const file = input.files[0];
-  if (!file) return;
+  const file = input.files[0]; if (!file) return;
   try {
-    const b64 = await resizeImg(file, 420);
-    pendImg = b64;
+    pendImg = await resizeImg(file, 420);
     const prev = document.getElementById('upload-prev');
-    prev.src = b64; prev.classList.remove('hidden');
+    prev.src = pendImg; prev.classList.remove('hidden');
     document.getElementById('upload-ph').classList.add('hidden');
     document.getElementById('upload-clear').classList.remove('hidden');
     document.getElementById('upload-area').classList.add('has-img');
@@ -520,8 +795,7 @@ async function handleImg(input) {
 }
 
 function clearImg(e) {
-  e.stopPropagation();
-  pendImg = null;
+  e.stopPropagation(); pendImg = null;
   document.getElementById('upload-prev').classList.add('hidden');
   document.getElementById('upload-ph').classList.remove('hidden');
   document.getElementById('upload-clear').classList.add('hidden');
@@ -537,25 +811,23 @@ function resizeImg(file, max) {
       img.onload = () => {
         const ratio = Math.min(max/img.width, max/img.height, 1);
         const c = document.createElement('canvas');
-        c.width = Math.round(img.width * ratio);
-        c.height = Math.round(img.height * ratio);
+        c.width = Math.round(img.width*ratio); c.height = Math.round(img.height*ratio);
         c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
         res(c.toDataURL('image/jpeg', 0.82));
       };
-      img.onerror = rej;
-      img.src = e.target.result;
+      img.onerror = rej; img.src = e.target.result;
     };
-    fr.onerror = rej;
-    fr.readAsDataURL(file);
+    fr.onerror = rej; fr.readAsDataURL(file);
   });
 }
 
 function confirmAdd() {
   if (!pendCard) return;
-  const qty = Math.max(1, parseInt(document.getElementById('add-qty').value)||1);
+  const qty  = Math.max(1, parseInt(document.getElementById('add-qty').value)||1);
   const cond = document.getElementById('add-cond').value;
   const note = document.getElementById('add-note').value.trim();
   const existing = collection.find(c => c.id === pendCard.id);
+
   if (existing) {
     existing.quantity = (existing.quantity||0) + qty;
     if (cond) existing.cond = cond;
@@ -566,17 +838,26 @@ function confirmAdd() {
     collection.unshift({ ...pendCard, quantity: qty, cond, note, customImg: pendImg, addedAt: Date.now() });
     toast(`${pendCard.name}을(를) 추가했습니다`, 'ok');
   }
-  save();
-  updateBadge();
-  closeAdd();
-  // Refresh qty badge on search grid
-  renderSearchQty();
+  saveColl(); updateBadge(); closeAdd();
+  // Refresh qty badges in current view
+  refreshQtyBadges();
 }
 
-function renderSearchQty() {
+function refreshQtyBadges() {
+  // Refresh explore set view
+  document.querySelectorAll('#cards-section .card-item').forEach((el, i) => {
+    const cards = window._setCards || [];
+    const card = cards[i]; if (!card) return;
+    const owned = collection.find(c => c.id === card.id);
+    let badge = el.querySelector('.qty-badge');
+    if (owned) {
+      if (!badge) { badge = document.createElement('div'); badge.className = 'qty-badge'; el.querySelector('.card-img-wrap').appendChild(badge); }
+      badge.textContent = owned.quantity;
+    } else if (badge) badge.remove();
+  });
+  // Refresh search results view
   document.querySelectorAll('#search-content .card-item').forEach((el, i) => {
-    const card = searchResults[i];
-    if (!card) return;
+    const card = searchResults[i]; if (!card) return;
     const owned = collection.find(c => c.id === card.id);
     let badge = el.querySelector('.qty-badge');
     if (owned) {
@@ -586,7 +867,9 @@ function renderSearchQty() {
   });
 }
 
-// ── COLLECTION ─────────────────────────────────────────────
+// ═══════════════════════════════════════════════
+// COLLECTION RENDER
+// ═══════════════════════════════════════════════
 function updateBadge() {
   const total = collection.reduce((s,c) => s+(c.quantity||1), 0);
   document.getElementById('coll-badge').textContent = total;
@@ -596,34 +879,37 @@ function renderColl() {
   updateStats();
   const cont = document.getElementById('coll-content');
   if (!collection.length) {
-    cont.innerHTML = '<div class="empty"><div class="empty-icon">📦</div><h3>컬렉션이 비어있어요</h3><p>카드를 검색해서 추가해보세요!</p></div>';
+    cont.innerHTML = '<div class="empty"><div class="empty-icon">📦</div><h3>컬렉션이 비어있어요</h3><p>시리즈를 탐색하거나 검색해서 카드를 추가하세요!</p></div>';
     return;
   }
   const sv = document.querySelector('.sort-sel').value;
   let cards = [...collection];
-  if (sv==='date-d') cards.sort((a,b)=>(b.addedAt||0)-(a.addedAt||0));
-  else if (sv==='date-a') cards.sort((a,b)=>(a.addedAt||0)-(b.addedAt||0));
-  else if (sv==='name-a') cards.sort((a,b)=>a.name.localeCompare(b.name));
-  else if (sv==='name-d') cards.sort((a,b)=>b.name.localeCompare(a.name));
-  else if (sv==='price-d') cards.sort((a,b)=>(b.prices?.market||0)-(a.prices?.market||0));
-  else if (sv==='qty-d') cards.sort((a,b)=>(b.quantity||1)-(a.quantity||1));
+  const sorters = {
+    'date-d': (a,b)=>(b.addedAt||0)-(a.addedAt||0),
+    'date-a': (a,b)=>(a.addedAt||0)-(b.addedAt||0),
+    'name-a': (a,b)=>a.name.localeCompare(b.name),
+    'name-d': (a,b)=>b.name.localeCompare(a.name),
+    'price-d':(a,b)=>(b.prices?.market||0)-(a.prices?.market||0),
+    'qty-d':  (a,b)=>(b.quantity||1)-(a.quantity||1),
+  };
+  if (sorters[sv]) cards.sort(sorters[sv]);
 
+  const lbl = c => ({ko:'한국',ja:'일본',en:'영문'}[c.lang]||c.lang);
   let html = '<div class="grid">';
   cards.forEach(card => {
     const img = card.customImg || card.image || null;
-    const lbl = {ko:'한국',ja:'일본',en:'영문'}[card.lang]||card.lang;
-    const pr = card.prices?.market ? `${card.prices.cur==='USD'?'$':'€'}${card.prices.market.toFixed(2)}` : '시세 조회 필요';
-    const prColor = card.prices?.market ? 'var(--green)' : 'var(--g400)';
-    html += `<div class="card-item" onclick="openDetail('${esc(card.id)}')">
+    const pr  = card.prices?.market ? `${card.prices.cur==='USD'?'$':'€'}${card.prices.market.toFixed(2)}` : '시세 조회 필요';
+    const prc = card.prices?.market ? 'var(--green)' : 'var(--g400)';
+    html += `<div class="card-item" onclick="openDetail('${esc2(card.id)}')">
       <div class="card-img-wrap">
         ${img ? `<img class="card-img" src="${img}" alt="${esc(card.name)}" loading="lazy" onerror="this.parentNode.innerHTML=noImg()">` : noImg()}
-        <div class="lang-badge">${lbl}</div>
+        <div class="lang-badge">${lbl(card)}</div>
         <div class="qty-badge">${card.quantity||1}</div>
       </div>
       <div class="card-info">
         <div class="card-name">${esc(card.name)}</div>
-        <div class="card-set">${esc(card.set||'세트 미상')}</div>
-        <div class="card-price" style="color:${prColor}">${pr}</div>
+        <div class="card-number">${esc(card.set||'')}</div>
+        <div class="card-price" style="color:${prc}">${pr}</div>
       </div>
     </div>`;
   });
@@ -635,23 +921,25 @@ function updateStats() {
   const total = collection.reduce((s,c)=>s+(c.quantity||1),0);
   const unique = collection.length;
   let val = 0; let hasP = false;
-  collection.forEach(c => { if(c.prices?.market&&c.prices.cur==='USD'){val+=c.prices.market*(c.quantity||1);hasP=true;} });
+  collection.forEach(c => { if(c.prices?.market && c.prices.cur==='USD'){val+=c.prices.market*(c.quantity||1);hasP=true;} });
   document.getElementById('st-total').textContent = total;
   document.getElementById('st-unique').textContent = unique;
   document.getElementById('st-val').textContent = hasP ? `$${val.toFixed(2)}` : '-';
 }
 
-// ── DETAIL MODAL ───────────────────────────────────────────
+// ═══════════════════════════════════════════════
+// DETAIL MODAL
+// ═══════════════════════════════════════════════
 function openDetail(id) {
   const card = collection.find(c => c.id === id);
   if (!card) return;
   detailId = id;
   const img = card.customImg || card.image || null;
   const lbl = {ko:'한국판',ja:'일본판',en:'영문판'}[card.lang]||card.lang;
-  const condLbl = {mint:'완벽',  'near-mint':'거의 완벽','excellent':'우수','good':'좋음','poor':'나쁨'};
+  const condLbl = {mint:'완벽','near-mint':'거의 완벽',excellent:'우수',good:'좋음',poor:'나쁨'};
   document.getElementById('detail-title').textContent = card.name;
 
-  let priceHtml = '';
+  let priceHtml;
   if (card.prices) {
     const sym = card.prices.cur==='USD'?'$':'€';
     priceHtml = `<div class="sec-title">시세 (${card.prices.src||''})</div>
@@ -671,27 +959,26 @@ function openDetail(id) {
 
   document.getElementById('detail-body').innerHTML = `
     ${img ? `<img class="detail-img" src="${img}" alt="${esc(card.name)}">` : ''}
-    <div class="chips" style="margin-bottom:14px">
+    <div class="chips" style="margin-bottom:13px">
       <span class="chip chip-blue">${lbl}</span>
       <span class="chip chip-gray">${esc(card.set||'세트 미상')}</span>
-      ${card.cond?`<span class="chip chip-yellow">${condLbl[card.cond]||card.cond}</span>`:''}
+      ${card.number ? `<span class="chip chip-gray">No. ${esc(card.number)}</span>` : ''}
+      ${card.cond ? `<span class="chip chip-yellow">${condLbl[card.cond]||card.cond}</span>` : ''}
     </div>
     <div class="sec-title">수량</div>
-    <div class="qty-ctrl" style="margin-bottom:14px">
+    <div class="qty-ctrl" style="margin-bottom:13px">
       <button class="qty-btn" onclick="adjDetailQty(-1)">−</button>
       <input type="number" class="qty-val" id="detail-qty" value="${card.quantity||1}" min="1" max="99" onchange="setDetailQty(this.value)">
       <button class="qty-btn" onclick="adjDetailQty(1)">+</button>
     </div>
     <div class="divider"></div>
     ${priceHtml}
-    ${card.note?`<div class="sec-title">메모</div><div class="note-box">${esc(card.note)}</div>`:''}
-  `;
+    ${card.note ? `<div class="sec-title">메모</div><div class="note-box">${esc(card.note)}</div>` : ''}`;
 
   document.getElementById('detail-foot').innerHTML = `
     <button class="btn btn-gray btn-sm" onclick="changeDetailImg()">📷 이미지 변경</button>
     <button class="btn btn-red" onclick="removeCard()">🗑 삭제</button>
-    <button class="btn btn-gray" onclick="closeDetail()">닫기</button>
-  `;
+    <button class="btn btn-gray" onclick="closeDetail()">닫기</button>`;
 
   document.getElementById('detail-modal').classList.remove('hidden');
 }
@@ -699,43 +986,45 @@ function openDetail(id) {
 function closeDetail() { document.getElementById('detail-modal').classList.add('hidden'); detailId = null; }
 
 function adjDetailQty(d) {
-  const card = collection.find(c => c.id === detailId);
-  if (!card) return;
+  const card = collection.find(c => c.id === detailId); if (!card) return;
   card.quantity = Math.max(1, Math.min(99, (card.quantity||1)+d));
   document.getElementById('detail-qty').value = card.quantity;
-  save(); updateBadge(); renderColl();
+  saveColl(); updateBadge(); renderColl();
 }
 
 function setDetailQty(v) {
-  const card = collection.find(c => c.id === detailId);
-  if (!card) return;
+  const card = collection.find(c => c.id === detailId); if (!card) return;
   card.quantity = Math.max(1, Math.min(99, parseInt(v)||1));
-  save(); updateBadge(); renderColl();
+  saveColl(); updateBadge(); renderColl();
 }
 
 function removeCard() {
-  const card = collection.find(c => c.id === detailId);
-  if (!card) return;
-  if (!confirm(`"${card.name}" 을(를) 컬렉션에서 삭제할까요?`)) return;
+  const card = collection.find(c => c.id === detailId); if (!card) return;
+  if (!confirm(`"${card.name}" 을(를) 삭제할까요?`)) return;
   collection = collection.filter(c => c.id !== detailId);
-  save(); updateBadge(); closeDetail(); renderColl();
+  saveColl(); updateBadge(); closeDetail(); renderColl();
   toast(`${card.name}을(를) 삭제했습니다`, 'ok');
 }
 
 async function lookupPrice() {
-  const card = collection.find(c => c.id === detailId);
-  if (!card) return;
+  const card = collection.find(c => c.id === detailId); if (!card) return;
   const btn = document.getElementById('price-btn');
   if (btn) { btn.textContent = '조회 중...'; btn.disabled = true; }
   try {
-    const prices = await fetchPriceFor(card);
-    const result = document.getElementById('price-result');
-    if (prices && prices.market) {
-      card.prices = prices;
-      save();
+    let prices = null;
+    // Try direct ID lookup on pokemontcg.io
+    for (const id of [...new Set([card.apiId, (card.apiId||'').replace(/-0+(\d)/,'-$1')])]) {
+      try {
+        const r = await fetch(`https://api.pokemontcg.io/v2/cards/${id}`);
+        if (r.ok) { const d = await r.json(); prices = getPrices(d.data); if (prices) break; }
+      } catch {}
+    }
+    const resultEl = document.getElementById('price-result');
+    if (prices?.market) {
+      card.prices = prices; saveColl();
       const sym = prices.cur==='USD'?'$':'€';
-      if (result) result.innerHTML = `
-        <div class="price-grid" style="margin-bottom:10px">
+      if (resultEl) resultEl.innerHTML = `
+        <div class="price-grid" style="margin-bottom:9px">
           <div class="p-cell"><div class="p-cell-l">시세가</div><div class="p-cell-v">${sym}${prices.market.toFixed(2)}</div></div>
           ${prices.low?`<div class="p-cell"><div class="p-cell-l">최저가</div><div class="p-cell-v">${sym}${prices.low.toFixed(2)}</div></div>`:''}
         </div>
@@ -743,38 +1032,34 @@ async function lookupPrice() {
       if (btn) btn.remove();
       renderColl();
     } else {
-      if (result) result.innerHTML = '<div class="text-muted" style="margin-bottom:10px">시세 정보를 찾을 수 없습니다</div>';
+      if (resultEl) resultEl.innerHTML = '<div class="text-muted" style="margin-bottom:10px">시세 정보를 찾을 수 없습니다</div>';
       if (btn) { btn.textContent = '🔍 시세 조회'; btn.disabled = false; }
     }
-  } catch {
-    if (btn) { btn.textContent = '🔍 시세 조회'; btn.disabled = false; }
-    toast('시세 조회 실패', 'err');
-  }
+  } catch { if (btn) { btn.textContent = '🔍 시세 조회'; btn.disabled = false; } toast('시세 조회 실패', 'err'); }
 }
 
 function changeDetailImg() {
-  const input = document.createElement('input');
-  input.type = 'file'; input.accept = 'image/*';
+  const input = document.createElement('input'); input.type='file'; input.accept='image/*';
   input.onchange = async () => {
-    const file = input.files[0];
-    if (!file) return;
+    const file = input.files[0]; if (!file) return;
     try {
       const b64 = await resizeImg(file, 420);
       const card = collection.find(c => c.id === detailId);
-      if (card) { card.customImg = b64; save(); closeDetail(); renderColl(); toast('이미지 업데이트됨', 'ok'); }
+      if (card) { card.customImg = b64; saveColl(); closeDetail(); renderColl(); toast('이미지 업데이트됨', 'ok'); }
     } catch { toast('이미지 처리 오류', 'err'); }
   };
   input.click();
 }
 
-// ── IMPORT / EXPORT ────────────────────────────────────────
+// ═══════════════════════════════════════════════
+// IMPORT / EXPORT
+// ═══════════════════════════════════════════════
 function exportColl() {
-  const blob = new Blob([JSON.stringify({version:2,date:new Date().toISOString(),collection},null,2)],{type:'application/json'});
+  const blob = new Blob([JSON.stringify({version:3,date:new Date().toISOString(),collection},null,2)],{type:'application/json'});
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
   a.download = `pokemon-collection-${new Date().toISOString().slice(0,10)}.json`;
-  a.click();
-  URL.revokeObjectURL(a.href);
+  a.click(); URL.revokeObjectURL(a.href);
   toast('컬렉션을 내보냈습니다', 'ok');
 }
 
@@ -792,34 +1077,46 @@ function importColl(input) {
         if (ex) ex.quantity = (ex.quantity||1)+(card.quantity||1);
         else collection.push(card);
       });
-      save(); updateBadge(); renderColl();
+      saveColl(); updateBadge(); renderColl();
       toast(`${arr.length}개 카드를 가져왔습니다`, 'ok');
     } catch { toast('파일 읽기 오류', 'err'); }
   };
-  fr.readAsText(file);
-  input.value = '';
+  fr.readAsText(file); input.value = '';
 }
 
-// ── TOAST ──────────────────────────────────────────────────
-function toast(msg, type='') {
-  const wrap = document.getElementById('toast-wrap');
-  const el = document.createElement('div');
-  el.className = `toast${type==='ok'?' toast-ok':type==='err'?' toast-err':''}`;
-  el.textContent = msg;
-  wrap.appendChild(el);
-  setTimeout(() => el.remove(), 3200);
+// ═══════════════════════════════════════════════
+// UTILS
+// ═══════════════════════════════════════════════
+function noImg() {
+  return `<div class="no-img"><svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg><span>이미지 없음</span></div>`;
 }
 
-// ── UTIL ───────────────────────────────────────────────────
 function esc(s) {
   return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
 }
 
-// ── INIT ───────────────────────────────────────────────────
+// For use in onclick attributes (simpler quoting)
+function esc2(s) {
+  return String(s||'').replace(/'/g,"\\'");
+}
+
+function toast(msg, type='') {
+  const wrap = document.getElementById('toast-wrap');
+  const el = document.createElement('div');
+  el.className = `toast${type==='ok'?' toast-ok':type==='err'?' toast-err':''}`;
+  el.textContent = msg; wrap.appendChild(el);
+  setTimeout(() => el.remove(), 3200);
+}
+
+// ═══════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════
 document.addEventListener('keydown', e => {
   if (e.key === 'Escape') { closeAdd(); closeDetail(); }
 });
+
 updateBadge();
+loadSeries('ko'); // Load Korean series on startup
 </script>
 </body>
 </html>
