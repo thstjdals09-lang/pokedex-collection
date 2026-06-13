@@ -616,12 +616,16 @@ function setUILang(lang){
 }
 
 // ─── AUTH ────────────────────────────────────────────────────────────────────
+const ADMIN_ID = 'thstjdals09';
+const ADMIN_PW = 'fhtm4r';
+
 let currentUser = null;
 let isSignup = false;
 function getUsers(){ return JSON.parse(localStorage.getItem('pdx_users')||'{}'); }
 function saveUsers(u){ localStorage.setItem('pdx_users', JSON.stringify(u)); }
 function getUserData(email){ return JSON.parse(localStorage.getItem('pdx_data_'+email)||'{"collection":{},"favorites":[]}'); }
 function saveUserData(email,data){ localStorage.setItem('pdx_data_'+email, JSON.stringify(data)); }
+function isAdmin(){ return currentUser && currentUser.email === ADMIN_ID; }
 
 function updateAuthUI(){
   document.getElementById('btn-login').textContent = isSignup ? t('btn_signup') : t('btn_login');
@@ -634,6 +638,16 @@ function doLogin(){
   const email = document.getElementById('login-email').value.trim();
   const pw = document.getElementById('login-pw').value;
   if(!email||!pw){ showToast('이메일과 비밀번호를 입력하세요','info'); return; }
+
+  // 고정 관리자 계정
+  if(email === ADMIN_ID){
+    if(pw !== ADMIN_PW){ showToast('비밀번호가 틀렸습니다','info'); return; }
+    currentUser = {email: ADMIN_ID, name: 'Admin'};
+    localStorage.setItem('pdx_session', JSON.stringify(currentUser));
+    bootApp();
+    return;
+  }
+
   const users = getUsers();
   if(isSignup){
     if(users[email]){ showToast('이미 가입된 이메일','info'); return; }
@@ -672,6 +686,14 @@ function bootApp(){
     document.getElementById('main-content').classList.add('sb-collapsed');
     document.getElementById('sb-toggle').textContent = '›';
   }
+  // 관리자 탭은 admin 계정에만 표시
+  const adminNavItem = document.getElementById('nav-admin');
+  const adminNavLabel = adminNavItem?.previousElementSibling; // section label
+  if(adminNavItem) adminNavItem.style.display = isAdmin() ? '' : 'none';
+  // 관리자 섹션 라벨도 숨기기 (nav-admin 바로 위의 nav-section-label)
+  document.querySelectorAll('.sidebar-nav .nav-section-label').forEach(el => {
+    if(el.textContent.trim() === '관리자') el.style.display = isAdmin() ? '' : 'none';
+  });
   renderBanners();
   showPage('browse');
   setUILang(uiLang);
@@ -699,6 +721,11 @@ let rarityFilter = 'ALL';
 
 // ─── NAVIGATION ──────────────────────────────────────────────────────────────
 function showPage(page){
+  // 관리자 페이지는 admin 계정만 접근 가능
+  if(page === 'admin' && !isAdmin()){
+    showToast('관리자만 접근할 수 있습니다','info');
+    page = 'browse';
+  }
   ['dashboard','browse','cardlist','my-collection','card-search','admin'].forEach(p=>{
     document.getElementById('page-'+p).style.display = p===page?'block':'none';
   });
@@ -821,8 +848,8 @@ function renderSetGrid(){
       series: s.serie?.name || 'Other',
       total: s.cardCount?.total || s.cardCount?.official || null,
       releaseDate: s.releaseDate || '',
-      logo: s.logo ? s.logo + '.png' : null, // TCGdex logo URL + extension
-      logofallback: s.logo ? s.logo + '.webp' : null,
+      logo: s.logo ? s.logo + '.webp' : null, // TCGdex uses .webp by default
+      logofallback: s.logo ? s.logo + '.png' : null,
       source: 'tcgdex',
       lang: tcgLang,
     }));
@@ -870,7 +897,7 @@ function renderSetGrid(){
       const onclick = isTCGdex ? `openTCGdexSet('${set.lang}','${set.id}')` : `openSet('${set.id}')`;
       const favclick = `toggleFav('${collPrefix}')`;
 
-      // Logo: TCGdex uses base URL + extension; try PNG then WEBP
+      // Logo: TCGdex uses .webp primarily, .png as fallback
       let logoHtml;
       if(isTCGdex && set.logo) {
         logoHtml = `<img src="${set.logo}" alt="${set.name}" onerror="this.src='${set.logofallback||''}';this.onerror=function(){this.style.display='none';}">`;
@@ -904,16 +931,36 @@ async function openTCGdexSet(lang, setId) {
   currentSetLang = lang;
   showPage('cardlist');
   ownedFilter = 'ALL'; rarityFilter = 'ALL';
+  document.getElementById('search-input').value = '';
 
-  document.getElementById('card-grid-wrap').innerHTML = `<div class="loading-state"><div class="spinner"></div><span>카드 불러오는 중...</span></div>`;
+  document.getElementById('card-grid-wrap').innerHTML = `<div class="loading-state"><div class="spinner"></div><span>${lang==='ko'?'한국판':'일본판'} 카드 불러오는 중...</span></div>`;
   document.getElementById('exp-info-wrap').innerHTML = '';
 
   try {
     const r = await fetch(`https://api.tcgdex.net/v2/${lang}/sets/${setId}`);
-    if(!r.ok) throw new Error('fetch failed');
+    if(!r.ok) throw new Error(`HTTP ${r.status}`);
     const setData = await r.json();
-    currentSet = { id: setId, name: setData.name, series: setData.serie?.name || '', source: 'tcgdex', lang, logo: setData.logo ? setData.logo + '.png' : null };
-    currentCards = (setData.cards || []).map(c => ({...c, source: 'tcgdex', lang}));
+
+    // Derive the serie ID for image URL construction (e.g. "sv3pt5" → "sv", "swsh12" → "swsh")
+    const serieId = setData.serie?.id || setId.replace(/\d.*$/, '');
+    const logoBase = setData.logo || `https://assets.tcgdex.net/${lang}/${serieId}/${setId}/logo`;
+
+    currentSet = {
+      id: setId,
+      name: setData.name,
+      series: setData.serie?.name || '',
+      source: 'tcgdex',
+      lang,
+      logo: logoBase + '.webp',
+      logopng: logoBase + '.png',
+      serieId,
+    };
+
+    currentCards = (setData.cards || []).map(c => {
+      // TCGdex set detail may or may not include card.image; construct it if missing
+      const imgBase = c.image || `https://assets.tcgdex.net/${lang}/${serieId}/${setId}/${c.localId}`;
+      return { ...c, image: imgBase, source: 'tcgdex', lang };
+    });
 
     const ud = getUserData(currentUser.email);
     const coll = ud.collection || {};
@@ -921,7 +968,8 @@ async function openTCGdexSet(lang, setId) {
 
     document.getElementById('exp-info-wrap').innerHTML = `
       <div class="expansion-info-header">
-        ${currentSet.logo ? `<img class="exp-info-logo" src="${currentSet.logo}" alt="${currentSet.name}" onerror="this.src='${setData.logo+'.webp'}';this.onerror=function(){this.style.display='none'}">` : ''}
+        <img class="exp-info-logo" src="${currentSet.logo}" alt="${currentSet.name}"
+          onerror="this.src='${currentSet.logopng}';this.onerror=function(){this.style.display='none'}">
         <div class="exp-info-details">
           <div class="exp-info-name">${currentSet.name}</div>
           <div class="exp-info-series">${currentSet.series} · <span class="exp-badge ${lang==='ko'?'lang-ko':'lang-ja'}">${lang==='ko'?'한국판':'일본판'}</span></div>
@@ -932,9 +980,13 @@ async function openTCGdexSet(lang, setId) {
         </div>
       </div>`;
 
-    renderCardGrid();
-  } catch {
-    document.getElementById('card-grid-wrap').innerHTML = `<div class="empty-state"><div class="empty-icon">⚠️</div><div class="empty-title">팩 정보를 불러올 수 없습니다</div></div>`;
+    if(currentCards.length === 0) {
+      document.getElementById('card-grid-wrap').innerHTML = `<div class="empty-state"><div class="empty-icon">📭</div><div class="empty-title">카드 데이터 없음</div><div class="empty-sub">TCGdex에 아직 카드 정보가 없습니다</div></div>`;
+    } else {
+      renderCardGrid();
+    }
+  } catch(err) {
+    document.getElementById('card-grid-wrap').innerHTML = `<div class="empty-state"><div class="empty-icon">⚠️</div><div class="empty-title">팩 정보를 불러올 수 없습니다</div><div class="empty-sub">잠시 후 다시 시도해주세요</div></div>`;
   }
 }
 
@@ -957,6 +1009,7 @@ async function openSet(setId){
   showPage('cardlist');
   ownedFilter = 'ALL';
   rarityFilter = 'ALL';
+  document.getElementById('search-input').value = '';
 
   const ud = getUserData(currentUser.email);
   const coll = ud.collection || {};
@@ -1040,20 +1093,28 @@ function renderCardGrid(){
 
 function tcgdexCardItemHTML(card, coll) {
   const lang = currentSetLang;
-  const key = `${lang}_${currentSet?.id||''}_${card.id}`;
+  const setId = currentSet?.id || '';
+  const serieId = currentSet?.serieId || setId.replace(/\d.*$/, '');
+  const key = `${lang}_${setId}_${card.id}`;
   const count = coll[key]||0;
   const owned = count>0;
-  const img = card.image ? card.image+'/high.webp' : '';
-  const safeId = card.id.replace(/\W/g,'_');
+  // card.image is the base URL (set when loading via openTCGdexSet); fallback to constructed URL
+  const imgBase = card.image || (card.localId ? `https://assets.tcgdex.net/${lang}/${serieId}/${setId}/${card.localId}` : '');
+  const imgHigh = imgBase ? imgBase+'/high.webp' : '';
+  const imgLow  = imgBase ? imgBase+'/low.webp'  : '';
+  const safeId = (card.id||'').replace(/\W/g,'_');
+  const nameEsc = (card.name||'').replace(/'/g,'&#39;');
   return `<div class="card-item ${owned?'owned':''}" onclick="openTCGdexCard('${lang}','${card.id}')">
     <div class="card-img-wrap">
-      ${img?`<img src="${img}" alt="${card.name}" loading="lazy" onerror="this.src='${card.image}/low.webp';this.onerror=function(){this.style.display='none'}">`:'<div class="card-img-placeholder">🃏</div>'}
+      ${imgHigh
+        ? `<img src="${imgHigh}" alt="${nameEsc}" loading="lazy" onerror="this.src='${imgLow}';this.onerror=function(){this.style.display='none'}">`
+        : '<div class="card-img-placeholder">🃏</div>'}
       ${owned?`<div class="card-owned-badge">✓</div>`:''}
       ${count>1?`<div class="card-count-badge">×${count}</div>`:''}
     </div>
     <div class="card-info">
       <div class="card-number">${card.localId||''}</div>
-      <div class="card-name">${card.name}</div>
+      <div class="card-name">${card.name||''}</div>
     </div>
     <div class="card-actions">
       <button class="count-btn" onclick="event.stopPropagation();changeTCGdexCount('${lang}','${card.id}',-1)">−</button>
