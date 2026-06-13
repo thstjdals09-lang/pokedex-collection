@@ -349,8 +349,8 @@
       <button class="nav-item" onclick="showPage('browse');filterByLang('JA');" ><span class="nav-icon">🇯🇵</span><span class="nav-label" data-i18n="lang_ja">일본판</span></button>
       <button class="nav-item" onclick="showPage('browse');filterByLang('EN');"><span class="nav-icon">🇺🇸</span><span class="nav-label" data-i18n="lang_en">영어판</span></button>
       <button class="nav-item" onclick="showPage('browse');filterByLang('KO');"><span class="nav-icon">🇰🇷</span><span class="nav-label" data-i18n="lang_ko">한국판</span></button>
-      <div class="nav-section-label">관리자</div>
-      <button class="nav-item" onclick="showPage('admin')" id="nav-admin"><span class="nav-icon">⚙️</span><span class="nav-label">광고 관리</span></button>
+      <div class="nav-section-label" id="nav-admin-label" style="display:none">관리자</div>
+      <button class="nav-item" onclick="showPage('admin')" id="nav-admin" style="display:none"><span class="nav-icon">⚙️</span><span class="nav-label">광고 관리</span></button>
     </div>
     <div class="sidebar-bottom">
       <div class="sidebar-lang">
@@ -672,6 +672,9 @@ function doLogout(){
 }
 
 function bootApp(){
+  // Clear stale TCGdex set cache (old data used wrong set IDs)
+  sessionStorage.removeItem('pdx_tcgdex_sets_ko');
+  sessionStorage.removeItem('pdx_tcgdex_sets_ja');
   document.getElementById('login-screen').style.display='none';
   document.getElementById('app').style.display='block';
   document.getElementById('s-name').textContent = currentUser.name;
@@ -687,13 +690,9 @@ function bootApp(){
     document.getElementById('sb-toggle').textContent = '›';
   }
   // 관리자 탭은 admin 계정에만 표시
-  const adminNavItem = document.getElementById('nav-admin');
-  const adminNavLabel = adminNavItem?.previousElementSibling; // section label
-  if(adminNavItem) adminNavItem.style.display = isAdmin() ? '' : 'none';
-  // 관리자 섹션 라벨도 숨기기 (nav-admin 바로 위의 nav-section-label)
-  document.querySelectorAll('.sidebar-nav .nav-section-label').forEach(el => {
-    if(el.textContent.trim() === '관리자') el.style.display = isAdmin() ? '' : 'none';
-  });
+  const adminVisible = isAdmin() ? '' : 'none';
+  document.getElementById('nav-admin').style.display = adminVisible;
+  document.getElementById('nav-admin-label').style.display = adminVisible;
   renderBanners();
   showPage('browse');
   setUILang(uiLang);
@@ -813,16 +812,13 @@ async function filterByLang(lang){
 }
 
 async function loadTCGdexSets(lang) {
-  const cacheKey = `pdx_tcgdex_sets_${lang}`;
-  const cached = sessionStorage.getItem(cacheKey);
-  if(cached) { tcgdexSets[lang] = JSON.parse(cached); return; }
+  // Do not cache — old cached data used wrong set IDs; always fetch fresh
   try {
     const r = await fetch(`https://api.tcgdex.net/v2/${lang}/sets`);
     if(r.ok) {
       const d = await r.json();
       if(Array.isArray(d) && d.length > 0) {
         tcgdexSets[lang] = d;
-        sessionStorage.setItem(cacheKey, JSON.stringify(d));
         return;
       }
     }
@@ -842,17 +838,24 @@ function renderSetGrid(){
 
   let sets;
   if(useTCGdex) {
-    sets = tcgdexSets[tcgLang].map(s => ({
-      id: s.id,
-      name: s.name,
-      series: s.serie?.name || 'Other',
-      total: s.cardCount?.total || s.cardCount?.official || null,
-      releaseDate: s.releaseDate || '',
-      logo: s.logo ? s.logo + '.webp' : null, // TCGdex uses .webp by default
-      logofallback: s.logo ? s.logo + '.png' : null,
-      source: 'tcgdex',
-      lang: tcgLang,
-    }));
+    sets = tcgdexSets[tcgLang].map(s => {
+      // serie.id is the uppercase path component used in TCGdex asset URLs (e.g. "SV", "S", "SM")
+      const serieId = s.serie?.id || s.id.replace(/[0-9].*$/, '').toUpperCase();
+      // TCGdex asset logo URL pattern: {lang}/{SERIE}/{SET_ID}/logo.{ext}
+      const logoBase = `https://assets.tcgdex.net/${tcgLang}/${serieId}/${s.id}/logo`;
+      return {
+        id: s.id,
+        name: s.name,
+        series: s.serie?.name || 'Other',
+        total: s.cardCount?.total || s.cardCount?.official || null,
+        releaseDate: s.releaseDate || '',
+        logo: logoBase + '.webp',
+        logofallback: logoBase + '.png',
+        source: 'tcgdex',
+        lang: tcgLang,
+        serieId,
+      };
+    });
   } else {
     sets = allSets;
     if(langFilter !== 'ALL') sets = sets.filter(s => inferSetLanguage(s) === langFilter);
@@ -932,23 +935,28 @@ async function openTCGdexSet(lang, setId) {
   showPage('cardlist');
   ownedFilter = 'ALL'; rarityFilter = 'ALL';
   document.getElementById('search-input').value = '';
+  document.getElementById('rarity-filter').value = 'ALL';
 
   document.getElementById('card-grid-wrap').innerHTML = `<div class="loading-state"><div class="spinner"></div><span>${lang==='ko'?'한국판':'일본판'} 카드 불러오는 중...</span></div>`;
   document.getElementById('exp-info-wrap').innerHTML = '';
 
   try {
-    const r = await fetch(`https://api.tcgdex.net/v2/${lang}/sets/${setId}`);
-    if(!r.ok) throw new Error(`HTTP ${r.status}`);
-    const setData = await r.json();
+    // Step 1: get set metadata in the target language
+    const metaR = await fetch(`https://api.tcgdex.net/v2/${lang}/sets/${setId}`);
+    const setData = metaR.ok ? await metaR.json() : {};
 
-    // Derive the serie ID for image URL construction (e.g. "sv3pt5" → "sv", "swsh12" → "swsh")
-    const serieId = setData.serie?.id || setId.replace(/\d.*$/, '');
-    const logoBase = setData.logo || `https://assets.tcgdex.net/${lang}/${serieId}/${setId}/logo`;
+    // serie.id from API is the uppercase path component (e.g. "SV", "S", "SM")
+    const serieId = setData.serie?.id || setId.replace(/[0-9].*$/, '').toUpperCase();
+    const setName = setData.name || setId;
+    const serieName = setData.serie?.name || '';
+
+    // Logo URL: TCGdex assets follow {lang}/{SERIE}/{SET_ID}/logo.webp
+    const logoBase = `https://assets.tcgdex.net/${lang}/${serieId}/${setId}/logo`;
 
     currentSet = {
       id: setId,
-      name: setData.name,
-      series: setData.serie?.name || '',
+      name: setName,
+      series: serieName,
       source: 'tcgdex',
       lang,
       logo: logoBase + '.webp',
@@ -956,15 +964,34 @@ async function openTCGdexSet(lang, setId) {
       serieId,
     };
 
-    currentCards = (setData.cards || []).map(c => {
-      // TCGdex set detail may or may not include card.image; construct it if missing
-      const imgBase = c.image || `https://assets.tcgdex.net/${lang}/${serieId}/${setId}/${c.localId}`;
+    // Step 2: get card list — try target lang first, fall back to 'ja' (same set IDs, has card images)
+    let cards = (setData.cards || []);
+    let cardLang = lang;
+
+    if(cards.length === 0 && lang !== 'ja') {
+      // Korean TCGdex has metadata only; fetch Japanese cards as proxy (same set, same art)
+      try {
+        const jaR = await fetch(`https://api.tcgdex.net/v2/ja/sets/${setId}`);
+        if(jaR.ok) {
+          const jaData = await jaR.json();
+          cards = jaData.cards || [];
+          cardLang = 'ja';
+        }
+      } catch {}
+    }
+
+    // Build card objects with correct image URLs
+    currentCards = cards.map(c => {
+      // TCGdex returns image as base URL (e.g. "https://assets.tcgdex.net/ja/SV/SV2a/001")
+      // If missing, construct it from known pattern
+      const imgBase = c.image || `https://assets.tcgdex.net/${cardLang}/${serieId}/${setId}/${c.localId}`;
       return { ...c, image: imgBase, source: 'tcgdex', lang };
     });
 
     const ud = getUserData(currentUser.email);
     const coll = ud.collection || {};
     const ownedCount = Object.keys(coll).filter(k => k.startsWith(`${lang}_${setId}_`)).length;
+    const proxyNote = (lang === 'ko' && cardLang === 'ja') ? ' · <small style="opacity:.7">카드 이미지: 일본판 기준</small>' : '';
 
     document.getElementById('exp-info-wrap').innerHTML = `
       <div class="expansion-info-header">
@@ -972,7 +999,7 @@ async function openTCGdexSet(lang, setId) {
           onerror="this.src='${currentSet.logopng}';this.onerror=function(){this.style.display='none'}">
         <div class="exp-info-details">
           <div class="exp-info-name">${currentSet.name}</div>
-          <div class="exp-info-series">${currentSet.series} · <span class="exp-badge ${lang==='ko'?'lang-ko':'lang-ja'}">${lang==='ko'?'한국판':'일본판'}</span></div>
+          <div class="exp-info-series">${currentSet.series}${proxyNote} · <span class="exp-badge ${lang==='ko'?'lang-ko':'lang-ja'}">${lang==='ko'?'한국판':'일본판'}</span></div>
         </div>
         <div class="exp-stats">
           <div class="stat-item"><div class="stat-num" id="owned-stat">${ownedCount}</div><div class="stat-label">${t('collected')}</div></div>
@@ -981,12 +1008,12 @@ async function openTCGdexSet(lang, setId) {
       </div>`;
 
     if(currentCards.length === 0) {
-      document.getElementById('card-grid-wrap').innerHTML = `<div class="empty-state"><div class="empty-icon">📭</div><div class="empty-title">카드 데이터 없음</div><div class="empty-sub">TCGdex에 아직 카드 정보가 없습니다</div></div>`;
+      document.getElementById('card-grid-wrap').innerHTML = `<div class="empty-state"><div class="empty-icon">📭</div><div class="empty-title">카드 데이터 없음</div><div class="empty-sub">이 팩의 카드 이미지는 TCGdex에 아직 없습니다</div></div>`;
     } else {
       renderCardGrid();
     }
   } catch(err) {
-    document.getElementById('card-grid-wrap').innerHTML = `<div class="empty-state"><div class="empty-icon">⚠️</div><div class="empty-title">팩 정보를 불러올 수 없습니다</div><div class="empty-sub">잠시 후 다시 시도해주세요</div></div>`;
+    document.getElementById('card-grid-wrap').innerHTML = `<div class="empty-state"><div class="empty-icon">⚠️</div><div class="empty-title">팩을 불러올 수 없습니다</div><div class="empty-sub">잠시 후 다시 시도해주세요</div></div>`;
   }
 }
 
@@ -1450,18 +1477,25 @@ function getDemoCards(setId){
 }
 
 function getDemoTCGdexSets(lang) {
+  // TCGdex uses uppercase series IDs: SV, S (SWSH era), SM
+  // Korean and Japanese share the same set IDs in the SV/S era
   if(lang === 'ko') return [
-    {id:'sv3pt5',name:'포켓몬 카드 151',serie:{name:'스칼렛 & 바이올렛'},cardCount:{total:207},logo:'https://assets.tcgdex.net/ko/sv/sv3pt5/logo',releaseDate:'2023-09-22'},
-    {id:'sv2',name:'팔데아의 진화',serie:{name:'스칼렛 & 바이올렛'},cardCount:{total:279},logo:'https://assets.tcgdex.net/ko/sv/sv2/logo',releaseDate:'2023-06-09'},
-    {id:'sv1',name:'스칼렛 ex · 바이올렛 ex',serie:{name:'스칼렛 & 바이올렛'},cardCount:{total:258},logo:'https://assets.tcgdex.net/ko/sv/sv1/logo',releaseDate:'2023-03-31'},
-    {id:'swsh12',name:'실버 템페스트',serie:{name:'소드 & 실드'},cardCount:{total:245},logo:'https://assets.tcgdex.net/ko/swsh/swsh12/logo',releaseDate:'2022-11-11'},
-    {id:'swsh1',name:'소드 & 실드',serie:{name:'소드 & 실드'},cardCount:{total:202},logo:'https://assets.tcgdex.net/ko/swsh/swsh1/logo',releaseDate:'2020-04-17'},
+    {id:'SV2a',name:'포켓몬 카드 151',serie:{id:'SV',name:'스칼렛・바이올렛'},cardCount:{total:165},releaseDate:'2023-06-16'},
+    {id:'SV1S',name:'스칼렛ex',serie:{id:'SV',name:'스칼렛・바이올렛'},cardCount:{total:78},releaseDate:'2023-01-20'},
+    {id:'SV1V',name:'바이올렛ex',serie:{id:'SV',name:'스칼렛・바이올렛'},cardCount:{total:78},releaseDate:'2023-01-20'},
+    {id:'SV3',name:'흑염의 지배자',serie:{id:'SV',name:'스칼렛・바이올렛'},cardCount:{total:108},releaseDate:'2023-07-28'},
+    {id:'SV4a',name:'샤이니트레저 ex',serie:{id:'SV',name:'스칼렛・바이올렛'},cardCount:{total:190},releaseDate:'2023-12-01'},
+    {id:'S1W',name:'소드',serie:{id:'S',name:'소드・실드'},cardCount:{total:60},releaseDate:'2020-04-17'},
+    {id:'S1H',name:'실드',serie:{id:'S',name:'소드・실드'},cardCount:{total:60},releaseDate:'2020-04-17'},
   ];
   if(lang === 'ja') return [
-    {id:'sv3pt5',name:'ポケモンカード151',serie:{name:'スカーレット＆バイオレット'},cardCount:{total:207},logo:'https://assets.tcgdex.net/ja/sv/sv3pt5/logo',releaseDate:'2023-07-28'},
-    {id:'sv2',name:'拡張パック パルデアの進化書',serie:{name:'スカーレット＆バイオレット'},cardCount:{total:98},logo:'https://assets.tcgdex.net/ja/sv/sv2/logo',releaseDate:'2023-04-14'},
-    {id:'sv1',name:'拡張パック スカーレットex',serie:{name:'スカーレット＆バイオレット'},cardCount:{total:78},logo:'https://assets.tcgdex.net/ja/sv/sv1/logo',releaseDate:'2023-01-20'},
-    {id:'swsh1',name:'ソード＆シールド',serie:{name:'ソード＆シールド'},cardCount:{total:214},logo:'https://assets.tcgdex.net/ja/swsh/swsh1/logo',releaseDate:'2020-01-10'},
+    {id:'SV2a',name:'ポケモンカード151',serie:{id:'SV',name:'スカーレット&バイオレット'},cardCount:{total:210},releaseDate:'2023-07-28'},
+    {id:'SV1S',name:'スカーレットex',serie:{id:'SV',name:'スカーレット&バイオレット'},cardCount:{total:108},releaseDate:'2023-01-20'},
+    {id:'SV1V',name:'バイオレットex',serie:{id:'SV',name:'スカーレット&バイオレット'},cardCount:{total:108},releaseDate:'2023-01-20'},
+    {id:'SV3',name:'黒炎の支配者',serie:{id:'SV',name:'スカーレット&バイオレット'},cardCount:{total:141},releaseDate:'2023-07-28'},
+    {id:'SV4a',name:'シャイニートレジャーex',serie:{id:'SV',name:'スカーレット&バイオレット'},cardCount:{total:320},releaseDate:'2023-12-22'},
+    {id:'SV5a',name:'クリムゾンヘイズ',serie:{id:'SV',name:'スカーレット&バイオレット'},cardCount:{total:96},releaseDate:'2024-01-26'},
+    {id:'SV6',name:'変幻の仮面',serie:{id:'SV',name:'スカーレット&バイオレット'},cardCount:{total:101},releaseDate:'2024-04-26'},
   ];
   return [];
 }
@@ -1945,3 +1979,4 @@ window.addEventListener('DOMContentLoaded',()=>{
 </script>
 </body>
 </html>
+
