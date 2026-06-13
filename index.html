@@ -210,6 +210,18 @@
   .rarity-U .rarity-bar{background:#6366f1}
   .rarity-C .rarity-bar{background:var(--text3)}
 
+  /* GLOBAL CARD SEARCH */
+  .cs-search-bar{display:flex;gap:8px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:18px;margin-bottom:8px}
+  .cs-search-bar input{flex:1;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:11px 15px;color:var(--text);font-family:inherit;font-size:15px;outline:none;transition:border-color .15s}
+  .cs-search-bar input:focus{border-color:var(--accent)}
+  .cs-search-btn{padding:11px 22px;background:var(--accent);border:none;border-radius:var(--radius);color:#111;font-family:inherit;font-size:14px;font-weight:800;cursor:pointer;white-space:nowrap;transition:opacity .15s}
+  .cs-search-btn:hover{opacity:.85}
+  .cs-hint{font-size:12px;color:var(--text3);margin-bottom:24px}
+  .cs-section{margin-bottom:32px}
+  .cs-lang-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;padding-bottom:10px;border-bottom:1px solid var(--border)}
+  .cs-lang-title{font-size:15px;font-weight:900}
+  .cs-lang-cnt{font-size:13px;color:var(--text2)}
+
   /* RESPONSIVE */
   .hamburger{display:none;background:none;border:none;color:var(--text);font-size:24px;cursor:pointer;padding:4px}
   @media(max-width:768px){
@@ -264,6 +276,7 @@
     <div class="sidebar-nav">
       <button class="nav-item active" onclick="showPage('dashboard')" id="nav-dashboard"><span class="nav-icon">🏠</span><span data-i18n="nav_dashboard">대시보드</span></button>
       <button class="nav-item" onclick="showPage('browse')" id="nav-browse"><span class="nav-icon">🔍</span><span data-i18n="nav_browse">팩 탐색</span></button>
+      <button class="nav-item" onclick="showPage('card-search')" id="nav-card-search"><span class="nav-icon">🌐</span><span data-i18n="nav_card_search">카드 검색</span></button>
       <button class="nav-item" onclick="showPage('my-collection')" id="nav-collection"><span class="nav-icon">📦</span><span data-i18n="nav_collection">내 컬렉션</span></button>
       <div class="nav-section-label" data-i18n="nav_lang">언어별 팩</div>
       <button class="nav-item" onclick="showPage('browse');filterByLang('JA')"><span class="nav-icon">🇯🇵</span><span data-i18n="lang_ja">일본판</span></button>
@@ -293,7 +306,7 @@
       <div class="topbar-right">
         <div class="search-box">
           <span>🔍</span>
-          <input type="text" id="search-input" placeholder="카드 / 팩 검색..." oninput="onSearch(this.value)">
+          <input type="text" id="search-input" placeholder="카드 / 팩 검색... (Enter: 통합검색)" oninput="onSearch(this.value)" onkeydown="if(event.key==='Enter')triggerGlobalSearch()">
         </div>
       </div>
     </div>
@@ -351,6 +364,24 @@
         <div id="card-grid-wrap"></div>
       </div>
 
+      <!-- CARD SEARCH (cross-language) -->
+      <div id="page-card-search" style="display:none">
+        <div class="section-header" style="margin-bottom:16px">
+          <div>
+            <div class="section-title">🌐 <span data-i18n="nav_card_search">카드 통합 검색</span></div>
+            <div class="section-subtitle" id="cs-sub">한글·日本語·English 모두 동시 검색</div>
+          </div>
+        </div>
+        <div class="cs-search-bar">
+          <input type="text" id="cs-input" placeholder="카드 이름 검색... 예) 피카츄 · Pikachu · ピカチュウ" onkeydown="if(event.key==='Enter')doCSSearch()">
+          <button class="cs-search-btn" onclick="doCSSearch()">검색</button>
+        </div>
+        <div class="cs-hint">💡 한글·영어·일본어 어떤 언어로 입력해도 3개 언어 카드가 동시에 나타납니다</div>
+        <div id="cs-results">
+          <div class="empty-state"><div class="empty-icon">🌐</div><div class="empty-title">카드 이름을 입력하세요</div><div class="empty-sub">한국판 · 영문판 · 일본판을 한번에 검색합니다</div></div>
+        </div>
+      </div>
+
       <!-- MY COLLECTION -->
       <div id="page-my-collection" style="display:none">
         <div class="section-header">
@@ -389,6 +420,7 @@ const T = {
     lbl_email:'이메일', lbl_pw:'비밀번호', btn_login:'로그인', btn_signup:'회원가입',
     to_signup:'계정이 없으신가요?', to_login:'이미 계정이 있으신가요?',
     link_signup:'회원가입', link_login:'로그인', sub:'포켓몬 카드 컬렉션 매니저',
+    nav_card_search:'카드 검색',
     stat_owned:'총 보유 수량', stat_unique:'보유 종류', stat_packs:'등록 팩', stat_val:'추정 가치(USD)',
     empty_packs:'아직 팩이 없어요', empty_packs_sub:'팩 탐색에서 ⭐를 눌러 추가하세요',
     own_qty:'보유 수량', collected:'보유', total_c:'전체',
@@ -408,6 +440,7 @@ const T = {
     lbl_email:'Email', lbl_pw:'Password', btn_login:'Sign In', btn_signup:'Sign Up',
     to_signup:"Don't have an account?", to_login:'Already have an account?',
     link_signup:'Sign Up', link_login:'Sign In', sub:'Pokémon Card Collection Manager',
+    nav_card_search:'Card Search',
     stat_owned:'Total Owned', stat_unique:'Unique Cards', stat_packs:'Saved Packs', stat_val:'Est. Value (USD)',
     empty_packs:'No packs saved yet', empty_packs_sub:'Star a pack in Browse to add it here',
     own_qty:'Quantity Owned', collected:'Owned', total_c:'Total',
@@ -427,6 +460,7 @@ const T = {
     lbl_email:'メール', lbl_pw:'パスワード', btn_login:'ログイン', btn_signup:'新規登録',
     to_signup:'アカウントをお持ちでないですか？', to_login:'すでにアカウントをお持ちですか？',
     link_signup:'新規登録', link_login:'ログイン', sub:'ポケモンカードコレクション管理',
+    nav_card_search:'カード検索',
     stat_owned:'総所持数', stat_unique:'所持種類', stat_packs:'登録パック', stat_val:'推定価値(USD)',
     empty_packs:'パークが未登録', empty_packs_sub:'パック一覧で⭐を押して追加してください',
     own_qty:'所持数', collected:'所持', total_c:'全カード',
@@ -446,6 +480,7 @@ const T = {
     lbl_email:'邮箱', lbl_pw:'密码', btn_login:'登录', btn_signup:'注册',
     to_signup:'没有账号？', to_login:'已有账号？',
     link_signup:'注册', link_login:'登录', sub:'宝可梦卡牌收藏管理器',
+    nav_card_search:'卡牌搜索',
     stat_owned:'总拥有量', stat_unique:'卡牌种类', stat_packs:'已注册包', stat_val:'估值(USD)',
     empty_packs:'还没有添加卡包', empty_packs_sub:'在浏览页面点击⭐添加',
     own_qty:'拥有数量', collected:'已有', total_c:'全部',
@@ -528,7 +563,7 @@ function bootApp(){
   const savedKey = localStorage.getItem('pdx_apikey_'+currentUser.email)||'';
   document.getElementById('api-key-input').value = savedKey;
   APIKEY = savedKey;
-  showPage('dashboard');
+  showPage('browse'); // 팩 목록을 기본 화면으로
   setUILang(uiLang);
 }
 
@@ -551,15 +586,15 @@ let rarityFilter = 'ALL';
 
 // ─── NAVIGATION ──────────────────────────────────────────────────────────────
 function showPage(page){
-  ['dashboard','browse','cardlist','my-collection'].forEach(p=>{
+  ['dashboard','browse','cardlist','my-collection','card-search'].forEach(p=>{
     document.getElementById('page-'+p).style.display = p===page?'block':'none';
   });
-  ['dashboard','browse','collection'].forEach(n=>{
+  ['dashboard','browse','collection','card-search'].forEach(n=>{
     document.getElementById('nav-'+n)?.classList.remove('active');
   });
-  const navMap={dashboard:'nav-dashboard',browse:'nav-browse','my-collection':'nav-collection'};
+  const navMap={dashboard:'nav-dashboard',browse:'nav-browse','my-collection':'nav-collection','card-search':'nav-card-search'};
   if(navMap[page]) document.getElementById(navMap[page])?.classList.add('active');
-  const titleMap={dashboard:'nav_dashboard',browse:'nav_browse','my-collection':'nav_collection',cardlist:'nav_browse'};
+  const titleMap={dashboard:'nav_dashboard',browse:'nav_browse','my-collection':'nav_collection',cardlist:'nav_browse','card-search':'nav_card_search'};
   document.getElementById('topbar-title').textContent = t(titleMap[page]||'nav_dashboard');
   if(page==='dashboard') renderDashboard();
   if(page==='browse'){ if(allSets.length===0) loadAllSets(); else renderSetGrid(); }
@@ -1101,6 +1136,279 @@ function getDemoCards(setId){
     cardmarket:null,
     artist:'Demo Artist',
   }));
+}
+
+// ─── GLOBAL CARD SEARCH (cross-language) ─────────────────────────────────────
+let csData = { en: [], ko: [], ja: [] }; // current search results
+
+function triggerGlobalSearch() {
+  const q = document.getElementById('search-input').value.trim();
+  if(!q) return;
+  document.getElementById('cs-input').value = q;
+  showPage('card-search');
+  runCSSearch(q);
+}
+
+function doCSSearch() {
+  const q = document.getElementById('cs-input').value.trim();
+  if(!q) return;
+  runCSSearch(q);
+}
+
+async function runCSSearch(query) {
+  const sub = document.getElementById('cs-sub');
+  const results = document.getElementById('cs-results');
+  sub.textContent = '한국판 · 영문판 · 일본판 동시 검색 중...';
+  results.innerHTML = '<div class="loading-state"><div class="spinner"></div><span>3개 언어 검색 중...</span></div>';
+
+  const [enCards, koCards, jaCards] = await Promise.all([
+    csSearchPTCG(query),
+    csSearchTCGdex('ko', query),
+    csSearchTCGdex('ja', query),
+  ]);
+
+  csData = { en: enCards, ko: koCards, ja: jaCards };
+  const total = enCards.length + koCards.length + jaCards.length;
+  sub.textContent = `총 ${total}개 결과 · 🇺🇸 영문 ${enCards.length} · 🇰🇷 한국 ${koCards.length} · 🇯🇵 일본 ${jaCards.length}`;
+  renderCSResults();
+}
+
+async function csSearchPTCG(query) {
+  try {
+    const headers = APIKEY ? {'X-Api-Key': APIKEY} : {};
+    const r = await fetch(`${API_BASE}/cards?q=name:*${encodeURIComponent(query)}*&pageSize=20&orderBy=name`, {headers});
+    if(!r.ok) return [];
+    const d = await r.json();
+    return d.data || [];
+  } catch { return []; }
+}
+
+async function csSearchTCGdex(lang, query) {
+  try {
+    const r = await fetch(`https://api.tcgdex.net/v2/${lang}/cards?name=${encodeURIComponent(query)}`);
+    if(!r.ok) return [];
+    const d = await r.json();
+    if(!Array.isArray(d)) return [];
+    const ql = query.toLowerCase();
+    return d.filter(c => c.name && c.name.toLowerCase().includes(ql)).slice(0, 24);
+  } catch { return []; }
+}
+
+function renderCSResults() {
+  const ud = getUserData(currentUser.email);
+  const coll = ud.collection || {};
+  let html = '';
+
+  if(csData.en.length > 0) {
+    html += `<div class="cs-section">
+      <div class="cs-lang-hd">
+        <div class="cs-lang-title">🇺🇸 영문판</div>
+        <div class="cs-lang-cnt">${csData.en.length}개 · pokemontcg.io</div>
+      </div>
+      <div class="card-grid">${csData.en.map(c => csEnCardHTML(c, coll)).join('')}</div>
+    </div>`;
+  }
+
+  if(csData.ko.length > 0) {
+    html += `<div class="cs-section">
+      <div class="cs-lang-hd">
+        <div class="cs-lang-title">🇰🇷 한국판</div>
+        <div class="cs-lang-cnt">${csData.ko.length}개 · TCGdex</div>
+      </div>
+      <div class="card-grid">${csData.ko.map(c => csTCGdexCardHTML(c, 'ko', coll)).join('')}</div>
+    </div>`;
+  }
+
+  if(csData.ja.length > 0) {
+    html += `<div class="cs-section">
+      <div class="cs-lang-hd">
+        <div class="cs-lang-title">🇯🇵 일본판</div>
+        <div class="cs-lang-cnt">${csData.ja.length}개 · TCGdex</div>
+      </div>
+      <div class="card-grid">${csData.ja.map(c => csTCGdexCardHTML(c, 'ja', coll)).join('')}</div>
+    </div>`;
+  }
+
+  if(!html) {
+    html = `<div class="empty-state"><div class="empty-icon">🔎</div><div class="empty-title">검색 결과 없음</div><div class="empty-sub">다른 이름으로 검색해보세요</div></div>`;
+  }
+
+  document.getElementById('cs-results').innerHTML = html;
+}
+
+// English card HTML (full price + collection support)
+function csEnCardHTML(card, coll) {
+  const setId = card.set?.id || '';
+  const key = setId + '_' + card.id;
+  const count = coll[key] || 0;
+  const owned = count > 0;
+  const img = card.images?.small || '';
+  const price = getPrice(card);
+  const priceStr = price ? `$${price.toFixed(2)}` : '-';
+  const rc = rarityCode(card.rarity);
+  return `<div class="card-item ${owned?'owned':''} rarity-${rc}" onclick="csOpenEN('${card.id}','${setId}')">
+    <div class="rarity-bar"></div>
+    <div class="card-img-wrap">
+      ${img?`<img src="${img}" alt="${card.name}" loading="lazy">`:'<div class="card-img-placeholder">🃏</div>'}
+      ${owned?`<div class="card-owned-badge">✓</div>`:''}
+      ${count>1?`<div class="card-count-badge">×${count}</div>`:''}
+    </div>
+    <div class="card-info">
+      <div class="card-number">#${card.number||'?'} · ${card.set?.name||''}</div>
+      <div class="card-name">${card.name}</div>
+      <div class="card-price">${priceStr}</div>
+    </div>
+    <div class="card-actions">
+      <button class="count-btn" onclick="event.stopPropagation();csChangeEN('${card.id}','${setId}',-1)">−</button>
+      <div class="count-display" id="csen-${card.id.replace(/\W/g,'_')}">${count}</div>
+      <button class="count-btn" onclick="event.stopPropagation();csChangeEN('${card.id}','${setId}',1)">+</button>
+    </div>
+  </div>`;
+}
+
+// Korean / Japanese card HTML (TCGdex)
+function csTCGdexCardHTML(card, lang, coll) {
+  const key = lang + '_' + card.id;
+  const count = coll[key] || 0;
+  const owned = count > 0;
+  const img = card.image ? card.image + '/high.webp' : null;
+  const badgeClass = lang === 'ko' ? 'lang-ko' : 'lang-ja';
+  const badgeLabel = lang === 'ko' ? 'KOR' : 'JPN';
+  const safeId = card.id.replace(/\W/g, '_');
+  return `<div class="card-item ${owned?'owned':''}" onclick="csTCGdexOpen('${lang}','${card.id}')">
+    <div class="card-img-wrap">
+      ${img?`<img src="${img}" alt="${card.name}" loading="lazy" onerror="this.style.display='none';this.nextSibling.style.display='flex'">`:''}
+      <div class="card-img-placeholder" ${img?'style="display:none"':''}>🃏</div>
+      ${owned?`<div class="card-owned-badge">✓</div>`:''}
+      ${count>1?`<div class="card-count-badge">×${count}</div>`:''}
+      <div style="position:absolute;bottom:4px;right:4px"><span class="exp-badge ${badgeClass}">${badgeLabel}</span></div>
+    </div>
+    <div class="card-info">
+      <div class="card-number">${card.localId||''} · ${card.set?.name||''}</div>
+      <div class="card-name">${card.name}</div>
+    </div>
+    <div class="card-actions">
+      <button class="count-btn" onclick="event.stopPropagation();csTCGdexChange('${lang}','${card.id}',-1)">−</button>
+      <div class="count-display" id="cstd-${safeId}">${count}</div>
+      <button class="count-btn" onclick="event.stopPropagation();csTCGdexChange('${lang}','${card.id}',1)">+</button>
+    </div>
+  </div>`;
+}
+
+// Open English card from search results (reuse existing modal)
+function csOpenEN(cardId, setId) {
+  const card = csData.en.find(c => c.id === cardId);
+  if(!card) return;
+  currentSet = { id: setId, name: card.set?.name || '' };
+  if(!currentCards.find(c => c.id === cardId)) currentCards.push(card);
+  openCard(cardId);
+}
+
+function csChangeEN(cardId, setId, delta) {
+  const ud = getUserData(currentUser.email);
+  const coll = ud.collection || {};
+  const key = setId + '_' + cardId;
+  const nv = Math.max(0, (coll[key]||0) + delta);
+  if(nv === 0) delete coll[key]; else coll[key] = nv;
+  ud.collection = coll;
+  saveUserData(currentUser.email, ud);
+  const el = document.getElementById('csen-' + cardId.replace(/\W/g,'_'));
+  if(el) el.textContent = nv;
+}
+
+// Open Korean/Japanese card modal
+function csTCGdexOpen(lang, cardId) {
+  const cards = csData[lang];
+  const card = cards.find(c => c.id === cardId);
+  if(!card) return;
+
+  const ud = getUserData(currentUser.email);
+  const coll = ud.collection || {};
+  const key = lang + '_' + cardId;
+  const count = coll[key] || 0;
+  const img = card.image ? card.image + '/high.webp' : null;
+  const langLabel = lang === 'ko' ? '한국판' : '일본판';
+  const badgeClass = lang === 'ko' ? 'lang-ko' : 'lang-ja';
+
+  document.getElementById('modal-hdr').innerHTML = `
+    <div class="modal-card-img">
+      ${img ? `<img src="${img}" alt="${card.name}" onerror="this.parentNode.innerHTML='<div style=\\'aspect-ratio:.717;background:var(--surface2);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:40px\\'>🃏</div>'">`
+             : '<div style="aspect-ratio:.717;background:var(--surface2);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:40px">🃏</div>'}
+    </div>
+    <div class="modal-card-details">
+      <div class="modal-card-number">${card.localId||''} · ${card.set?.name||''}</div>
+      <div class="modal-card-name">${card.name}</div>
+      <div class="modal-badges">
+        <span class="badge exp-badge ${badgeClass}">${langLabel}</span>
+      </div>
+    </div>`;
+
+  document.getElementById('modal-price').innerHTML = `
+    <div class="price-label">시세 정보</div>
+    <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+      <span style="color:var(--text3);font-size:13px">TCGdex는 시세를 제공하지 않습니다</span>
+      <button onclick="csFetchPrice('${lang}','${cardId}')" style="padding:5px 12px;background:var(--accent);border:none;border-radius:8px;color:#111;font-family:inherit;font-size:12px;font-weight:800;cursor:pointer;white-space:nowrap">영문판 시세 조회</button>
+    </div>
+    <div id="cs-price-result" style="margin-top:10px"></div>`;
+
+  document.getElementById('modal-own').innerHTML = `
+    <div class="own-label">${t('own_qty')}</div>
+    <div class="own-controls">
+      <button class="own-btn" onclick="csTCGdexModalChange('${lang}','${cardId}',-1)">−</button>
+      <div class="own-count" id="cs-modal-count">${count}</div>
+      <button class="own-btn" onclick="csTCGdexModalChange('${lang}','${cardId}',1)">+</button>
+    </div>`;
+
+  document.getElementById('card-modal').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function csTCGdexChange(lang, cardId, delta) {
+  const ud = getUserData(currentUser.email);
+  const coll = ud.collection || {};
+  const key = lang + '_' + cardId;
+  const nv = Math.max(0, (coll[key]||0) + delta);
+  if(nv === 0) delete coll[key]; else coll[key] = nv;
+  ud.collection = coll;
+  saveUserData(currentUser.email, ud);
+  const el = document.getElementById('cstd-' + cardId.replace(/\W/g,'_'));
+  if(el) el.textContent = nv;
+}
+
+function csTCGdexModalChange(lang, cardId, delta) {
+  csTCGdexChange(lang, cardId, delta);
+  const ud = getUserData(currentUser.email);
+  const count = (ud.collection || {})[lang + '_' + cardId] || 0;
+  const el = document.getElementById('cs-modal-count');
+  if(el) el.textContent = count;
+}
+
+async function csFetchPrice(lang, tcgdexId) {
+  const resultEl = document.getElementById('cs-price-result');
+  if(!resultEl) return;
+  resultEl.innerHTML = '<span style="color:var(--text3);font-size:12px">조회 중...</span>';
+  // TCGdex IDs often match pokemontcg.io IDs (e.g. swsh1-1)
+  const tryIds = [...new Set([tcgdexId, tcgdexId.replace(/-0+(\d)/, '-$1')])];
+  for(const id of tryIds) {
+    try {
+      const headers = APIKEY ? {'X-Api-Key': APIKEY} : {};
+      const r = await fetch(`${API_BASE}/cards/${id}`, {headers});
+      if(r.ok) {
+        const d = await r.json();
+        const price = getPrice(d.data);
+        if(price) {
+          resultEl.innerHTML = `
+            <div style="background:var(--surface2);border-radius:8px;padding:10px;margin-top:6px">
+              <div style="font-size:11px;color:var(--text3);margin-bottom:4px">영문판 참고가 (TCGPlayer)</div>
+              <div style="font-size:22px;font-weight:900;color:var(--accent)">$${price.toFixed(2)}</div>
+              <div style="font-size:11px;color:var(--text3);margin-top:2px">${d.data.name} · ${d.data.set?.name||''}</div>
+            </div>`;
+          return;
+        }
+      }
+    } catch {}
+  }
+  resultEl.innerHTML = '<span style="color:var(--text3);font-size:12px">시세 정보를 찾을 수 없습니다</span>';
 }
 
 // ─── INIT ────────────────────────────────────────────────────────────────────
