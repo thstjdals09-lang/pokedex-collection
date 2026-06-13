@@ -38,24 +38,102 @@
 
   /* APP */
   #app{display:none;min-height:100vh}
-  .sidebar{position:fixed;left:0;top:0;bottom:0;width:240px;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;z-index:100;padding:24px 0}
-  .sidebar-logo{padding:0 20px 24px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px}
-  .sidebar-logo .logo-text{font-size:18px;font-weight:900;letter-spacing:-.5px}
+  :root{--sb-w:240px;--sb-col-w:64px}
+  .sidebar{position:fixed;left:0;top:0;bottom:0;width:var(--sb-w);background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;z-index:100;padding:0;transition:width .25s ease,transform .3s ease;overflow:hidden}
+  .sidebar.collapsed{width:var(--sb-col-w)}
+  .sidebar-logo{padding:18px 16px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;position:relative;min-height:66px;overflow:hidden}
+  .sidebar-logo .logo-text{font-size:17px;font-weight:900;letter-spacing:-.5px;white-space:nowrap;transition:opacity .2s,width .25s;overflow:hidden}
   .sidebar-logo .logo-text span{color:var(--accent)}
-  .sidebar-nav{flex:1;padding:16px 12px;display:flex;flex-direction:column;gap:2px}
-  .nav-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:var(--radius);color:var(--text2);font-size:14px;font-weight:700;cursor:pointer;transition:all .15s;border:none;background:none;text-align:left;width:100%;font-family:inherit}
+  .sidebar.collapsed .logo-text{opacity:0;width:0}
+  .sidebar-toggle-btn{position:absolute;right:-1px;top:50%;transform:translateY(-50%);width:22px;height:40px;background:var(--surface2);border:1px solid var(--border);border-right:none;border-radius:6px 0 0 6px;color:var(--text2);font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s}
+  .sidebar-toggle-btn:hover{background:var(--accent);color:#111;border-color:var(--accent)}
+  .sidebar-nav{flex:1;padding:12px 8px;display:flex;flex-direction:column;gap:2px;overflow-y:auto;overflow-x:hidden}
+  .nav-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:var(--radius);color:var(--text2);font-size:13px;font-weight:700;cursor:pointer;transition:all .15s;border:none;background:none;text-align:left;width:100%;font-family:inherit;white-space:nowrap;min-height:42px}
   .nav-item:hover{background:var(--surface2);color:var(--text)}
   .nav-item.active{background:#3d7dca22;color:var(--accent)}
-  .nav-icon{font-size:18px;flex-shrink:0}
-  .nav-section-label{padding:16px 12px 6px;font-size:10px;font-weight:800;color:var(--text3);text-transform:uppercase;letter-spacing:.12em}
-  .sidebar-bottom{padding:16px 12px;border-top:1px solid var(--border)}
-  .user-info{display:flex;align-items:center;gap:10px;padding:8px 12px}
-  .user-avatar{width:36px;height:36px;background:linear-gradient(135deg,var(--accent),var(--accent2));border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:900;color:#111;flex-shrink:0}
-  .user-name{font-size:13px;font-weight:700}
-  .user-email{font-size:11px;color:var(--text2)}
-  .sidebar-lang{display:flex;gap:4px;padding:0 12px;margin-top:10px}
-  .sidebar-lang .lang-btn{padding:5px 2px;font-size:11px}
-  .main-content{margin-left:240px;min-height:100vh;display:flex;flex-direction:column}
+  .nav-icon{font-size:17px;flex-shrink:0;width:20px;text-align:center}
+  .nav-label{transition:opacity .2s;overflow:hidden;white-space:nowrap}
+  .sidebar.collapsed .nav-label{opacity:0}
+  .nav-section-label{padding:14px 12px 5px;font-size:10px;font-weight:800;color:var(--text3);text-transform:uppercase;letter-spacing:.12em;white-space:nowrap;transition:opacity .2s}
+  .sidebar.collapsed .nav-section-label{opacity:0}
+  .sidebar-bottom{padding:10px 8px;border-top:1px solid var(--border)}
+  .user-info{display:flex;align-items:center;gap:10px;padding:6px 8px;overflow:hidden}
+  .user-avatar{width:34px;height:34px;background:linear-gradient(135deg,var(--accent),var(--accent2));border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:900;color:#111;flex-shrink:0}
+  .user-name{font-size:12px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .user-email{font-size:10px;color:var(--text2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .user-details{min-width:0;flex:1;transition:opacity .2s}
+  .sidebar.collapsed .user-details{opacity:0}
+  .sidebar-lang{display:flex;gap:3px;padding:0 8px;margin-top:6px;overflow:hidden}
+  .sidebar-lang .lang-btn{padding:4px 2px;font-size:10px}
+  .sidebar.collapsed .sidebar-lang{display:none}
+  .main-content{margin-left:var(--sb-w);min-height:100vh;display:flex;flex-direction:column;transition:margin-left .25s ease}
+  .main-content.sb-collapsed{margin-left:var(--sb-col-w)}
+
+  /* BANNER ADS */
+  .ad-slot{margin-bottom:16px;display:none}
+  .ad-slot.has-banner{display:block}
+  .ad-banner-card{background:linear-gradient(135deg,var(--surface2),var(--surface));border:1px solid var(--border);border-radius:var(--radius);padding:10px 14px;display:flex;align-items:center;gap:12px;cursor:pointer;position:relative;transition:border-color .15s;overflow:hidden}
+  .ad-banner-card:hover{border-color:var(--accent2)}
+  .ad-banner-card img{height:40px;object-fit:contain;border-radius:6px;flex-shrink:0}
+  .ad-banner-text{flex:1;min-width:0}
+  .ad-label{font-size:9px;color:var(--text3);font-weight:700;text-transform:uppercase;letter-spacing:.08em}
+  .ad-title{font-size:13px;font-weight:800;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .ad-close{position:absolute;right:8px;top:8px;background:none;border:none;color:var(--text3);font-size:13px;cursor:pointer;line-height:1;padding:2px 5px}
+  .ad-close:hover{color:var(--text)}
+
+  /* ADMIN PAGE */
+  .admin-section{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:20px;margin-bottom:20px}
+  .admin-section h3{font-size:15px;font-weight:900;margin-bottom:14px}
+  .banner-item{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:12px;display:flex;align-items:center;gap:12px;margin-bottom:8px}
+  .banner-item-info{flex:1;min-width:0}
+  .banner-item-title{font-size:13px;font-weight:800;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .banner-item-meta{font-size:10px;color:var(--text2);margin-top:2px}
+  .btn-sm{padding:5px 10px;border:none;border-radius:8px;font-family:inherit;font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap}
+  .btn-sm.edit-btn{background:var(--accent2);color:#fff}
+  .btn-sm.del-btn{background:var(--danger);color:#fff}
+  .btn-sm.on{background:var(--success);color:#000}
+  .btn-sm.off{background:var(--surface);border:1px solid var(--border);color:var(--text2)}
+  .admin-form{display:flex;flex-direction:column;gap:10px}
+  .admin-form-row{display:flex;gap:10px;flex-wrap:wrap}
+  .admin-field{flex:1;min-width:140px;display:flex;flex-direction:column;gap:4px}
+  .admin-field label{font-size:10px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.06em}
+  .admin-field input,.admin-field select{padding:8px 10px;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-family:inherit;font-size:13px;outline:none;width:100%}
+  .admin-field input:focus,.admin-field select:focus{border-color:var(--accent)}
+  .btn-add{padding:10px 20px;background:var(--accent);border:none;border-radius:var(--radius);color:#111;font-family:inherit;font-size:13px;font-weight:800;cursor:pointer;align-self:flex-start}
+
+  /* RESPONSIVE */
+  .hamburger{display:none;background:none;border:none;color:var(--text);font-size:22px;cursor:pointer;padding:4px;line-height:1}
+  @media(max-width:900px){
+    .sidebar{transform:translateX(calc(-1 * var(--sb-w)));transition:transform .3s ease,width .25s ease}
+    .sidebar.mobile-open{transform:translateX(0)}
+    .sidebar.collapsed{transform:translateX(calc(-1 * var(--sb-col-w)))}
+    .sidebar.mobile-open.collapsed{transform:translateX(0)}
+    .main-content,.main-content.sb-collapsed{margin-left:0}
+    .sidebar-toggle-btn{display:none}
+    .hamburger{display:block}
+    .sidebar-overlay{display:block !important}
+  }
+  @media(max-width:768px){
+    .page-content{padding:14px}
+    .topbar{padding:10px 16px}
+    .topbar h1{font-size:16px}
+    .card-grid{grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px}
+    .expansion-grid{grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px}
+    .stats-grid{grid-template-columns:repeat(2,1fr)}
+    .my-packs-grid{grid-template-columns:1fr}
+    .search-box input{width:130px}
+    .login-card{padding:32px 24px}
+  }
+  @media(max-width:480px){
+    .card-grid{grid-template-columns:repeat(2,1fr);gap:8px}
+    .expansion-grid{grid-template-columns:repeat(2,1fr);gap:8px}
+    .page-content{padding:10px}
+    .topbar h1{display:none}
+    .search-box input{width:100px;font-size:12px}
+    .modal-overlay{align-items:flex-end;padding:0}
+    .modal{border-radius:var(--radius-lg) var(--radius-lg) 0 0;max-height:94vh}
+  }
+  .sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:99}
   .topbar{position:sticky;top:0;background:var(--bg);border-bottom:1px solid var(--border);padding:16px 32px;display:flex;align-items:center;gap:16px;z-index:50}
   .topbar h1{font-size:20px;font-weight:900}
   .topbar-right{margin-left:auto;display:flex;align-items:center;gap:12px}
@@ -222,19 +300,6 @@
   .cs-lang-title{font-size:15px;font-weight:900}
   .cs-lang-cnt{font-size:13px;color:var(--text2)}
 
-  /* RESPONSIVE */
-  .hamburger{display:none;background:none;border:none;color:var(--text);font-size:24px;cursor:pointer;padding:4px}
-  @media(max-width:768px){
-    .sidebar{transform:translateX(-100%);transition:transform .3s}
-    .sidebar.open{transform:translateX(0)}
-    .main-content{margin-left:0}
-    .page-content{padding:16px}
-    .topbar{padding:12px 16px}
-    .card-grid{grid-template-columns:repeat(auto-fill,minmax(120px,1fr))}
-    .expansion-grid{grid-template-columns:repeat(auto-fill,minmax(140px,1fr))}
-    .hamburger{display:block}
-    .login-card{width:100%;margin:16px;padding:32px 24px}
-  }
 </style>
 </head>
 <body>
@@ -267,22 +332,25 @@
 </div>
 
 <!-- APP -->
+<div class="sidebar-overlay" id="sidebar-overlay" onclick="closeMobileSidebar()"></div>
 <div id="app">
   <nav class="sidebar" id="sidebar">
     <div class="sidebar-logo">
-      <svg width="26" height="26" viewBox="0 0 64 64"><circle cx="32" cy="32" r="30" fill="#cc2244"/><rect x="2" y="29" width="60" height="6" fill="#111"/><circle cx="32" cy="32" r="10" fill="#fff" stroke="#111" stroke-width="3"/><circle cx="32" cy="32" r="5" fill="#cc2244" stroke="#111" stroke-width="2"/><path d="M2,32 A30,30 0 0,1 62,32" fill="#fff"/></svg>
+      <svg width="26" height="26" viewBox="0 0 64 64" style="flex-shrink:0"><circle cx="32" cy="32" r="30" fill="#cc2244"/><rect x="2" y="29" width="60" height="6" fill="#111"/><circle cx="32" cy="32" r="10" fill="#fff" stroke="#111" stroke-width="3"/><circle cx="32" cy="32" r="5" fill="#cc2244" stroke="#111" stroke-width="2"/><path d="M2,32 A30,30 0 0,1 62,32" fill="#fff"/></svg>
       <div class="logo-text">Poké<span>Dex</span></div>
+      <button class="sidebar-toggle-btn" id="sb-toggle" onclick="toggleSidebar()" title="사이드바 접기/펼치기">‹</button>
     </div>
     <div class="sidebar-nav">
-      <button class="nav-item active" onclick="showPage('dashboard')" id="nav-dashboard"><span class="nav-icon">🏠</span><span data-i18n="nav_dashboard">대시보드</span></button>
-      <button class="nav-item" onclick="showPage('browse')" id="nav-browse"><span class="nav-icon">🔍</span><span data-i18n="nav_browse">팩 탐색</span></button>
-      <button class="nav-item" onclick="showPage('card-search')" id="nav-card-search"><span class="nav-icon">🌐</span><span data-i18n="nav_card_search">카드 검색</span></button>
-      <button class="nav-item" onclick="showPage('my-collection')" id="nav-collection"><span class="nav-icon">📦</span><span data-i18n="nav_collection">내 컬렉션</span></button>
+      <button class="nav-item active" onclick="showPage('dashboard')" id="nav-dashboard"><span class="nav-icon">🏠</span><span class="nav-label" data-i18n="nav_dashboard">대시보드</span></button>
+      <button class="nav-item" onclick="showPage('browse')" id="nav-browse"><span class="nav-icon">🔍</span><span class="nav-label" data-i18n="nav_browse">팩 탐색</span></button>
+      <button class="nav-item" onclick="showPage('card-search')" id="nav-card-search"><span class="nav-icon">🌐</span><span class="nav-label" data-i18n="nav_card_search">카드 검색</span></button>
+      <button class="nav-item" onclick="showPage('my-collection')" id="nav-collection"><span class="nav-icon">📦</span><span class="nav-label" data-i18n="nav_collection">내 컬렉션</span></button>
       <div class="nav-section-label" data-i18n="nav_lang">언어별 팩</div>
-      <button class="nav-item" onclick="showPage('browse');filterByLang('JA')"><span class="nav-icon">🇯🇵</span><span data-i18n="lang_ja">일본판</span></button>
-      <button class="nav-item" onclick="showPage('browse');filterByLang('EN')"><span class="nav-icon">🇺🇸</span><span data-i18n="lang_en">영어판</span></button>
-      <button class="nav-item" onclick="showPage('browse');filterByLang('KO')"><span class="nav-icon">🇰🇷</span><span data-i18n="lang_ko">한국판</span></button>
-      <button class="nav-item" onclick="showPage('browse');filterByLang('ZH')"><span class="nav-icon">🇨🇳</span><span data-i18n="lang_zh">중국판</span></button>
+      <button class="nav-item" onclick="showPage('browse');filterByLang('JA');" ><span class="nav-icon">🇯🇵</span><span class="nav-label" data-i18n="lang_ja">일본판</span></button>
+      <button class="nav-item" onclick="showPage('browse');filterByLang('EN');"><span class="nav-icon">🇺🇸</span><span class="nav-label" data-i18n="lang_en">영어판</span></button>
+      <button class="nav-item" onclick="showPage('browse');filterByLang('KO');"><span class="nav-icon">🇰🇷</span><span class="nav-label" data-i18n="lang_ko">한국판</span></button>
+      <div class="nav-section-label">관리자</div>
+      <button class="nav-item" onclick="showPage('admin')" id="nav-admin"><span class="nav-icon">⚙️</span><span class="nav-label">광고 관리</span></button>
     </div>
     <div class="sidebar-bottom">
       <div class="sidebar-lang">
@@ -293,15 +361,15 @@
       </div>
       <div class="user-info">
         <div class="user-avatar" id="s-avatar">T</div>
-        <div><div class="user-name" id="s-name">Trainer</div><div class="user-email" id="s-email">-</div></div>
+        <div class="user-details"><div class="user-name" id="s-name">Trainer</div><div class="user-email" id="s-email">-</div></div>
       </div>
-      <button class="nav-item" onclick="doLogout()" style="margin-top:4px"><span class="nav-icon">🚪</span><span data-i18n="nav_logout">로그아웃</span></button>
+      <button class="nav-item" onclick="doLogout()" style="margin-top:4px"><span class="nav-icon">🚪</span><span class="nav-label" data-i18n="nav_logout">로그아웃</span></button>
     </div>
   </nav>
 
-  <div class="main-content">
+  <div class="main-content" id="main-content">
     <div class="topbar">
-      <button class="hamburger" onclick="document.getElementById('sidebar').classList.toggle('open')">☰</button>
+      <button class="hamburger" onclick="openMobileSidebar()">☰</button>
       <h1 id="topbar-title">대시보드</h1>
       <div class="topbar-right">
         <div class="search-box">
@@ -315,6 +383,7 @@
 
       <!-- DASHBOARD -->
       <div id="page-dashboard">
+        <div class="ad-slot" id="ad-dashboard"></div>
         <div class="api-banner" id="api-banner">
           <span>🔑</span>
           <span style="font-weight:700;white-space:nowrap">pokemontcg.io API Key <span style="color:var(--success);font-size:11px">(선택)</span>:</span>
@@ -331,6 +400,7 @@
 
       <!-- BROWSE -->
       <div id="page-browse" style="display:none">
+        <div class="ad-slot" id="ad-browse_top"></div>
         <div class="section-header" style="margin-bottom:16px">
           <div><div class="section-title" data-i18n="browse_title">확장팩 탐색</div><div class="section-subtitle" data-i18n="browse_sub">언어·시리즈별로 팩을 선택하세요</div></div>
         </div>
@@ -366,6 +436,7 @@
 
       <!-- CARD SEARCH (cross-language) -->
       <div id="page-card-search" style="display:none">
+        <div class="ad-slot" id="ad-search_top"></div>
         <div class="section-header" style="margin-bottom:16px">
           <div>
             <div class="section-title">🌐 <span data-i18n="nav_card_search">카드 통합 검색</span></div>
@@ -388,6 +459,38 @@
           <div><div class="section-title" data-i18n="nav_collection">내 컬렉션</div><div class="section-subtitle" id="coll-sub"></div></div>
         </div>
         <div id="my-coll-content"></div>
+      </div>
+
+      <!-- ADMIN -->
+      <div id="page-admin" style="display:none">
+        <div class="section-header" style="margin-bottom:20px">
+          <div><div class="section-title">⚙️ 광고 배너 관리</div><div class="section-subtitle">배너 광고를 추가·수정·삭제합니다</div></div>
+        </div>
+        <div class="admin-section">
+          <h3>📋 배너 목록</h3>
+          <div id="admin-banner-list"><div style="color:var(--text3);font-size:13px">등록된 배너가 없습니다</div></div>
+        </div>
+        <div class="admin-section">
+          <h3>➕ 배너 추가 / 수정</h3>
+          <div class="admin-form">
+            <input type="hidden" id="edit-banner-id">
+            <div class="admin-form-row">
+              <div class="admin-field"><label>배너 제목</label><input type="text" id="bn-title" placeholder="예) 포켓몬 센터 공식샵"></div>
+              <div class="admin-field"><label>위치</label>
+                <select id="bn-pos">
+                  <option value="browse_top">팩 탐색 상단</option>
+                  <option value="search_top">카드 검색 상단</option>
+                  <option value="dashboard">대시보드</option>
+                </select>
+              </div>
+            </div>
+            <div class="admin-form-row">
+              <div class="admin-field"><label>이미지 URL (선택)</label><input type="text" id="bn-img" placeholder="https://..."></div>
+              <div class="admin-field"><label>링크 URL (선택)</label><input type="text" id="bn-link" placeholder="https://..."></div>
+            </div>
+            <button class="btn-add" onclick="saveBanner()">저장</button>
+          </div>
+        </div>
       </div>
 
     </div>
@@ -563,7 +666,14 @@ function bootApp(){
   const savedKey = localStorage.getItem('pdx_apikey_'+currentUser.email)||'';
   document.getElementById('api-key-input').value = savedKey;
   APIKEY = savedKey;
-  showPage('browse'); // 팩 목록을 기본 화면으로
+  // Restore sidebar collapsed state
+  if(localStorage.getItem('pdx_sb_collapsed') === '1') {
+    document.getElementById('sidebar').classList.add('collapsed');
+    document.getElementById('main-content').classList.add('sb-collapsed');
+    document.getElementById('sb-toggle').textContent = '›';
+  }
+  renderBanners();
+  showPage('browse');
   setUILang(uiLang);
 }
 
@@ -578,7 +688,10 @@ function saveApiKey(){
 // ─── STATE ───────────────────────────────────────────────────────────────────
 let APIKEY = '';
 let allSets = [];
+let tcgdexSets = { ko: [], ja: [] }; // sets from TCGdex per language
 let currentSet = null;
+let currentSetSource = 'ptcg'; // 'ptcg' or 'tcgdex'
+let currentSetLang = 'en';
 let currentCards = [];
 let langFilter = 'ALL';
 let ownedFilter = 'ALL';
@@ -586,19 +699,23 @@ let rarityFilter = 'ALL';
 
 // ─── NAVIGATION ──────────────────────────────────────────────────────────────
 function showPage(page){
-  ['dashboard','browse','cardlist','my-collection','card-search'].forEach(p=>{
+  ['dashboard','browse','cardlist','my-collection','card-search','admin'].forEach(p=>{
     document.getElementById('page-'+p).style.display = p===page?'block':'none';
   });
-  ['dashboard','browse','collection','card-search'].forEach(n=>{
+  ['dashboard','browse','collection','card-search','admin'].forEach(n=>{
     document.getElementById('nav-'+n)?.classList.remove('active');
   });
-  const navMap={dashboard:'nav-dashboard',browse:'nav-browse','my-collection':'nav-collection','card-search':'nav-card-search'};
+  const navMap={dashboard:'nav-dashboard',browse:'nav-browse','my-collection':'nav-collection','card-search':'nav-card-search',admin:'nav-admin'};
   if(navMap[page]) document.getElementById(navMap[page])?.classList.add('active');
-  const titleMap={dashboard:'nav_dashboard',browse:'nav_browse','my-collection':'nav_collection',cardlist:'nav_browse','card-search':'nav_card_search'};
+  const titleMap={dashboard:'nav_dashboard',browse:'nav_browse','my-collection':'nav_collection',cardlist:'nav_browse','card-search':'nav_card_search',admin:'nav_dashboard'};
   document.getElementById('topbar-title').textContent = t(titleMap[page]||'nav_dashboard');
+  if(page==='admin') document.getElementById('topbar-title').textContent = '광고 관리';
   if(page==='dashboard') renderDashboard();
   if(page==='browse'){ if(allSets.length===0) loadAllSets(); else renderSetGrid(); }
   if(page==='my-collection') renderMyCollection();
+  if(page==='admin') renderAdminPage();
+  // Close mobile sidebar on nav
+  closeMobileSidebar();
 }
 
 function backToBrowse(){ currentSet=null; showPage('browse'); }
@@ -628,15 +745,15 @@ const KNOWN_SERIES_ORDER = [
 ];
 
 async function loadAllSets(){
-  document.getElementById('expansion-grid-wrap').innerHTML = `<div class="loading-state"><div class="spinner"></div><span>${t('loading')}</span></div>`;
+  // Show demo sets instantly so the page doesn't feel slow
+  allSets = getDemoSets();
+  renderSetGrid();
+  // Then fetch real data in the background and refresh
   const data = await apiGet('/sets?orderBy=-releaseDate&pageSize=250');
   if(data && data.data && data.data.length > 0){
     allSets = data.data;
-  } else {
-    allSets = getDemoSets();
-    showToast('API 연결 실패 — 데모 데이터 표시 중','info');
+    renderSetGrid();
   }
-  renderSetGrid();
 }
 
 // Infer language from set properties (pokemontcg.io is mostly English)
@@ -655,92 +772,170 @@ function inferSetLanguage(set){
   return 'EN'; // default
 }
 
-function filterByLang(lang){
+async function filterByLang(lang){
   langFilter = lang;
   document.querySelectorAll('#lang-filter-bar .lang-tag').forEach(el=>{
     el.classList.toggle('active', el.dataset.lang === lang);
   });
+  // For KO/JA, load TCGdex sets if not cached
+  if((lang === 'KO' || lang === 'JA') && tcgdexSets[lang.toLowerCase()].length === 0) {
+    document.getElementById('expansion-grid-wrap').innerHTML = `<div class="loading-state"><div class="spinner"></div><span>${lang === 'KO' ? '한국판' : '일본판'} 팩 불러오는 중...</span></div>`;
+    await loadTCGdexSets(lang.toLowerCase());
+  }
   renderSetGrid();
 }
 
+async function loadTCGdexSets(lang) {
+  const cacheKey = `pdx_tcgdex_sets_${lang}`;
+  const cached = sessionStorage.getItem(cacheKey);
+  if(cached) { tcgdexSets[lang] = JSON.parse(cached); return; }
+  try {
+    const r = await fetch(`https://api.tcgdex.net/v2/${lang}/sets`);
+    if(r.ok) {
+      const d = await r.json();
+      if(Array.isArray(d) && d.length > 0) {
+        tcgdexSets[lang] = d;
+        sessionStorage.setItem(cacheKey, JSON.stringify(d));
+        return;
+      }
+    }
+  } catch {}
+  tcgdexSets[lang] = getDemoTCGdexSets(lang);
+}
+
 function renderSetGrid(){
-  let sets = allSets;
   const search = document.getElementById('search-input').value.toLowerCase();
-
-  if(langFilter !== 'ALL'){
-    sets = sets.filter(s => inferSetLanguage(s) === langFilter);
-  }
-  if(search && document.getElementById('page-browse').style.display !== 'none'){
-    sets = sets.filter(s => s.name.toLowerCase().includes(search) || (s.series||'').toLowerCase().includes(search));
-  }
-
   const userData = getUserData(currentUser.email);
   const favs = userData.favorites || [];
   const coll = userData.collection || {};
 
-  // Group by series
+  // Decide which set list to use based on language filter
+  const useTCGdex = langFilter === 'KO' || langFilter === 'JA';
+  const tcgLang = langFilter === 'KO' ? 'ko' : 'ja';
+
+  let sets;
+  if(useTCGdex) {
+    sets = tcgdexSets[tcgLang].map(s => ({
+      id: s.id,
+      name: s.name,
+      series: s.serie?.name || 'Other',
+      total: s.cardCount?.total || s.cardCount?.official || null,
+      releaseDate: s.releaseDate || '',
+      logo: s.logo ? s.logo + '.png' : null, // TCGdex logo URL + extension
+      logofallback: s.logo ? s.logo + '.webp' : null,
+      source: 'tcgdex',
+      lang: tcgLang,
+    }));
+  } else {
+    sets = allSets;
+    if(langFilter !== 'ALL') sets = sets.filter(s => inferSetLanguage(s) === langFilter);
+  }
+
+  if(search) sets = sets.filter(s => s.name.toLowerCase().includes(search) || (s.series||'').toLowerCase().includes(search));
+
   const bySeries = {};
   sets.forEach(s => {
-    const series = s.series || 'Other';
+    const series = s.series || s.serie?.name || 'Other';
     if(!bySeries[series]) bySeries[series] = [];
     bySeries[series].push(s);
   });
 
-  // Sort series
-  const sortedSeries = Object.keys(bySeries).sort((a,b)=>{
+  const sortedSeries = Object.keys(bySeries).sort((a,b) => {
     const ai = KNOWN_SERIES_ORDER.indexOf(a);
     const bi = KNOWN_SERIES_ORDER.indexOf(b);
     if(ai===-1 && bi===-1) return a.localeCompare(b);
-    if(ai===-1) return 1;
-    if(bi===-1) return -1;
+    if(ai===-1) return 1; if(bi===-1) return -1;
     return ai - bi;
   });
 
   if(sortedSeries.length === 0){
-    document.getElementById('expansion-grid-wrap').innerHTML = `<div class="empty-state"><div class="empty-icon">📭</div><div class="empty-title">해당 언어 팩 없음</div><div class="empty-sub">pokemontcg.io는 주로 영어판을 제공합니다</div></div>`;
+    document.getElementById('expansion-grid-wrap').innerHTML = `<div class="empty-state"><div class="empty-icon">📭</div><div class="empty-title">팩 없음</div><div class="empty-sub">필터를 변경해보세요</div></div>`;
     return;
   }
 
   let html = '';
   sortedSeries.forEach(series => {
     const items = bySeries[series];
-    html += `<div style="margin-bottom:8px">
-      <div class="section-header" style="margin-top:24px;margin-bottom:12px">
-        <div class="section-title" style="font-size:15px">${series}</div>
-        <div class="section-subtitle">${items.length}개 세트</div>
-      </div>
-      <div class="expansion-grid">`;
+    html += `<div style="margin-bottom:8px"><div class="section-header" style="margin-top:24px;margin-bottom:12px"><div class="section-title" style="font-size:15px">${series}</div><div class="section-subtitle">${items.length}개 세트</div></div><div class="expansion-grid">`;
 
     items.forEach(set => {
-      const ownedCount = Object.keys(coll).filter(k=>k.startsWith(set.id+'_')).length;
+      const isTCGdex = set.source === 'tcgdex';
+      const collPrefix = isTCGdex ? `${set.lang}_${set.id}` : set.id;
+      const ownedCount = Object.keys(coll).filter(k => k.startsWith(collPrefix+'_')).length;
       const pct = set.total ? Math.round(ownedCount/set.total*100) : 0;
-      const lang = inferSetLanguage(set);
-      const langClass = {EN:'lang-en',JA:'lang-ja',KO:'lang-ko','ZH-HANT':'lang-zh','ZH-HANS':'lang-zh'}[lang]||'';
-      const langLabel = {EN:'ENG',JA:'JPN',KO:'KOR','ZH-HANT':'CHT','ZH-HANS':'CHS',DE:'DEU',FR:'FRA',IT:'ITA',PT:'POR'}[lang]||lang;
-      const isFav = favs.includes(set.id);
+      const lang = isTCGdex ? (set.lang === 'ko' ? 'KO' : 'JA') : inferSetLanguage(set);
+      const langClass = {EN:'lang-en',JA:'lang-ja',KO:'lang-ko'}[lang]||'';
+      const langLabel = {EN:'ENG',JA:'JPN',KO:'KOR'}[lang]||lang;
+      const isFav = favs.includes(collPrefix);
+      const onclick = isTCGdex ? `openTCGdexSet('${set.lang}','${set.id}')` : `openSet('${set.id}')`;
+      const favclick = `toggleFav('${collPrefix}')`;
 
-      html += `<div class="expansion-card ${isFav?'favorited':''}" onclick="openSet('${set.id}')">
-        <div class="exp-starred" onclick="event.stopPropagation();toggleFav('${set.id}')">${isFav?'⭐':'☆'}</div>
-        <div class="exp-logo">
-          ${set.images?.logo
-            ? `<img src="${set.images.logo}" alt="${set.name}" onerror="this.style.display='none'">`
-            : `<div class="exp-placeholder">📦</div>`}
-        </div>
+      // Logo: TCGdex uses base URL + extension; try PNG then WEBP
+      let logoHtml;
+      if(isTCGdex && set.logo) {
+        logoHtml = `<img src="${set.logo}" alt="${set.name}" onerror="this.src='${set.logofallback||''}';this.onerror=function(){this.style.display='none';}">`;
+      } else if(set.images?.logo) {
+        logoHtml = `<img src="${set.images.logo}" alt="${set.name}" onerror="this.style.display='none'">`;
+      } else {
+        logoHtml = `<div class="exp-placeholder">📦</div>`;
+      }
+
+      html += `<div class="expansion-card ${isFav?'favorited':''}" onclick="${onclick}">
+        <div class="exp-starred" onclick="event.stopPropagation();${favclick}">${isFav?'⭐':'☆'}</div>
+        <div class="exp-logo">${logoHtml}</div>
         <div class="exp-name">${set.name}</div>
         <div class="exp-meta">
           <span class="exp-badge ${langClass}">${langLabel}</span>
           <span class="exp-badge">${set.printedTotal||set.total||'?'}종</span>
-          ${set.releaseDate ? `<span class="exp-badge">${set.releaseDate.substring(0,7)}</span>` : ''}
+          ${set.releaseDate ? `<span class="exp-badge">${String(set.releaseDate).substring(0,7)}</span>` : ''}
         </div>
-        ${ownedCount > 0 ? `
-        <div class="exp-progress"><div class="exp-progress-bar" style="width:${pct}%"></div></div>
-        <div class="exp-progress-text">${ownedCount}/${set.total||'?'} (${pct}%)</div>` : ''}
+        ${ownedCount > 0 ? `<div class="exp-progress"><div class="exp-progress-bar" style="width:${pct}%"></div></div><div class="exp-progress-text">${ownedCount}/${set.total||'?'} (${pct}%)</div>` : ''}
       </div>`;
     });
     html += '</div></div>';
   });
 
   document.getElementById('expansion-grid-wrap').innerHTML = html;
+}
+
+// Open a TCGdex set (Korean/Japanese) — fetch cards and show in card list page
+async function openTCGdexSet(lang, setId) {
+  currentSetSource = 'tcgdex';
+  currentSetLang = lang;
+  showPage('cardlist');
+  ownedFilter = 'ALL'; rarityFilter = 'ALL';
+
+  document.getElementById('card-grid-wrap').innerHTML = `<div class="loading-state"><div class="spinner"></div><span>카드 불러오는 중...</span></div>`;
+  document.getElementById('exp-info-wrap').innerHTML = '';
+
+  try {
+    const r = await fetch(`https://api.tcgdex.net/v2/${lang}/sets/${setId}`);
+    if(!r.ok) throw new Error('fetch failed');
+    const setData = await r.json();
+    currentSet = { id: setId, name: setData.name, series: setData.serie?.name || '', source: 'tcgdex', lang, logo: setData.logo ? setData.logo + '.png' : null };
+    currentCards = (setData.cards || []).map(c => ({...c, source: 'tcgdex', lang}));
+
+    const ud = getUserData(currentUser.email);
+    const coll = ud.collection || {};
+    const ownedCount = Object.keys(coll).filter(k => k.startsWith(`${lang}_${setId}_`)).length;
+
+    document.getElementById('exp-info-wrap').innerHTML = `
+      <div class="expansion-info-header">
+        ${currentSet.logo ? `<img class="exp-info-logo" src="${currentSet.logo}" alt="${currentSet.name}" onerror="this.src='${setData.logo+'.webp'}';this.onerror=function(){this.style.display='none'}">` : ''}
+        <div class="exp-info-details">
+          <div class="exp-info-name">${currentSet.name}</div>
+          <div class="exp-info-series">${currentSet.series} · <span class="exp-badge ${lang==='ko'?'lang-ko':'lang-ja'}">${lang==='ko'?'한국판':'일본판'}</span></div>
+        </div>
+        <div class="exp-stats">
+          <div class="stat-item"><div class="stat-num" id="owned-stat">${ownedCount}</div><div class="stat-label">${t('collected')}</div></div>
+          <div class="stat-item"><div class="stat-num">${currentCards.length}</div><div class="stat-label">${t('total_c')}</div></div>
+        </div>
+      </div>`;
+
+    renderCardGrid();
+  } catch {
+    document.getElementById('card-grid-wrap').innerHTML = `<div class="empty-state"><div class="empty-icon">⚠️</div><div class="empty-title">팩 정보를 불러올 수 없습니다</div></div>`;
+  }
 }
 
 function toggleFav(setId){
@@ -756,6 +951,8 @@ function toggleFav(setId){
 
 // ─── CARD LIST ────────────────────────────────────────────────────────────────
 async function openSet(setId){
+  currentSetSource = 'ptcg';
+  currentSetLang = 'en';
   currentSet = allSets.find(s=>s.id===setId) || {id:setId,name:setId};
   showPage('cardlist');
   ownedFilter = 'ALL';
@@ -816,13 +1013,21 @@ function renderCardGrid(){
   const ud = getUserData(currentUser.email);
   const coll = ud.collection || {};
   let cards = currentCards;
+  const isTCGdex = currentSetSource === 'tcgdex';
 
   if(rarityFilter !== 'ALL') cards = cards.filter(c=>c.rarity===rarityFilter);
-  if(ownedFilter === 'OWNED') cards = cards.filter(c=>(coll[(currentSet?.id||'')+'_'+c.id]||0)>0);
-  if(ownedFilter === 'MISSING') cards = cards.filter(c=>!(coll[(currentSet?.id||'')+'_'+c.id]||0));
+
+  if(isTCGdex) {
+    const prefix = `${currentSetLang}_${currentSet?.id||''}`;
+    if(ownedFilter === 'OWNED') cards = cards.filter(c=>(coll[prefix+'_'+c.id]||0)>0);
+    if(ownedFilter === 'MISSING') cards = cards.filter(c=>!(coll[prefix+'_'+c.id]||0));
+  } else {
+    if(ownedFilter === 'OWNED') cards = cards.filter(c=>(coll[(currentSet?.id||'')+'_'+c.id]||0)>0);
+    if(ownedFilter === 'MISSING') cards = cards.filter(c=>!(coll[(currentSet?.id||'')+'_'+c.id]||0));
+  }
 
   const search = document.getElementById('search-input').value.toLowerCase();
-  if(search) cards = cards.filter(c=>c.name.toLowerCase().includes(search)||(c.number||'').includes(search));
+  if(search) cards = cards.filter(c=>c.name.toLowerCase().includes(search)||(c.number||c.localId||'').includes(search));
 
   if(cards.length===0){
     document.getElementById('card-grid-wrap').innerHTML=`<div class="empty-state"><div class="empty-icon">🃏</div><div class="empty-title">카드 없음</div></div>`;
@@ -830,7 +1035,52 @@ function renderCardGrid(){
   }
 
   document.getElementById('card-grid-wrap').innerHTML =
-    `<div class="card-grid">${cards.map(c=>cardItemHTML(c,coll)).join('')}</div>`;
+    `<div class="card-grid">${cards.map(c=>isTCGdex ? tcgdexCardItemHTML(c,coll) : cardItemHTML(c,coll)).join('')}</div>`;
+}
+
+function tcgdexCardItemHTML(card, coll) {
+  const lang = currentSetLang;
+  const key = `${lang}_${currentSet?.id||''}_${card.id}`;
+  const count = coll[key]||0;
+  const owned = count>0;
+  const img = card.image ? card.image+'/high.webp' : '';
+  const safeId = card.id.replace(/\W/g,'_');
+  return `<div class="card-item ${owned?'owned':''}" onclick="openTCGdexCard('${lang}','${card.id}')">
+    <div class="card-img-wrap">
+      ${img?`<img src="${img}" alt="${card.name}" loading="lazy" onerror="this.src='${card.image}/low.webp';this.onerror=function(){this.style.display='none'}">`:'<div class="card-img-placeholder">🃏</div>'}
+      ${owned?`<div class="card-owned-badge">✓</div>`:''}
+      ${count>1?`<div class="card-count-badge">×${count}</div>`:''}
+    </div>
+    <div class="card-info">
+      <div class="card-number">${card.localId||''}</div>
+      <div class="card-name">${card.name}</div>
+    </div>
+    <div class="card-actions">
+      <button class="count-btn" onclick="event.stopPropagation();changeTCGdexCount('${lang}','${card.id}',-1)">−</button>
+      <div class="count-display" id="tcgc-${safeId}">${count}</div>
+      <button class="count-btn" onclick="event.stopPropagation();changeTCGdexCount('${lang}','${card.id}',1)">+</button>
+    </div>
+  </div>`;
+}
+
+function changeTCGdexCount(lang, cardId, delta) {
+  const ud = getUserData(currentUser.email);
+  const coll = ud.collection||{};
+  const key = `${lang}_${currentSet?.id||''}_${cardId}`;
+  const nv = Math.max(0,(coll[key]||0)+delta);
+  if(nv===0) delete coll[key]; else coll[key]=nv;
+  ud.collection=coll; saveUserData(currentUser.email,ud);
+  const el = document.getElementById('tcgc-'+cardId.replace(/\W/g,'_'));
+  if(el) el.textContent=nv;
+  const oc = Object.keys(coll).filter(k=>k.startsWith(`${lang}_${currentSet?.id||''}_`)).length;
+  const stat = document.getElementById('owned-stat');
+  if(stat) stat.textContent=oc;
+}
+
+function openTCGdexCard(lang, cardId) {
+  const card = currentCards.find(c=>c.id===cardId);
+  if(!card) return;
+  csTCGdexOpen(lang, cardId);
 }
 
 function cardItemHTML(card, coll){
@@ -1138,8 +1388,32 @@ function getDemoCards(setId){
   }));
 }
 
+function getDemoTCGdexSets(lang) {
+  if(lang === 'ko') return [
+    {id:'sv3pt5',name:'포켓몬 카드 151',serie:{name:'스칼렛 & 바이올렛'},cardCount:{total:207},logo:'https://assets.tcgdex.net/ko/sv/sv3pt5/logo',releaseDate:'2023-09-22'},
+    {id:'sv2',name:'팔데아의 진화',serie:{name:'스칼렛 & 바이올렛'},cardCount:{total:279},logo:'https://assets.tcgdex.net/ko/sv/sv2/logo',releaseDate:'2023-06-09'},
+    {id:'sv1',name:'스칼렛 ex · 바이올렛 ex',serie:{name:'스칼렛 & 바이올렛'},cardCount:{total:258},logo:'https://assets.tcgdex.net/ko/sv/sv1/logo',releaseDate:'2023-03-31'},
+    {id:'swsh12',name:'실버 템페스트',serie:{name:'소드 & 실드'},cardCount:{total:245},logo:'https://assets.tcgdex.net/ko/swsh/swsh12/logo',releaseDate:'2022-11-11'},
+    {id:'swsh1',name:'소드 & 실드',serie:{name:'소드 & 실드'},cardCount:{total:202},logo:'https://assets.tcgdex.net/ko/swsh/swsh1/logo',releaseDate:'2020-04-17'},
+  ];
+  if(lang === 'ja') return [
+    {id:'sv3pt5',name:'ポケモンカード151',serie:{name:'スカーレット＆バイオレット'},cardCount:{total:207},logo:'https://assets.tcgdex.net/ja/sv/sv3pt5/logo',releaseDate:'2023-07-28'},
+    {id:'sv2',name:'拡張パック パルデアの進化書',serie:{name:'スカーレット＆バイオレット'},cardCount:{total:98},logo:'https://assets.tcgdex.net/ja/sv/sv2/logo',releaseDate:'2023-04-14'},
+    {id:'sv1',name:'拡張パック スカーレットex',serie:{name:'スカーレット＆バイオレット'},cardCount:{total:78},logo:'https://assets.tcgdex.net/ja/sv/sv1/logo',releaseDate:'2023-01-20'},
+    {id:'swsh1',name:'ソード＆シールド',serie:{name:'ソード＆シールド'},cardCount:{total:214},logo:'https://assets.tcgdex.net/ja/swsh/swsh1/logo',releaseDate:'2020-01-10'},
+  ];
+  return [];
+}
+
 // ─── GLOBAL CARD SEARCH (cross-language) ─────────────────────────────────────
-let csData = { en: [], ko: [], ja: [] }; // current search results
+let csData = { en: [], ko: [], ja: [] };
+
+// Detect whether input is Korean, Japanese, or other (English)
+function detectInputLang(q) {
+  if(/[가-힣]/.test(q)) return 'ko';
+  if(/[぀-ヿ一-鿿]/.test(q)) return 'ja';
+  return 'en';
+}
 
 function triggerGlobalSearch() {
   const q = document.getElementById('search-input').value.trim();
@@ -1158,19 +1432,68 @@ function doCSSearch() {
 async function runCSSearch(query) {
   const sub = document.getElementById('cs-sub');
   const results = document.getElementById('cs-results');
-  sub.textContent = '한국판 · 영문판 · 일본판 동시 검색 중...';
-  results.innerHTML = '<div class="loading-state"><div class="spinner"></div><span>3개 언어 검색 중...</span></div>';
+  csData = { en: [], ko: [], ja: [] };
+  sub.textContent = '3개 언어 동시 검색 중...';
+  results.innerHTML = '<div class="loading-state"><div class="spinner"></div><span>검색 중...</span></div>';
 
-  const [enCards, koCards, jaCards] = await Promise.all([
+  // Step 1: Search all 3 sources simultaneously
+  const [enRaw, koRaw, jaRaw] = await Promise.all([
     csSearchPTCG(query),
-    csSearchTCGdex('ko', query),
-    csSearchTCGdex('ja', query),
+    searchTCGdexByName('ko', query),
+    searchTCGdexByName('ja', query),
   ]);
 
-  csData = { en: enCards, ko: koCards, ja: jaCards };
-  const total = enCards.length + koCards.length + jaCards.length;
-  sub.textContent = `총 ${total}개 결과 · 🇺🇸 영문 ${enCards.length} · 🇰🇷 한국 ${koCards.length} · 🇯🇵 일본 ${jaCards.length}`;
+  const total0 = enRaw.length + koRaw.length + jaRaw.length;
+  if(total0 === 0) {
+    sub.textContent = '결과 없음';
+    results.innerHTML = `<div class="empty-state"><div class="empty-icon">🔎</div><div class="empty-title">검색 결과 없음</div><div class="empty-sub">한글·영어·일본어 어떤 이름으로도 검색 가능합니다</div></div>`;
+    return;
+  }
+
+  // Show immediate results
+  csData = { en: enRaw, ko: koRaw, ja: jaRaw };
+  sub.textContent = `검색 중... ${total0}개 발견 · 다른 언어 버전 불러오는 중...`;
   renderCSResults();
+
+  // Step 2: Cross-reference by card ID to fill missing language versions
+  const enIds = new Set(enRaw.map(c => c.id));
+  const koIds = new Set(koRaw.map(c => c.id));
+  const jaIds = new Set(jaRaw.map(c => c.id));
+
+  // IDs in KO or JA but not EN → fetch English (pokemontcg.io)
+  const needEN = [...new Set([...koRaw, ...jaRaw].map(c => c.id).filter(id => !enIds.has(id)))].slice(0, 10);
+  // IDs in EN or JA but not KO → fetch Korean
+  const needKO = [...new Set([...enRaw, ...jaRaw].map(c => c.id).filter(id => !koIds.has(id)))].slice(0, 10);
+  // IDs in EN or KO but not JA → fetch Japanese
+  const needJA = [...new Set([...enRaw, ...koRaw].map(c => c.id).filter(id => !jaIds.has(id)))].slice(0, 10);
+
+  const [addEN, addKO, addJA] = await Promise.all([
+    needEN.length ? fetchMultiplePTCG(needEN) : [],
+    needKO.length ? Promise.all(needKO.map(id => csFetchTCGdexCard('ko', id))).then(r => r.filter(Boolean)) : [],
+    needJA.length ? Promise.all(needJA.map(id => csFetchTCGdexCard('ja', id))).then(r => r.filter(Boolean)) : [],
+  ]);
+
+  csData.en = [...enRaw, ...addEN];
+  csData.ko = [...koRaw, ...addKO];
+  csData.ja = [...jaRaw, ...addJA];
+
+  const total = csData.en.length + csData.ko.length + csData.ja.length;
+  sub.textContent = `총 ${total}개 · 🇺🇸 영문 ${csData.en.length} · 🇰🇷 한국 ${csData.ko.length} · 🇯🇵 일본 ${csData.ja.length}`;
+  renderCSResults();
+}
+
+// Search TCGdex by name — uses filters[name] param, falls back to client-side filter
+async function searchTCGdexByName(lang, query) {
+  try {
+    const r = await fetch(`https://api.tcgdex.net/v2/${lang}/cards?filters[name]=${encodeURIComponent(query)}&limit=20`);
+    if(!r.ok) return [];
+    const d = await r.json();
+    if(!Array.isArray(d) || d.length === 0) return [];
+    const ql = query.toLowerCase();
+    const filtered = d.filter(c => c.name && c.name.toLowerCase().includes(ql));
+    // if server filtered correctly, d.length < 100; if it returned everything, filtered will be small
+    return (filtered.length > 0 ? filtered : (d.length < 100 ? d : [])).slice(0, 16);
+  } catch { return []; }
 }
 
 async function csSearchPTCG(query) {
@@ -1183,15 +1506,28 @@ async function csSearchPTCG(query) {
   } catch { return []; }
 }
 
-async function csSearchTCGdex(lang, query) {
+// Fetch multiple cards from pokemontcg.io by ID (for cross-referencing)
+async function fetchMultiplePTCG(ids) {
+  const results = await Promise.all(ids.map(async id => {
+    try {
+      const headers = APIKEY ? {'X-Api-Key': APIKEY} : {};
+      const r = await fetch(`${API_BASE}/cards/${id}`, {headers});
+      if(!r.ok) return null;
+      const d = await r.json();
+      return d.data || null;
+    } catch { return null; }
+  }));
+  return results.filter(Boolean);
+}
+
+// Fetch a single card from TCGdex using pokemontcg.io card ID (same ID system)
+async function csFetchTCGdexCard(lang, ptcgId) {
   try {
-    const r = await fetch(`https://api.tcgdex.net/v2/${lang}/cards?name=${encodeURIComponent(query)}`);
-    if(!r.ok) return [];
+    const r = await fetch(`https://api.tcgdex.net/v2/${lang}/cards/${ptcgId}`);
+    if(!r.ok) return null;
     const d = await r.json();
-    if(!Array.isArray(d)) return [];
-    const ql = query.toLowerCase();
-    return d.filter(c => c.name && c.name.toLowerCase().includes(ql)).slice(0, 24);
-  } catch { return []; }
+    return (d && d.name) ? d : null;
+  } catch { return null; }
 }
 
 function renderCSResults() {
@@ -1254,9 +1590,10 @@ function csEnCardHTML(card, coll) {
       ${count>1?`<div class="card-count-badge">×${count}</div>`:''}
     </div>
     <div class="card-info">
-      <div class="card-number">#${card.number||'?'} · ${card.set?.name||''}</div>
+      <div class="card-number">#${card.number||'?'}</div>
       <div class="card-name">${card.name}</div>
       <div class="card-price">${priceStr}</div>
+      <div class="card-set-badge" title="${card.set?.name||''}" onclick="event.stopPropagation();openSet('${setId}')" style="cursor:pointer;color:var(--accent2)">📦 ${card.set?.name||''}</div>
     </div>
     <div class="card-actions">
       <button class="count-btn" onclick="event.stopPropagation();csChangeEN('${card.id}','${setId}',-1)">−</button>
@@ -1272,20 +1609,24 @@ function csTCGdexCardHTML(card, lang, coll) {
   const count = coll[key] || 0;
   const owned = count > 0;
   const img = card.image ? card.image + '/high.webp' : null;
+  const imgFallback = card.image ? card.image + '/low.webp' : null;
   const badgeClass = lang === 'ko' ? 'lang-ko' : 'lang-ja';
   const badgeLabel = lang === 'ko' ? 'KOR' : 'JPN';
   const safeId = card.id.replace(/\W/g, '_');
+  const setId = card.id.includes('-') ? card.id.split('-').slice(0,-1).join('-') : '';
+  const setName = card.set?.name || '';
   return `<div class="card-item ${owned?'owned':''}" onclick="csTCGdexOpen('${lang}','${card.id}')">
     <div class="card-img-wrap">
-      ${img?`<img src="${img}" alt="${card.name}" loading="lazy" onerror="this.style.display='none';this.nextSibling.style.display='flex'">`:''}
-      <div class="card-img-placeholder" ${img?'style="display:none"':''}>🃏</div>
+      ${img?`<img src="${img}" alt="${card.name}" loading="lazy" onerror="${imgFallback?`this.src='${imgFallback}';this.onerror=function(){this.style.display='none'}`:'this.style.display=\'none\''}">`:''}
+      ${!img?'<div class="card-img-placeholder">🃏</div>':''}
       ${owned?`<div class="card-owned-badge">✓</div>`:''}
       ${count>1?`<div class="card-count-badge">×${count}</div>`:''}
       <div style="position:absolute;bottom:4px;right:4px"><span class="exp-badge ${badgeClass}">${badgeLabel}</span></div>
     </div>
     <div class="card-info">
-      <div class="card-number">${card.localId||''} · ${card.set?.name||''}</div>
+      <div class="card-number">${card.localId||''}</div>
       <div class="card-name">${card.name}</div>
+      ${setName?`<div class="card-set-badge" title="${setName}" onclick="event.stopPropagation();openTCGdexSet('${lang}','${setId}')" style="cursor:pointer;color:var(--accent2)">📦 ${setName}</div>`:''}
     </div>
     <div class="card-actions">
       <button class="count-btn" onclick="event.stopPropagation();csTCGdexChange('${lang}','${card.id}',-1)">−</button>
@@ -1318,7 +1659,8 @@ function csChangeEN(cardId, setId, delta) {
 
 // Open Korean/Japanese card modal
 function csTCGdexOpen(lang, cardId) {
-  const cards = csData[lang];
+  // Look in csData (from search) OR in currentCards (from set browser)
+  const cards = csData[lang] && csData[lang].length ? csData[lang] : currentCards;
   const card = cards.find(c => c.id === cardId);
   if(!card) return;
 
@@ -1409,6 +1751,127 @@ async function csFetchPrice(lang, tcgdexId) {
     } catch {}
   }
   resultEl.innerHTML = '<span style="color:var(--text3);font-size:12px">시세 정보를 찾을 수 없습니다</span>';
+}
+
+// ─── SIDEBAR TOGGLE ───────────────────────────────────────────────────────────
+function toggleSidebar() {
+  const sb = document.getElementById('sidebar');
+  const mc = document.getElementById('main-content');
+  const btn = document.getElementById('sb-toggle');
+  const collapsed = sb.classList.toggle('collapsed');
+  mc.classList.toggle('sb-collapsed', collapsed);
+  btn.textContent = collapsed ? '›' : '‹';
+  localStorage.setItem('pdx_sb_collapsed', collapsed ? '1' : '0');
+}
+
+function openMobileSidebar() {
+  document.getElementById('sidebar').classList.add('mobile-open');
+  document.getElementById('sidebar-overlay').style.display = 'block';
+}
+
+function closeMobileSidebar() {
+  document.getElementById('sidebar').classList.remove('mobile-open');
+  document.getElementById('sidebar-overlay').style.display = 'none';
+}
+
+// ─── ADMIN & BANNERS ──────────────────────────────────────────────────────────
+function getBanners() { return JSON.parse(localStorage.getItem('pdx_banners')||'[]'); }
+function saveBanners(b) { localStorage.setItem('pdx_banners', JSON.stringify(b)); }
+
+function renderAdminPage() {
+  const banners = getBanners();
+  if(banners.length === 0) {
+    document.getElementById('admin-banner-list').innerHTML = '<div style="color:var(--text3);font-size:13px">등록된 배너가 없습니다</div>';
+    return;
+  }
+  document.getElementById('admin-banner-list').innerHTML = banners.map((b,i) => `
+    <div class="banner-item">
+      <div class="banner-item-info">
+        <div class="banner-item-title">${b.title}</div>
+        <div class="banner-item-meta">위치: ${{browse_top:'팩 탐색 상단',search_top:'카드 검색 상단',dashboard:'대시보드'}[b.pos]||b.pos} ${b.link?`· ${b.link.substring(0,30)}...`:''}</div>
+      </div>
+      <div style="display:flex;gap:6px;align-items:center;flex-shrink:0">
+        <button class="btn-sm ${b.enabled?'on':'off'}" onclick="toggleBanner(${i})">${b.enabled?'ON':'OFF'}</button>
+        <button class="btn-sm edit-btn" onclick="editBanner(${i})">수정</button>
+        <button class="btn-sm del-btn" onclick="deleteBanner(${i})">삭제</button>
+      </div>
+    </div>`).join('');
+}
+
+function saveBanner() {
+  const id = document.getElementById('edit-banner-id').value;
+  const banner = {
+    title: document.getElementById('bn-title').value.trim() || '배너',
+    pos: document.getElementById('bn-pos').value,
+    img: document.getElementById('bn-img').value.trim(),
+    link: document.getElementById('bn-link').value.trim(),
+    enabled: true,
+  };
+  if(!banner.title) { showToast('배너 제목을 입력하세요','info'); return; }
+  const banners = getBanners();
+  if(id !== '') { banners[parseInt(id)] = {...banners[parseInt(id)], ...banner}; }
+  else { banners.push(banner); }
+  saveBanners(banners);
+  document.getElementById('edit-banner-id').value = '';
+  ['bn-title','bn-img','bn-link'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('bn-pos').selectedIndex = 0;
+  renderAdminPage();
+  renderBanners();
+  showToast('배너 저장됨','success');
+}
+
+function editBanner(i) {
+  const b = getBanners()[i];
+  document.getElementById('edit-banner-id').value = i;
+  document.getElementById('bn-title').value = b.title;
+  document.getElementById('bn-pos').value = b.pos;
+  document.getElementById('bn-img').value = b.img||'';
+  document.getElementById('bn-link').value = b.link||'';
+  document.querySelector('.btn-add').textContent = '수정 저장';
+}
+
+function deleteBanner(i) {
+  const banners = getBanners();
+  banners.splice(i,1);
+  saveBanners(banners);
+  renderAdminPage();
+  renderBanners();
+  showToast('배너 삭제됨','info');
+}
+
+function toggleBanner(i) {
+  const banners = getBanners();
+  banners[i].enabled = !banners[i].enabled;
+  saveBanners(banners);
+  renderAdminPage();
+  renderBanners();
+}
+
+function renderBanners() {
+  const banners = getBanners().filter(b => b.enabled);
+  // Clear all slots
+  ['browse_top','search_top','dashboard'].forEach(pos => {
+    const el = document.getElementById('ad-'+pos);
+    if(el) { el.innerHTML=''; el.classList.remove('has-banner'); }
+  });
+  const dismissed = JSON.parse(sessionStorage.getItem('pdx_dismissed_ads')||'[]');
+  banners.forEach((b,i) => {
+    if(dismissed.includes(i)) return;
+    const el = document.getElementById('ad-'+b.pos);
+    if(!el) return;
+    el.classList.add('has-banner');
+    el.innerHTML = `<div class="ad-banner-card" onclick="${b.link?`window.open('${b.link}','_blank')`:''}" style="${b.link?'cursor:pointer':'cursor:default'}">
+      ${b.img?`<img src="${b.img}" onerror="this.style.display='none'" alt="">` : '<span style="font-size:24px">📢</span>'}
+      <div class="ad-banner-text"><div class="ad-label">광고</div><div class="ad-title">${b.title}</div></div>
+      <button class="ad-close" onclick="event.stopPropagation();dismissAd(${i})">✕</button>
+    </div>`;
+  });
+}
+
+function dismissAd(i) {
+  const d = JSON.parse(sessionStorage.getItem('pdx_dismissed_ads')||'[]');
+  d.push(i); sessionStorage.setItem('pdx_dismissed_ads', JSON.stringify(d));
+  renderBanners();
 }
 
 // ─── INIT ────────────────────────────────────────────────────────────────────
