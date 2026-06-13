@@ -3,1120 +3,1113 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>포켓몬 카드 컬렉션</title>
-<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<title>PokéDex Collection</title>
 <style>
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-:root{
-  --red:#dc2626;--blue:#1d4ed8;--green:#16a34a;
-  --g50:#f9fafb;--g100:#f3f4f6;--g200:#e5e7eb;--g300:#d1d5db;
-  --g400:#9ca3af;--g500:#6b7280;--g600:#4b5563;--g700:#374151;--g900:#111827;
-  --sh:0 1px 3px rgba(0,0,0,.1),0 1px 2px rgba(0,0,0,.06);
-  --sh-lg:0 10px 15px rgba(0,0,0,.1),0 4px 6px rgba(0,0,0,.05);
-  --sh-xl:0 20px 25px rgba(0,0,0,.12),0 10px 10px rgba(0,0,0,.04);
-  --r:10px;--rl:16px;--rxl:22px
-}
-body{font-family:'Noto Sans KR',-apple-system,sans-serif;background:var(--g100);color:var(--g900);min-height:100vh}
+  @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=DM+Mono:wght@400;500&display=swap');
+  :root {
+    --bg:#0d0f14;--surface:#161921;--surface2:#1e2230;--border:#2a2f40;
+    --accent:#ffcb05;--accent2:#3d7dca;--accent3:#cc2244;
+    --text:#f0f2f8;--text2:#8892a4;--text3:#5a6275;
+    --success:#4ade80;--danger:#f87171;
+    --radius:12px;--radius-lg:20px;--shadow:0 8px 32px rgba(0,0,0,.4);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Nunito',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden}
 
-/* HEADER */
-header{background:linear-gradient(135deg,#dc2626,#b91c1c);color:#fff;padding:0 20px;height:58px;display:flex;align-items:center;gap:12px;box-shadow:0 2px 10px rgba(0,0,0,.25);position:sticky;top:0;z-index:200}
-.pokeball{width:34px;height:34px;flex-shrink:0}
-.h-title{font-size:17px;font-weight:800;letter-spacing:-.3px}
+  /* LOGIN */
+  #login-screen{display:flex;align-items:center;justify-content:center;min-height:100vh;
+    background:radial-gradient(ellipse 80% 60% at 50% 0%,#1a2a5e44,transparent),radial-gradient(ellipse 60% 40% at 80% 80%,#5a1a2e33,transparent),var(--bg)}
+  .login-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:48px 40px;width:420px;box-shadow:var(--shadow)}
+  .login-logo{text-align:center;margin-bottom:32px}
+  .login-title{font-size:28px;font-weight:900;letter-spacing:-.5px}
+  .login-title span{color:var(--accent)}
+  .login-sub{font-size:13px;color:var(--text2);margin-top:4px}
+  .lang-switcher{display:flex;gap:6px;margin-bottom:28px;background:var(--surface2);border-radius:10px;padding:4px}
+  .lang-btn{flex:1;padding:7px;border:none;background:none;border-radius:8px;color:var(--text2);font-family:inherit;font-size:13px;font-weight:700;cursor:pointer;transition:all .15s}
+  .lang-btn.active{background:var(--accent);color:#111}
+  .form-group{margin-bottom:16px}
+  .form-group label{display:block;font-size:12px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px}
+  .form-group input{width:100%;padding:12px 16px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-family:inherit;font-size:15px;outline:none;transition:border-color .15s}
+  .form-group input:focus{border-color:var(--accent)}
+  .btn-primary{width:100%;padding:14px;background:var(--accent);border:none;border-radius:var(--radius);color:#111;font-family:inherit;font-size:16px;font-weight:800;cursor:pointer;transition:opacity .15s,transform .1s;margin-top:8px}
+  .btn-primary:hover{opacity:.9;transform:translateY(-1px)}
+  .login-switch{text-align:center;margin-top:20px;font-size:13px;color:var(--text2)}
+  .login-switch a{color:var(--accent);cursor:pointer;font-weight:700;text-decoration:none}
 
-/* TABS */
-.tabs{background:#fff;display:flex;border-bottom:2px solid var(--g200);position:sticky;top:58px;z-index:199}
-.tab-btn{padding:12px 20px;font-size:14px;font-weight:600;color:var(--g500);background:none;border:none;border-bottom:3px solid transparent;cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:7px;margin-bottom:-2px;font-family:inherit}
-.tab-btn:hover{color:var(--blue)}
-.tab-btn.active{color:var(--blue);border-bottom-color:var(--blue)}
-.tab-badge{background:var(--red);color:#fff;font-size:11px;font-weight:700;padding:1px 7px;border-radius:10px;min-width:20px;text-align:center}
+  /* APP */
+  #app{display:none;min-height:100vh}
+  .sidebar{position:fixed;left:0;top:0;bottom:0;width:240px;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;z-index:100;padding:24px 0}
+  .sidebar-logo{padding:0 20px 24px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px}
+  .sidebar-logo .logo-text{font-size:18px;font-weight:900;letter-spacing:-.5px}
+  .sidebar-logo .logo-text span{color:var(--accent)}
+  .sidebar-nav{flex:1;padding:16px 12px;display:flex;flex-direction:column;gap:2px}
+  .nav-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:var(--radius);color:var(--text2);font-size:14px;font-weight:700;cursor:pointer;transition:all .15s;border:none;background:none;text-align:left;width:100%;font-family:inherit}
+  .nav-item:hover{background:var(--surface2);color:var(--text)}
+  .nav-item.active{background:#3d7dca22;color:var(--accent)}
+  .nav-icon{font-size:18px;flex-shrink:0}
+  .nav-section-label{padding:16px 12px 6px;font-size:10px;font-weight:800;color:var(--text3);text-transform:uppercase;letter-spacing:.12em}
+  .sidebar-bottom{padding:16px 12px;border-top:1px solid var(--border)}
+  .user-info{display:flex;align-items:center;gap:10px;padding:8px 12px}
+  .user-avatar{width:36px;height:36px;background:linear-gradient(135deg,var(--accent),var(--accent2));border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:900;color:#111;flex-shrink:0}
+  .user-name{font-size:13px;font-weight:700}
+  .user-email{font-size:11px;color:var(--text2)}
+  .sidebar-lang{display:flex;gap:4px;padding:0 12px;margin-top:10px}
+  .sidebar-lang .lang-btn{padding:5px 2px;font-size:11px}
+  .main-content{margin-left:240px;min-height:100vh;display:flex;flex-direction:column}
+  .topbar{position:sticky;top:0;background:var(--bg);border-bottom:1px solid var(--border);padding:16px 32px;display:flex;align-items:center;gap:16px;z-index:50}
+  .topbar h1{font-size:20px;font-weight:900}
+  .topbar-right{margin-left:auto;display:flex;align-items:center;gap:12px}
+  .search-box{display:flex;align-items:center;gap:8px;background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:8px 14px}
+  .search-box input{background:none;border:none;outline:none;color:var(--text);font-family:inherit;font-size:14px;width:200px}
+  .search-box input::placeholder{color:var(--text3)}
+  .page-content{padding:32px;flex:1}
 
-/* PANELS */
-.panel{display:none}.panel.active{display:block}
+  /* CARDS & GRIDS */
+  .section-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px}
+  .section-title{font-size:18px;font-weight:900}
+  .section-subtitle{font-size:13px;color:var(--text2);margin-top:2px}
+  .btn-outline{padding:8px 16px;background:none;border:1px solid var(--border);border-radius:var(--radius);color:var(--text2);font-family:inherit;font-size:13px;font-weight:700;cursor:pointer;transition:all .15s}
+  .btn-outline:hover{border-color:var(--accent);color:var(--accent)}
 
-/* LANG + SEARCH */
-.top-controls{background:#fff;padding:14px 18px;border-bottom:1px solid var(--g200);display:flex;flex-direction:column;gap:10px;position:sticky;top:104px;z-index:100}
-.lang-row{display:flex;gap:7px}
-.lang-chip{padding:7px 14px;font-size:13px;font-weight:700;border:2px solid var(--g200);border-radius:20px;cursor:pointer;background:#fff;color:var(--g600);transition:all .15s;font-family:inherit}
-.lang-chip:hover{border-color:var(--blue);color:var(--blue)}
-.lang-chip.active{background:var(--blue);border-color:var(--blue);color:#fff}
-.search-row{display:flex;gap:7px}
-.search-input{flex:1;padding:9px 14px;font-size:15px;font-family:inherit;border:2px solid var(--g200);border-radius:var(--r);outline:none;transition:border-color .15s;color:var(--g900)}
-.search-input:focus{border-color:var(--blue)}
-.search-input::placeholder{color:var(--g400)}
+  .lang-filter{display:flex;gap:6px;margin-bottom:24px;flex-wrap:wrap}
+  .lang-tag{display:flex;align-items:center;gap:6px;padding:6px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:20px;font-size:13px;font-weight:700;cursor:pointer;transition:all .15s;color:var(--text2)}
+  .lang-tag.active{background:#3d7dca22;border-color:var(--accent2);color:var(--text)}
 
-/* BUTTONS */
-.btn{display:inline-flex;align-items:center;justify-content:center;gap:5px;padding:9px 17px;font-size:14px;font-weight:600;font-family:inherit;border:none;border-radius:var(--r);cursor:pointer;transition:all .15s;white-space:nowrap;line-height:1}
-.btn-blue{background:var(--blue);color:#fff}.btn-blue:hover{background:#1e40af}
-.btn-gray{background:var(--g100);color:var(--g700)}.btn-gray:hover{background:var(--g200)}
-.btn-red{background:#fee2e2;color:var(--red)}.btn-red:hover{background:#fecaca}
-.btn-sm{padding:6px 11px;font-size:12px}
+  /* API KEY BANNER */
+  .api-banner{background:#ffcb0511;border:1px solid #ffcb0544;border-radius:var(--radius);padding:12px 16px;display:flex;align-items:center;gap:12px;margin-bottom:20px;font-size:13px;flex-wrap:wrap}
+  .api-banner input{flex:1;min-width:160px;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:6px 10px;color:var(--text);font-family:'DM Mono',monospace;font-size:12px;outline:none}
+  .api-banner button{padding:6px 14px;background:var(--accent);border:none;border-radius:8px;color:#111;font-family:inherit;font-size:12px;font-weight:800;cursor:pointer;white-space:nowrap}
 
-/* SERIES ACCORDION */
-.series-section{background:#fff;border-bottom:2px solid var(--g200)}
-.series-section-title{padding:11px 18px;font-size:12px;font-weight:700;color:var(--g400);text-transform:uppercase;letter-spacing:.5px;border-bottom:1px solid var(--g100);display:flex;align-items:center;justify-content:space-between}
-.series-loading{padding:28px 18px;text-align:center;color:var(--g400);font-size:13px;display:flex;flex-direction:column;align-items:center;gap:10px}
-.series-error{padding:18px;background:#fef2f2;color:var(--red);font-size:13px;margin:10px 18px;border-radius:var(--r)}
+  /* EXPANSION GRID */
+  .expansion-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:16px}
+  .expansion-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:20px 16px;cursor:pointer;transition:all .2s;position:relative;overflow:hidden}
+  .expansion-card::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,#3d7dca11,transparent);opacity:0;transition:opacity .2s}
+  .expansion-card:hover{border-color:var(--accent2);transform:translateY(-2px);box-shadow:var(--shadow)}
+  .expansion-card:hover::before{opacity:1}
+  .expansion-card.favorited{border-color:var(--accent);background:#ffcb0508}
+  .exp-logo{height:50px;display:flex;align-items:center;justify-content:center;margin-bottom:12px}
+  .exp-logo img{max-height:50px;max-width:100%;object-fit:contain;filter:drop-shadow(0 2px 8px rgba(0,0,0,.3))}
+  .exp-logo .exp-placeholder{width:50px;height:50px;background:var(--surface2);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:22px}
+  .exp-name{font-size:13px;font-weight:800;text-align:center;line-height:1.3;margin-bottom:8px}
+  .exp-meta{display:flex;align-items:center;justify-content:center;gap:6px;flex-wrap:wrap}
+  .exp-badge{font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px;background:var(--surface2);color:var(--text2)}
+  .exp-badge.lang-ja{background:#dc2626;color:#fff}
+  .exp-badge.lang-en{background:#1d4ed8;color:#fff}
+  .exp-badge.lang-ko{background:#16a34a;color:#fff}
+  .exp-badge.lang-zh{background:#d97706;color:#fff}
+  .exp-progress{margin-top:12px;background:var(--surface2);border-radius:4px;height:4px;overflow:hidden}
+  .exp-progress-bar{height:100%;background:linear-gradient(90deg,var(--accent2),var(--accent));border-radius:4px;transition:width .3s}
+  .exp-progress-text{font-size:10px;color:var(--text3);text-align:center;margin-top:4px}
+  .exp-starred{position:absolute;top:8px;right:8px;font-size:16px;cursor:pointer;line-height:1}
 
-.series-group{border-bottom:1px solid var(--g100)}
-.series-group:last-child{border-bottom:none}
-.series-group-hd{padding:11px 18px;display:flex;align-items:center;gap:9px;cursor:pointer;transition:background .15s;user-select:none}
-.series-group-hd:hover{background:var(--g50)}
-.series-arrow{font-size:10px;color:var(--g400);transition:transform .2s;flex-shrink:0;width:14px}
-.series-arrow.open{transform:rotate(90deg)}
-.series-gname{font-size:14px;font-weight:700;flex:1;color:var(--g900)}
-.series-gcnt{font-size:11px;color:var(--g400);font-weight:500}
-.series-sets{padding:6px 18px 12px 40px;display:flex;flex-wrap:wrap;gap:6px}
-.series-sets.collapsed{display:none}
-.set-chip{padding:5px 13px;background:var(--g100);border:1.5px solid var(--g200);border-radius:14px;font-size:12px;font-weight:600;color:var(--g700);cursor:pointer;transition:all .15s;font-family:inherit}
-.set-chip:hover{background:#eff6ff;border-color:var(--blue);color:var(--blue)}
-.set-chip.active{background:var(--blue);border-color:var(--blue);color:#fff}
+  /* CARD LIST */
+  .back-btn{display:flex;align-items:center;gap:6px;padding:8px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-family:inherit;font-size:13px;font-weight:700;cursor:pointer;transition:all .15s}
+  .back-btn:hover{border-color:var(--accent);color:var(--accent)}
+  .expansion-info-header{display:flex;align-items:center;gap:16px;padding:20px 24px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);margin-bottom:24px;flex-wrap:wrap}
+  .exp-info-logo{height:60px;max-width:140px;object-fit:contain}
+  .exp-info-details{flex:1;min-width:120px}
+  .exp-info-name{font-size:22px;font-weight:900}
+  .exp-info-series{font-size:13px;color:var(--text2)}
+  .exp-stats{display:flex;gap:24px}
+  .stat-item{text-align:center}
+  .stat-num{font-size:22px;font-weight:900;color:var(--accent)}
+  .stat-label{font-size:11px;color:var(--text2);text-transform:uppercase;letter-spacing:.08em}
+  .filter-bar{display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap;align-items:center}
+  .filter-select{padding:8px 12px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-family:inherit;font-size:13px;outline:none;cursor:pointer}
+  .filter-chip{padding:6px 12px;background:var(--surface2);border:1px solid var(--border);border-radius:20px;font-size:12px;font-weight:700;cursor:pointer;transition:all .15s;color:var(--text2);font-family:inherit}
+  .filter-chip.active{background:#ffcb0522;border-color:var(--accent);color:var(--accent)}
 
-/* CARDS SECTION */
-.cards-section{min-height:200px}
-.set-header{padding:12px 18px;background:#fff;border-bottom:1px solid var(--g200);display:flex;align-items:center;gap:10px}
-.set-header-name{font-size:15px;font-weight:800}
-.set-header-cnt{font-size:13px;color:var(--g400)}
-.set-header-close{margin-left:auto;padding:5px 9px;font-size:12px}
+  /* CARD GRID */
+  .card-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:14px}
+  .card-item{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;cursor:pointer;transition:all .2s;position:relative}
+  .card-item:hover{transform:translateY(-3px);box-shadow:0 8px 24px rgba(0,0,0,.4);border-color:var(--accent2)}
+  .card-item.owned{border-color:var(--success)}
+  .card-item.owned::after{content:'';position:absolute;inset:0;background:var(--success);opacity:.05;pointer-events:none}
+  .card-img-wrap{position:relative;aspect-ratio:0.717;background:var(--surface2);overflow:hidden}
+  .card-img-wrap img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .3s}
+  .card-item:hover .card-img-wrap img{transform:scale(1.04)}
+  .card-img-placeholder{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:36px;color:var(--text3)}
+  .card-owned-badge{position:absolute;top:6px;right:6px;background:var(--success);color:#000;font-size:10px;font-weight:900;padding:3px 7px;border-radius:20px;z-index:2}
+  .card-count-badge{position:absolute;top:6px;left:6px;background:var(--accent);color:#111;font-size:11px;font-weight:900;padding:3px 8px;border-radius:20px;z-index:2}
+  .card-info{padding:10px 10px 8px}
+  .card-number{font-size:10px;color:var(--text3);font-family:'DM Mono',monospace;margin-bottom:2px}
+  .card-name{font-size:12px;font-weight:800;line-height:1.3;margin-bottom:4px}
+  .card-price{font-size:12px;font-weight:700;color:var(--accent);font-family:'DM Mono',monospace}
+  .card-rarity{font-size:10px;color:var(--text3);margin-top:2px}
+  .card-actions{display:flex;gap:4px;padding:0 8px 10px}
+  .count-btn{flex:1;padding:5px;background:var(--surface2);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:inherit;font-size:16px;font-weight:900;cursor:pointer;transition:all .15s}
+  .count-btn:hover{background:var(--accent);color:#111;border-color:var(--accent)}
+  .count-display{flex:1;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:900;background:var(--surface2);border-radius:6px;font-family:'DM Mono',monospace}
 
-/* CARD GRID */
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:13px;padding:16px 18px}
-@media(max-width:430px){.grid{grid-template-columns:repeat(2,1fr);gap:9px;padding:12px}}
-.card-item{background:#fff;border-radius:var(--rl);overflow:hidden;box-shadow:var(--sh);cursor:pointer;transition:transform .2s,box-shadow .2s;position:relative}
-.card-item:hover{transform:translateY(-3px) scale(1.01);box-shadow:var(--sh-xl)}
-.card-img-wrap{width:100%;aspect-ratio:2.5/3.5;background:linear-gradient(135deg,var(--g100),var(--g200));display:flex;align-items:center;justify-content:center;overflow:hidden;position:relative}
-.card-img{width:100%;height:100%;object-fit:contain;transition:transform .3s}
-.card-item:hover .card-img{transform:scale(1.04)}
-.no-img{display:flex;flex-direction:column;align-items:center;gap:5px;color:var(--g400);font-size:11px}
-.card-info{padding:8px 10px 10px}
-.card-name{font-size:12px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:2px}
-.card-number{font-size:11px;color:var(--g400);margin-bottom:3px}
-.card-price{font-size:12px;font-weight:700;color:var(--green)}
-.qty-badge{position:absolute;top:6px;right:6px;background:var(--blue);color:#fff;font-size:11px;font-weight:700;width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center}
-.lang-badge{position:absolute;top:6px;left:6px;background:rgba(0,0,0,.55);color:#fff;font-size:9px;font-weight:700;padding:2px 5px;border-radius:4px}
+  /* MODAL */
+  .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:1000;align-items:center;justify-content:center;padding:20px}
+  .modal-overlay.open{display:flex}
+  .modal{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);width:100%;max-width:520px;max-height:90vh;overflow-y:auto;box-shadow:var(--shadow)}
+  .modal-header{padding:24px 24px 0;display:flex;align-items:flex-start;gap:16px}
+  .modal-card-img{width:120px;flex-shrink:0;border-radius:8px;overflow:hidden}
+  .modal-card-img img{width:100%;display:block}
+  .modal-card-details{flex:1}
+  .modal-card-number{font-size:11px;color:var(--text3);font-family:'DM Mono',monospace;margin-bottom:4px}
+  .modal-card-name{font-size:20px;font-weight:900;margin-bottom:8px}
+  .modal-badges{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px}
+  .badge{font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;background:var(--surface2);border:1px solid var(--border);color:var(--text2)}
+  .modal-price-section{margin:0 24px;padding:16px 0;border-top:1px solid var(--border);border-bottom:1px solid var(--border)}
+  .price-label{font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px}
+  .price-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+  .price-cell{background:var(--surface2);border-radius:8px;padding:8px;text-align:center}
+  .price-condition{font-size:10px;color:var(--text3);margin-bottom:2px}
+  .price-val{font-size:14px;font-weight:900;font-family:'DM Mono',monospace}
+  .price-val.market{color:var(--accent)}
+  .modal-own-section{padding:20px 24px}
+  .own-label{font-size:13px;font-weight:700;color:var(--text2);margin-bottom:12px}
+  .own-controls{display:flex;align-items:center;gap:12px}
+  .own-btn{width:44px;height:44px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-size:20px;font-weight:900;cursor:pointer;transition:all .15s;font-family:inherit;display:flex;align-items:center;justify-content:center}
+  .own-btn:hover{background:var(--accent);color:#111;border-color:var(--accent)}
+  .own-count{font-size:32px;font-weight:900;min-width:60px;text-align:center;font-family:'DM Mono',monospace;color:var(--accent)}
+  .modal-close{position:sticky;bottom:0;padding:16px 24px;background:var(--surface);border-top:1px solid var(--border)}
+  .modal-close button{width:100%;padding:12px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-family:inherit;font-size:14px;font-weight:700;cursor:pointer;transition:all .15s}
+  .modal-close button:hover{background:var(--accent);color:#111;border-color:var(--accent)}
 
-/* LOADING / EMPTY */
-.loading{padding:50px 18px;display:flex;flex-direction:column;align-items:center;gap:12px;color:var(--g400)}
-.spinner{width:40px;height:40px;border:4px solid var(--g200);border-top-color:var(--blue);border-radius:50%;animation:spin .8s linear infinite}
-@keyframes spin{to{transform:rotate(360deg)}}
-.empty{padding:50px 18px;text-align:center;color:var(--g400)}
-.empty-icon{font-size:54px;margin-bottom:12px}
-.empty h3{font-size:16px;font-weight:700;color:var(--g600);margin-bottom:5px}
-.empty p{font-size:13px}
+  /* DASHBOARD */
+  .stats-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:16px;margin-bottom:32px}
+  .stat-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:20px}
+  .stat-card-icon{font-size:28px;margin-bottom:12px}
+  .stat-card-num{font-size:28px;font-weight:900;font-family:'DM Mono',monospace}
+  .stat-card-label{font-size:12px;color:var(--text2);margin-top:4px;font-weight:700}
+  .my-packs-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:16px}
+  .my-pack-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:16px;cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:14px}
+  .my-pack-card:hover{border-color:var(--accent2);transform:translateY(-2px)}
+  .my-pack-logo{height:44px;width:80px;object-fit:contain;flex-shrink:0}
+  .my-pack-logo-placeholder{width:44px;height:44px;background:var(--surface2);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
+  .my-pack-info{flex:1;min-width:0}
+  .my-pack-name{font-size:13px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 
-/* STATS */
-.stats-bar{background:#fff;border-bottom:1px solid var(--g200);padding:13px 18px;display:flex;gap:24px;overflow-x:auto}
-.stat-v{font-size:22px;font-weight:800;color:var(--blue);line-height:1}
-.stat-l{font-size:11px;color:var(--g400);margin-top:2px;font-weight:500}
-.coll-ctrl{background:#fff;border-bottom:1px solid var(--g200);padding:10px 18px;display:flex;gap:7px;align-items:center;flex-wrap:wrap}
-.sort-sel{padding:6px 10px;font-size:13px;font-family:inherit;border:1px solid var(--g300);border-radius:8px;outline:none;cursor:pointer;color:var(--g700);background:#fff}
+  /* LOADING / EMPTY */
+  .loading-state{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:60px;gap:16px;color:var(--text2)}
+  .spinner{width:40px;height:40px;border:3px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .7s linear infinite}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .empty-state{text-align:center;padding:60px 20px;color:var(--text2)}
+  .empty-icon{font-size:48px;margin-bottom:12px}
+  .empty-title{font-size:18px;font-weight:700;margin-bottom:6px;color:var(--text)}
+  .empty-sub{font-size:14px}
 
-/* MODAL */
-.overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;z-index:1000;padding:16px;backdrop-filter:blur(3px);animation:fi .15s}
-@keyframes fi{from{opacity:0}to{opacity:1}}
-.modal{background:#fff;border-radius:var(--rxl);width:100%;max-width:450px;max-height:90vh;overflow-y:auto;box-shadow:var(--sh-xl);animation:su .2s}
-@keyframes su{from{transform:translateY(16px);opacity:0}to{transform:translateY(0);opacity:1}}
-.modal-head{padding:17px 20px;border-bottom:1px solid var(--g200);display:flex;align-items:center;justify-content:space-between}
-.modal-title{font-size:16px;font-weight:800}
-.close-btn{width:28px;height:28px;border-radius:50%;border:none;background:var(--g100);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px;color:var(--g500)}
-.close-btn:hover{background:var(--g200)}
-.modal-body{padding:20px}
-.modal-foot{padding:13px 20px;border-top:1px solid var(--g200);display:flex;gap:7px;justify-content:flex-end}
+  /* TOAST */
+  .toast{position:fixed;bottom:24px;right:24px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:12px 18px;font-size:14px;font-weight:700;z-index:9999;transform:translateY(80px);opacity:0;transition:all .3s;box-shadow:var(--shadow)}
+  .toast.show{transform:translateY(0);opacity:1}
+  .toast.success{border-color:var(--success);color:var(--success)}
+  .toast.info{border-color:var(--accent);color:var(--accent)}
 
-/* ADD PREVIEW */
-.m-preview{display:flex;gap:13px;margin-bottom:16px}
-.m-card-img{width:100px;height:140px;border-radius:var(--r);object-fit:contain;background:var(--g100);flex-shrink:0}
-.m-card-info h3{font-size:16px;font-weight:800;margin-bottom:3px}
-.m-set{font-size:12px;color:var(--g500);margin-bottom:7px}
-.chips{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:7px}
-.chip{display:inline-flex;align-items:center;padding:3px 8px;border-radius:10px;font-size:11px;font-weight:600}
-.chip-blue{background:#dbeafe;color:#1d4ed8}
-.chip-green{background:#dcfce7;color:#16a34a}
-.chip-yellow{background:#fef9c3;color:#a16207}
-.chip-gray{background:var(--g100);color:var(--g600)}
-.price-tag{background:#dcfce7;color:var(--green);font-size:12px;font-weight:700;padding:3px 8px;border-radius:6px;display:inline-block;margin-bottom:4px}
+  /* RARITY SIDEBAR */
+  .rarity-bar{width:5px;height:100%;position:absolute;left:0;top:0;border-radius:2px 0 0 2px}
+  .rarity-UR .rarity-bar{background:linear-gradient(180deg,#7c3aed,#db2777)}
+  .rarity-SR .rarity-bar{background:linear-gradient(180deg,#dc2626,#f97316)}
+  .rarity-SAR .rarity-bar,.rarity-HyperRare .rarity-bar{background:linear-gradient(180deg,#f59e0b,#fde68a)}
+  .rarity-SIR .rarity-bar{background:linear-gradient(180deg,#0ea5e9,#38bdf8)}
+  .rarity-RR .rarity-bar{background:#7c3aed}
+  .rarity-R .rarity-bar{background:#3b82f6}
+  .rarity-U .rarity-bar{background:#6366f1}
+  .rarity-C .rarity-bar{background:var(--text3)}
 
-/* FORM */
-.form-g{margin-bottom:13px}
-label{display:block;font-size:13px;font-weight:600;color:var(--g700);margin-bottom:5px}
-.form-ctrl{width:100%;padding:9px 12px;font-size:14px;font-family:inherit;border:2px solid var(--g200);border-radius:var(--r);outline:none;transition:border-color .15s;color:var(--g900);background:#fff}
-.form-ctrl:focus{border-color:var(--blue)}
-textarea.form-ctrl{resize:vertical}
-.qty-ctrl{display:flex;align-items:center;border:2px solid var(--g200);border-radius:var(--r);overflow:hidden;width:fit-content}
-.qty-btn{width:34px;height:34px;border:none;background:var(--g100);font-size:19px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--g700);transition:background .15s;font-family:inherit}
-.qty-btn:hover{background:var(--g200)}
-.qty-val{width:44px;text-align:center;font-size:15px;font-weight:700;border:none;border-left:2px solid var(--g200);border-right:2px solid var(--g200);padding:6px 0;outline:none;color:var(--g900);font-family:inherit}
-
-/* UPLOAD */
-.upload-area{border:2px dashed var(--g300);border-radius:var(--r);padding:16px;text-align:center;cursor:pointer;transition:all .15s;color:var(--g500)}
-.upload-area:hover{border-color:var(--blue);color:var(--blue);background:#eff6ff}
-.upload-area.has-img{border-color:var(--green);background:#f0fdf4}
-.upload-prev{width:100%;max-height:160px;object-fit:contain;border-radius:8px;margin-bottom:6px}
-
-/* DETAIL */
-.detail-img{width:100%;max-width:190px;margin:0 auto 13px;display:block;border-radius:var(--r)}
-.price-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin:8px 0}
-.p-cell{background:var(--g50);padding:8px 10px;border-radius:8px}
-.p-cell-l{font-size:10px;color:var(--g400);font-weight:500;margin-bottom:2px}
-.p-cell-v{font-size:13px;font-weight:700}
-.divider{height:1px;background:var(--g200);margin:13px 0}
-.sec-title{font-size:11px;font-weight:700;color:var(--g400);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px}
-.note-box{background:var(--g50);padding:9px 11px;border-radius:8px;font-size:13px;color:var(--g700);margin-bottom:10px}
-
-/* TOAST */
-.toast-wrap{position:fixed;bottom:18px;right:18px;z-index:2000;display:flex;flex-direction:column;gap:6px;pointer-events:none}
-.toast{background:var(--g900);color:#fff;padding:10px 16px;border-radius:var(--r);font-size:13px;font-weight:500;box-shadow:var(--sh-lg);animation:ti .3s ease,to .3s ease 2.7s forwards;max-width:280px}
-.toast-ok{background:#166534}.toast-err{background:#991b1b}
-@keyframes ti{from{transform:translateX(110%);opacity:0}to{transform:translateX(0);opacity:1}}
-@keyframes to{from{transform:translateX(0);opacity:1}to{transform:translateX(110%);opacity:0}}
-
-.hidden{display:none!important}
-.text-muted{color:var(--g400);font-size:12px}
+  /* RESPONSIVE */
+  .hamburger{display:none;background:none;border:none;color:var(--text);font-size:24px;cursor:pointer;padding:4px}
+  @media(max-width:768px){
+    .sidebar{transform:translateX(-100%);transition:transform .3s}
+    .sidebar.open{transform:translateX(0)}
+    .main-content{margin-left:0}
+    .page-content{padding:16px}
+    .topbar{padding:12px 16px}
+    .card-grid{grid-template-columns:repeat(auto-fill,minmax(120px,1fr))}
+    .expansion-grid{grid-template-columns:repeat(auto-fill,minmax(140px,1fr))}
+    .hamburger{display:block}
+    .login-card{width:100%;margin:16px;padding:32px 24px}
+  }
 </style>
 </head>
 <body>
 
-<header>
-  <svg class="pokeball" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-    <circle cx="50" cy="50" r="47" fill="white" stroke="#333" stroke-width="5"/>
-    <path d="M3 50 A47 47 0 0 1 97 50 Z" fill="#dc2626"/>
-    <line x1="3" y1="50" x2="97" y2="50" stroke="#333" stroke-width="5"/>
-    <circle cx="50" cy="50" r="13" fill="white" stroke="#333" stroke-width="5"/>
-    <circle cx="50" cy="50" r="6" fill="#e5e7eb"/>
-  </svg>
-  <div class="h-title">포켓몬 카드 컬렉션</div>
-</header>
-
-<nav class="tabs">
-  <button class="tab-btn active" onclick="switchTab('explore')" id="tab-explore">
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg>
-    시리즈 탐색
-  </button>
-  <button class="tab-btn" onclick="switchTab('search')" id="tab-search">
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-    카드 검색
-  </button>
-  <button class="tab-btn" onclick="switchTab('coll')" id="tab-coll">
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 11H5m14 0a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-6a2 2 0 0 1 2-2m14 0V9a2 2 0 0 0-2-2M5 11V9a2 2 0 0 1 2-2m0 0V5a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v2M7 7h10"/></svg>
-    내 컬렉션
-    <span class="tab-badge" id="coll-badge">0</span>
-  </button>
-</nav>
-
-<!-- ═══════════ EXPLORE TAB ═══════════ -->
-<div class="panel active" id="panel-explore">
-  <!-- Language selector (sticky under tabs) -->
-  <div class="top-controls" id="explore-lang-bar">
-    <div class="lang-row">
-      <button class="lang-chip active" onclick="setLang('ko','explore')" id="elang-ko">🇰🇷 한국판</button>
-      <button class="lang-chip" onclick="setLang('ja','explore')" id="elang-ja">🇯🇵 일본판</button>
-      <button class="lang-chip" onclick="setLang('en','explore')" id="elang-en">🇺🇸 영문판</button>
+<!-- LOGIN -->
+<div id="login-screen">
+  <div class="login-card">
+    <div class="login-logo">
+      <svg width="64" height="64" viewBox="0 0 64 64" style="display:block;margin:0 auto 14px">
+        <circle cx="32" cy="32" r="30" fill="#cc2244"/>
+        <rect x="2" y="29" width="60" height="6" fill="#111"/>
+        <circle cx="32" cy="32" r="10" fill="#fff" stroke="#111" stroke-width="3"/>
+        <circle cx="32" cy="32" r="5" fill="#cc2244" stroke="#111" stroke-width="2"/>
+        <path d="M2,32 A30,30 0 0,1 62,32" fill="#fff"/>
+      </svg>
+      <div class="login-title">Poké<span>Dex</span></div>
+      <div class="login-sub" id="login-sub-text">포켓몬 카드 컬렉션 매니저</div>
     </div>
-  </div>
-
-  <!-- Series accordion -->
-  <div class="series-section" id="series-section">
-    <div class="series-section-title">
-      <span>시리즈 목록</span>
-      <span id="series-total-label" class="text-muted"></span>
+    <div class="lang-switcher">
+      <button class="lang-btn active" onclick="setUILang('ko')">한국어</button>
+      <button class="lang-btn" onclick="setUILang('en')">English</button>
+      <button class="lang-btn" onclick="setUILang('ja')">日本語</button>
+      <button class="lang-btn" onclick="setUILang('zh')">中文</button>
     </div>
-    <div id="series-body">
-      <div class="series-loading"><div class="spinner"></div><span>시리즈 불러오는 중...</span></div>
-    </div>
-  </div>
-
-  <!-- Cards area (shown when set selected) -->
-  <div class="cards-section" id="cards-section">
-    <div class="empty" style="padding:36px 18px">
-      <div class="empty-icon">👆</div>
-      <h3>세트를 선택하세요</h3>
-      <p>위 시리즈 목록에서 세트를 클릭하면<br>카드 목록이 여기에 표시됩니다</p>
-    </div>
+    <div class="form-group"><label id="lbl-email">이메일</label><input type="email" id="login-email" placeholder="trainer@pokemon.com"></div>
+    <div class="form-group"><label id="lbl-pw">비밀번호</label><input type="password" id="login-pw" placeholder="••••••••"></div>
+    <button class="btn-primary" onclick="doLogin()" id="btn-login">로그인</button>
+    <div class="login-switch"><span id="switch-text">계정이 없으신가요?</span> <a onclick="toggleMode()" id="switch-link">회원가입</a></div>
   </div>
 </div>
 
-<!-- ═══════════ SEARCH TAB ═══════════ -->
-<div class="panel" id="panel-search">
-  <div class="top-controls">
-    <div class="lang-row">
-      <button class="lang-chip active" onclick="setLang('ko','search')" id="slang-ko">🇰🇷 한국판</button>
-      <button class="lang-chip" onclick="setLang('ja','search')" id="slang-ja">🇯🇵 일본판</button>
-      <button class="lang-chip" onclick="setLang('en','search')" id="slang-en">🇺🇸 영문판</button>
+<!-- APP -->
+<div id="app">
+  <nav class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+      <svg width="26" height="26" viewBox="0 0 64 64"><circle cx="32" cy="32" r="30" fill="#cc2244"/><rect x="2" y="29" width="60" height="6" fill="#111"/><circle cx="32" cy="32" r="10" fill="#fff" stroke="#111" stroke-width="3"/><circle cx="32" cy="32" r="5" fill="#cc2244" stroke="#111" stroke-width="2"/><path d="M2,32 A30,30 0 0,1 62,32" fill="#fff"/></svg>
+      <div class="logo-text">Poké<span>Dex</span></div>
     </div>
-    <div class="search-row">
-      <input type="text" class="search-input" id="search-input" placeholder="카드 이름으로 검색..." onkeydown="if(event.key==='Enter')doSearch()">
-      <button class="btn btn-blue" onclick="doSearch()">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-        검색
-      </button>
+    <div class="sidebar-nav">
+      <button class="nav-item active" onclick="showPage('dashboard')" id="nav-dashboard"><span class="nav-icon">🏠</span><span data-i18n="nav_dashboard">대시보드</span></button>
+      <button class="nav-item" onclick="showPage('browse')" id="nav-browse"><span class="nav-icon">🔍</span><span data-i18n="nav_browse">팩 탐색</span></button>
+      <button class="nav-item" onclick="showPage('my-collection')" id="nav-collection"><span class="nav-icon">📦</span><span data-i18n="nav_collection">내 컬렉션</span></button>
+      <div class="nav-section-label" data-i18n="nav_lang">언어별 팩</div>
+      <button class="nav-item" onclick="showPage('browse');filterByLang('JA')"><span class="nav-icon">🇯🇵</span><span data-i18n="lang_ja">일본판</span></button>
+      <button class="nav-item" onclick="showPage('browse');filterByLang('EN')"><span class="nav-icon">🇺🇸</span><span data-i18n="lang_en">영어판</span></button>
+      <button class="nav-item" onclick="showPage('browse');filterByLang('KO')"><span class="nav-icon">🇰🇷</span><span data-i18n="lang_ko">한국판</span></button>
+      <button class="nav-item" onclick="showPage('browse');filterByLang('ZH')"><span class="nav-icon">🇨🇳</span><span data-i18n="lang_zh">중국판</span></button>
     </div>
-  </div>
-  <div id="search-content">
-    <div class="empty"><div class="empty-icon">🔍</div><h3>카드를 검색해보세요</h3><p>카드 이름을 입력하고 검색 버튼을 누르세요</p></div>
-  </div>
-</div>
+    <div class="sidebar-bottom">
+      <div class="sidebar-lang">
+        <button class="lang-btn active" onclick="setUILang('ko')">KO</button>
+        <button class="lang-btn" onclick="setUILang('en')">EN</button>
+        <button class="lang-btn" onclick="setUILang('ja')">JA</button>
+        <button class="lang-btn" onclick="setUILang('zh')">ZH</button>
+      </div>
+      <div class="user-info">
+        <div class="user-avatar" id="s-avatar">T</div>
+        <div><div class="user-name" id="s-name">Trainer</div><div class="user-email" id="s-email">-</div></div>
+      </div>
+      <button class="nav-item" onclick="doLogout()" style="margin-top:4px"><span class="nav-icon">🚪</span><span data-i18n="nav_logout">로그아웃</span></button>
+    </div>
+  </nav>
 
-<!-- ═══════════ COLLECTION TAB ═══════════ -->
-<div class="panel" id="panel-coll">
-  <div class="stats-bar">
-    <div><div class="stat-v" id="st-total">0</div><div class="stat-l">총 카드 수</div></div>
-    <div><div class="stat-v" id="st-unique">0</div><div class="stat-l">종류</div></div>
-    <div><div class="stat-v" id="st-val">-</div><div class="stat-l">예상 시세(USD)</div></div>
-  </div>
-  <div class="coll-ctrl">
-    <select class="sort-sel" onchange="renderColl()">
-      <option value="date-d">최근 추가순</option>
-      <option value="date-a">오래된순</option>
-      <option value="name-a">이름순 ↑</option>
-      <option value="name-d">이름순 ↓</option>
-      <option value="price-d">가격 높은순</option>
-      <option value="qty-d">수량 많은순</option>
-    </select>
-    <div style="margin-left:auto;display:flex;gap:6px">
-      <button class="btn btn-gray btn-sm" onclick="exportColl()">📤 내보내기</button>
-      <button class="btn btn-gray btn-sm" onclick="document.getElementById('import-file').click()">📥 가져오기</button>
-      <input type="file" id="import-file" accept=".json" class="hidden" onchange="importColl(this)">
-    </div>
-  </div>
-  <div id="coll-content">
-    <div class="empty"><div class="empty-icon">📦</div><h3>컬렉션이 비어있어요</h3><p>시리즈를 탐색하거나 검색해서 카드를 추가하세요!</p></div>
-  </div>
-</div>
-
-<!-- ═══════════ ADD MODAL ═══════════ -->
-<div class="overlay hidden" id="add-modal" onclick="if(event.target===this)closeAdd()">
-  <div class="modal">
-    <div class="modal-head"><div class="modal-title">컬렉션에 추가</div><button class="close-btn" onclick="closeAdd()">✕</button></div>
-    <div class="modal-body">
-      <div class="m-preview" id="add-preview"></div>
-      <div class="form-g">
-        <label>수량</label>
-        <div class="qty-ctrl">
-          <button class="qty-btn" onclick="adjQty(-1)">−</button>
-          <input type="number" class="qty-val" id="add-qty" value="1" min="1" max="99">
-          <button class="qty-btn" onclick="adjQty(1)">+</button>
+  <div class="main-content">
+    <div class="topbar">
+      <button class="hamburger" onclick="document.getElementById('sidebar').classList.toggle('open')">☰</button>
+      <h1 id="topbar-title">대시보드</h1>
+      <div class="topbar-right">
+        <div class="search-box">
+          <span>🔍</span>
+          <input type="text" id="search-input" placeholder="카드 / 팩 검색..." oninput="onSearch(this.value)">
         </div>
       </div>
-      <div class="form-g">
-        <label>상태</label>
-        <select class="form-ctrl" id="add-cond">
-          <option value="mint">완벽 (Mint)</option>
-          <option value="near-mint" selected>거의 완벽 (Near Mint)</option>
-          <option value="excellent">우수 (Excellent)</option>
-          <option value="good">좋음 (Good)</option>
-          <option value="poor">나쁨 (Poor)</option>
-        </select>
-      </div>
-      <div class="form-g">
-        <label>메모</label>
-        <textarea class="form-ctrl" id="add-note" rows="2" placeholder="메모..."></textarea>
-      </div>
-      <div class="form-g">
-        <label>커스텀 이미지 <span class="text-muted">(선택)</span></label>
-        <div class="upload-area" id="upload-area" onclick="document.getElementById('img-file').click()">
-          <div id="upload-ph">
-            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin:0 auto 6px;display:block;opacity:.35"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-            <div style="font-size:13px">클릭하여 이미지 업로드</div>
-            <div class="text-muted" style="margin-top:3px">JPG · PNG · WEBP</div>
-          </div>
-          <img id="upload-prev" class="upload-prev hidden">
-          <div id="upload-clear" class="hidden" style="margin-top:6px">
-            <button class="btn btn-gray btn-sm" onclick="clearImg(event)">이미지 제거</button>
-          </div>
+    </div>
+
+    <div class="page-content">
+
+      <!-- DASHBOARD -->
+      <div id="page-dashboard">
+        <div class="api-banner" id="api-banner">
+          <span>🔑</span>
+          <span style="font-weight:700;white-space:nowrap">pokemontcg.io API Key <span style="color:var(--success);font-size:11px">(선택)</span>:</span>
+          <input type="password" id="api-key-input" placeholder="API Key (없어도 동작, 있으면 레이트리밋 향상)">
+          <button onclick="saveApiKey()" data-i18n="save">저장</button>
         </div>
-        <input type="file" id="img-file" accept="image/*" class="hidden" onchange="handleImg(this)">
+        <div class="stats-grid" id="dash-stats"></div>
+        <div class="section-header">
+          <div><div class="section-title" data-i18n="dash_packs">내 컬렉션 팩</div><div class="section-subtitle" data-i18n="dash_packs_sub">즐겨찾기한 팩의 수집 현황</div></div>
+          <button class="btn-outline" onclick="showPage('browse')" data-i18n="add_pack">팩 추가 +</button>
+        </div>
+        <div id="dash-packs"></div>
       </div>
-    </div>
-    <div class="modal-foot">
-      <button class="btn btn-gray" onclick="closeAdd()">취소</button>
-      <button class="btn btn-blue" onclick="confirmAdd()">추가하기</button>
+
+      <!-- BROWSE -->
+      <div id="page-browse" style="display:none">
+        <div class="section-header" style="margin-bottom:16px">
+          <div><div class="section-title" data-i18n="browse_title">확장팩 탐색</div><div class="section-subtitle" data-i18n="browse_sub">언어·시리즈별로 팩을 선택하세요</div></div>
+        </div>
+        <div class="lang-filter" id="lang-filter-bar">
+          <div class="lang-tag active" onclick="filterByLang('ALL')" data-lang="ALL">🌍 <span data-i18n="lang_all">전체</span></div>
+          <div class="lang-tag" onclick="filterByLang('EN')" data-lang="EN">🇺🇸 <span data-i18n="lang_en">영어판</span></div>
+          <div class="lang-tag" onclick="filterByLang('JA')" data-lang="JA">🇯🇵 <span data-i18n="lang_ja">일본판</span></div>
+          <div class="lang-tag" onclick="filterByLang('KO')" data-lang="KO">🇰🇷 <span data-i18n="lang_ko">한국판</span></div>
+          <div class="lang-tag" onclick="filterByLang('ZH-HANT')" data-lang="ZH-HANT">🇹🇼 <span data-i18n="lang_zhtw">번체 중문</span></div>
+          <div class="lang-tag" onclick="filterByLang('ZH-HANS')" data-lang="ZH-HANS">🇨🇳 <span data-i18n="lang_zhcn">간체 중문</span></div>
+          <div class="lang-tag" onclick="filterByLang('DE')" data-lang="DE">🇩🇪 독일판</div>
+          <div class="lang-tag" onclick="filterByLang('FR')" data-lang="FR">🇫🇷 프랑스판</div>
+          <div class="lang-tag" onclick="filterByLang('IT')" data-lang="IT">🇮🇹 이탈리아판</div>
+          <div class="lang-tag" onclick="filterByLang('PT')" data-lang="PT">🇵🇹 포르투갈판</div>
+        </div>
+        <div id="expansion-grid-wrap"><div class="loading-state"><div class="spinner"></div><span data-i18n="loading">불러오는 중...</span></div></div>
+      </div>
+
+      <!-- CARD LIST -->
+      <div id="page-cardlist" style="display:none">
+        <div style="margin-bottom:16px"><button class="back-btn" onclick="backToBrowse()">← <span data-i18n="back">뒤로</span></button></div>
+        <div id="exp-info-wrap"></div>
+        <div class="filter-bar" id="card-filter-bar">
+          <select class="filter-select" id="rarity-filter" onchange="applyCardFilter()">
+            <option value="ALL" data-i18n="all_rarity">전체 레어도</option>
+          </select>
+          <button class="filter-chip active" onclick="setOwnedFilter('ALL')" data-owned="ALL" data-i18n="filter_all">전체</button>
+          <button class="filter-chip" onclick="setOwnedFilter('OWNED')" data-owned="OWNED" data-i18n="filter_owned">보유</button>
+          <button class="filter-chip" onclick="setOwnedFilter('MISSING')" data-owned="MISSING" data-i18n="filter_missing">미보유</button>
+        </div>
+        <div id="card-grid-wrap"></div>
+      </div>
+
+      <!-- MY COLLECTION -->
+      <div id="page-my-collection" style="display:none">
+        <div class="section-header">
+          <div><div class="section-title" data-i18n="nav_collection">내 컬렉션</div><div class="section-subtitle" id="coll-sub"></div></div>
+        </div>
+        <div id="my-coll-content"></div>
+      </div>
+
     </div>
   </div>
 </div>
 
-<!-- ═══════════ DETAIL MODAL ═══════════ -->
-<div class="overlay hidden" id="detail-modal" onclick="if(event.target===this)closeDetail()">
+<!-- CARD MODAL -->
+<div class="modal-overlay" id="card-modal" onclick="if(event.target===this)closeModal()">
   <div class="modal">
-    <div class="modal-head"><div class="modal-title" id="detail-title">카드 상세</div><button class="close-btn" onclick="closeDetail()">✕</button></div>
-    <div class="modal-body" id="detail-body"></div>
-    <div class="modal-foot" id="detail-foot"></div>
+    <div class="modal-header" id="modal-hdr"></div>
+    <div class="modal-price-section" id="modal-price"></div>
+    <div class="modal-own-section" id="modal-own"></div>
+    <div class="modal-close"><button onclick="closeModal()" data-i18n="close">닫기</button></div>
   </div>
 </div>
 
-<!-- TOAST -->
-<div class="toast-wrap" id="toast-wrap"></div>
+<div class="toast" id="toast"></div>
 
 <script>
-'use strict';
+// ─── I18N ───────────────────────────────────────────────────────────────────
+const T = {
+  ko:{ nav_dashboard:'대시보드', nav_browse:'팩 탐색', nav_collection:'내 컬렉션',
+    nav_lang:'언어별 팩', nav_logout:'로그아웃',
+    lang_all:'전체', lang_ja:'일본판', lang_en:'영어판', lang_ko:'한국판',
+    lang_zhtw:'번체 중문', lang_zhcn:'간체 중문',
+    browse_title:'확장팩 탐색', browse_sub:'언어·시리즈별로 팩을 선택하세요',
+    loading:'불러오는 중...', back:'뒤로', save:'저장', close:'닫기',
+    all_rarity:'전체 레어도', filter_all:'전체', filter_owned:'보유', filter_missing:'미보유',
+    dash_packs:'내 컬렉션 팩', dash_packs_sub:'즐겨찾기한 팩의 수집 현황', add_pack:'팩 추가 +',
+    lbl_email:'이메일', lbl_pw:'비밀번호', btn_login:'로그인', btn_signup:'회원가입',
+    to_signup:'계정이 없으신가요?', to_login:'이미 계정이 있으신가요?',
+    link_signup:'회원가입', link_login:'로그인', sub:'포켓몬 카드 컬렉션 매니저',
+    stat_owned:'총 보유 수량', stat_unique:'보유 종류', stat_packs:'등록 팩', stat_val:'추정 가치(USD)',
+    empty_packs:'아직 팩이 없어요', empty_packs_sub:'팩 탐색에서 ⭐를 눌러 추가하세요',
+    own_qty:'보유 수량', collected:'보유', total_c:'전체',
+    price_usd:'시세 (USD · TCGPlayer)', price_eur:'시세 (EUR · Cardmarket)',
+    market:'시장가', low:'최저', high:'최고', mid:'평균',
+    no_price:'가격 정보 없음', toast_fav_add:'즐겨찾기 추가 ⭐', toast_fav_rm:'즐겨찾기 제거',
+    api_hint:'pokemontcg.io에서 무료 API 키를 발급받으면 레이트리밋이 높아집니다',
+  },
+  en:{ nav_dashboard:'Dashboard', nav_browse:'Browse Packs', nav_collection:'My Collection',
+    nav_lang:'By Language', nav_logout:'Logout',
+    lang_all:'All', lang_ja:'Japanese', lang_en:'English', lang_ko:'Korean',
+    lang_zhtw:'Chinese (T)', lang_zhcn:'Chinese (S)',
+    browse_title:'Browse Expansions', browse_sub:'Filter by language & series',
+    loading:'Loading...', back:'Back', save:'Save', close:'Close',
+    all_rarity:'All Rarities', filter_all:'All', filter_owned:'Owned', filter_missing:'Missing',
+    dash_packs:'My Saved Packs', dash_packs_sub:'Collection progress for saved packs', add_pack:'Add Pack +',
+    lbl_email:'Email', lbl_pw:'Password', btn_login:'Sign In', btn_signup:'Sign Up',
+    to_signup:"Don't have an account?", to_login:'Already have an account?',
+    link_signup:'Sign Up', link_login:'Sign In', sub:'Pokémon Card Collection Manager',
+    stat_owned:'Total Owned', stat_unique:'Unique Cards', stat_packs:'Saved Packs', stat_val:'Est. Value (USD)',
+    empty_packs:'No packs saved yet', empty_packs_sub:'Star a pack in Browse to add it here',
+    own_qty:'Quantity Owned', collected:'Owned', total_c:'Total',
+    price_usd:'Market Price (USD · TCGPlayer)', price_eur:'Market Price (EUR · Cardmarket)',
+    market:'Market', low:'Low', high:'High', mid:'Mid',
+    no_price:'No price data', toast_fav_add:'Added to favorites ⭐', toast_fav_rm:'Removed from favorites',
+    api_hint:'Get a free API key at dev.pokemontcg.io for higher rate limits',
+  },
+  ja:{ nav_dashboard:'ダッシュボード', nav_browse:'パック一覧', nav_collection:'コレクション',
+    nav_lang:'言語別', nav_logout:'ログアウト',
+    lang_all:'全て', lang_ja:'日本語版', lang_en:'英語版', lang_ko:'韓国語版',
+    lang_zhtw:'繁体中文', lang_zhcn:'簡体中文',
+    browse_title:'拡張パック一覧', browse_sub:'言語・シリーズでフィルター',
+    loading:'読み込み中...', back:'戻る', save:'保存', close:'閉じる',
+    all_rarity:'全レアリティ', filter_all:'全て', filter_owned:'所持中', filter_missing:'未所持',
+    dash_packs:'コレクションパック', dash_packs_sub:'お気に入りパックの収集進捗', add_pack:'パック追加 +',
+    lbl_email:'メール', lbl_pw:'パスワード', btn_login:'ログイン', btn_signup:'新規登録',
+    to_signup:'アカウントをお持ちでないですか？', to_login:'すでにアカウントをお持ちですか？',
+    link_signup:'新規登録', link_login:'ログイン', sub:'ポケモンカードコレクション管理',
+    stat_owned:'総所持数', stat_unique:'所持種類', stat_packs:'登録パック', stat_val:'推定価値(USD)',
+    empty_packs:'パークが未登録', empty_packs_sub:'パック一覧で⭐を押して追加してください',
+    own_qty:'所持数', collected:'所持', total_c:'全カード',
+    price_usd:'市場価格 (USD · TCGPlayer)', price_eur:'市場価格 (EUR · Cardmarket)',
+    market:'市場価', low:'最安', high:'最高', mid:'平均',
+    no_price:'価格情報なし', toast_fav_add:'お気に入りに追加 ⭐', toast_fav_rm:'お気に入りから削除',
+    api_hint:'dev.pokemontcg.ioで無料APIキーを取得するとレート制限が向上します',
+  },
+  zh:{ nav_dashboard:'仪表板', nav_browse:'浏览卡包', nav_collection:'我的收藏',
+    nav_lang:'按语言', nav_logout:'退出',
+    lang_all:'全部', lang_ja:'日版', lang_en:'英版', lang_ko:'韩版',
+    lang_zhtw:'繁体中文', lang_zhcn:'简体中文',
+    browse_title:'浏览扩展包', browse_sub:'按语言和系列筛选',
+    loading:'加载中...', back:'返回', save:'保存', close:'关闭',
+    all_rarity:'全部稀有度', filter_all:'全部', filter_owned:'已拥有', filter_missing:'未拥有',
+    dash_packs:'我的收藏包', dash_packs_sub:'已收藏卡包的收集进度', add_pack:'添加卡包 +',
+    lbl_email:'邮箱', lbl_pw:'密码', btn_login:'登录', btn_signup:'注册',
+    to_signup:'没有账号？', to_login:'已有账号？',
+    link_signup:'注册', link_login:'登录', sub:'宝可梦卡牌收藏管理器',
+    stat_owned:'总拥有量', stat_unique:'卡牌种类', stat_packs:'已注册包', stat_val:'估值(USD)',
+    empty_packs:'还没有添加卡包', empty_packs_sub:'在浏览页面点击⭐添加',
+    own_qty:'拥有数量', collected:'已有', total_c:'全部',
+    price_usd:'市场价格 (USD · TCGPlayer)', price_eur:'市场价格 (EUR · Cardmarket)',
+    market:'市场价', low:'最低', high:'最高', mid:'均价',
+    no_price:'无价格数据', toast_fav_add:'已添加收藏 ⭐', toast_fav_rm:'已取消收藏',
+    api_hint:'在dev.pokemontcg.io获取免费API密钥可提高请求限制',
+  }
+};
+let uiLang = localStorage.getItem('pokedex_lang') || 'ko';
+function t(k){ return (T[uiLang]&&T[uiLang][k]) || T.en[k] || k; }
 
-// ═══════════════════════════════════════════════
-// STATE
-// ═══════════════════════════════════════════════
-const COLL_KEY = 'pkm_coll_v3';
-
-let exploreLang = 'ko';   // language for series explorer
-let searchLang  = 'ko';   // language for search tab
-
-let seriesCache = {};     // {lang: [{id,name,sets:[...]}]}
-let setCardCache = {};    // {'ko:swsh1': [cards]}
-let activeSetChip = null; // currently selected set chip element
-let activeSetId   = null;
-
-let searchResults = [];
-let collection = loadColl();
-let pendCard = null;
-let pendImg  = null;
-let detailId = null;
-
-// ═══════════════════════════════════════════════
-// STORAGE
-// ═══════════════════════════════════════════════
-function loadColl() {
-  try { return JSON.parse(localStorage.getItem(COLL_KEY) || '[]'); } catch { return []; }
+function setUILang(lang){
+  uiLang = lang;
+  localStorage.setItem('pokedex_lang', lang);
+  document.querySelectorAll('[data-i18n]').forEach(el => { const k=el.getAttribute('data-i18n'); el.textContent=t(k); });
+  // Login form
+  document.getElementById('lbl-email').textContent = t('lbl_email');
+  document.getElementById('lbl-pw').textContent = t('lbl_pw');
+  document.getElementById('login-sub-text').textContent = t('sub');
+  updateAuthUI();
+  // Lang buttons
+  const langMap = {'한국어':'ko','english':'en','日本語':'ja','中文':'zh','ko':'ko','en':'en','ja':'ja','zh':'zh'};
+  document.querySelectorAll('.lang-btn').forEach(b => {
+    const txt = b.textContent.trim();
+    const mapped = langMap[txt] || langMap[txt.toLowerCase()];
+    if(mapped) b.classList.toggle('active', mapped === lang);
+  });
+  document.getElementById('search-input').placeholder = {ko:'카드 / 팩 검색...',ja:'カード検索...',zh:'搜索...',en:'Search cards / packs...'}[lang]||'Search...';
 }
-function saveColl() {
-  try { localStorage.setItem(COLL_KEY, JSON.stringify(collection)); }
-  catch { toast('저장 공간 부족 — 커스텀 이미지를 줄여보세요', 'err'); }
+
+// ─── AUTH ────────────────────────────────────────────────────────────────────
+let currentUser = null;
+let isSignup = false;
+function getUsers(){ return JSON.parse(localStorage.getItem('pdx_users')||'{}'); }
+function saveUsers(u){ localStorage.setItem('pdx_users', JSON.stringify(u)); }
+function getUserData(email){ return JSON.parse(localStorage.getItem('pdx_data_'+email)||'{"collection":{},"favorites":[]}'); }
+function saveUserData(email,data){ localStorage.setItem('pdx_data_'+email, JSON.stringify(data)); }
+
+function updateAuthUI(){
+  document.getElementById('btn-login').textContent = isSignup ? t('btn_signup') : t('btn_login');
+  document.getElementById('switch-text').textContent = isSignup ? t('to_login') : t('to_signup');
+  document.getElementById('switch-link').textContent = isSignup ? t('link_login') : t('link_signup');
+}
+function toggleMode(){ isSignup=!isSignup; updateAuthUI(); }
+
+function doLogin(){
+  const email = document.getElementById('login-email').value.trim();
+  const pw = document.getElementById('login-pw').value;
+  if(!email||!pw){ showToast('이메일과 비밀번호를 입력하세요','info'); return; }
+  const users = getUsers();
+  if(isSignup){
+    if(users[email]){ showToast('이미 가입된 이메일','info'); return; }
+    users[email]={pw,name:email.split('@')[0]};
+    saveUsers(users);
+    isSignup=false; updateAuthUI();
+    showToast('회원가입 완료! 로그인해주세요','success');
+    return;
+  }
+  if(!users[email]){ users[email]={pw,name:email.split('@')[0]}; saveUsers(users); }
+  if(users[email].pw !== pw){ showToast('비밀번호가 틀렸습니다','info'); return; }
+  currentUser={email,name:users[email].name};
+  localStorage.setItem('pdx_session', JSON.stringify(currentUser));
+  bootApp();
 }
 
-// ═══════════════════════════════════════════════
-// TABS
-// ═══════════════════════════════════════════════
-function switchTab(t) {
-  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
-  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-  document.getElementById('panel-' + t).classList.add('active');
-  document.getElementById('tab-' + t).classList.add('active');
-  if (t === 'coll') renderColl();
+function doLogout(){
+  currentUser=null;
+  localStorage.removeItem('pdx_session');
+  document.getElementById('app').style.display='none';
+  document.getElementById('login-screen').style.display='flex';
 }
 
-// ═══════════════════════════════════════════════
-// LANGUAGE
-// ═══════════════════════════════════════════════
-function setLang(lang, context) {
-  if (context === 'explore') {
-    exploreLang = lang;
-    document.querySelectorAll('[id^="elang-"]').forEach(c => c.classList.remove('active'));
-    document.getElementById('elang-' + lang).classList.add('active');
-    // Clear current set selection
-    activeSetChip = null; activeSetId = null;
-    document.getElementById('cards-section').innerHTML = `<div class="empty" style="padding:36px 18px"><div class="empty-icon">👆</div><h3>세트를 선택하세요</h3><p>위 시리즈 목록에서 세트를 클릭하면<br>카드 목록이 여기에 표시됩니다</p></div>`;
-    loadSeries(lang);
+function bootApp(){
+  document.getElementById('login-screen').style.display='none';
+  document.getElementById('app').style.display='block';
+  document.getElementById('s-name').textContent = currentUser.name;
+  document.getElementById('s-email').textContent = currentUser.email;
+  document.getElementById('s-avatar').textContent = currentUser.name[0].toUpperCase();
+  const savedKey = localStorage.getItem('pdx_apikey_'+currentUser.email)||'';
+  document.getElementById('api-key-input').value = savedKey;
+  APIKEY = savedKey;
+  showPage('dashboard');
+  setUILang(uiLang);
+}
+
+function saveApiKey(){
+  APIKEY = document.getElementById('api-key-input').value.trim();
+  localStorage.setItem('pdx_apikey_'+currentUser.email, APIKEY);
+  document.getElementById('api-banner').style.background = '#4ade8011';
+  showToast('API 키 저장됨 ✓','success');
+  if(allSets.length===0) loadAllSets();
+}
+
+// ─── STATE ───────────────────────────────────────────────────────────────────
+let APIKEY = '';
+let allSets = [];
+let currentSet = null;
+let currentCards = [];
+let langFilter = 'ALL';
+let ownedFilter = 'ALL';
+let rarityFilter = 'ALL';
+
+// ─── NAVIGATION ──────────────────────────────────────────────────────────────
+function showPage(page){
+  ['dashboard','browse','cardlist','my-collection'].forEach(p=>{
+    document.getElementById('page-'+p).style.display = p===page?'block':'none';
+  });
+  ['dashboard','browse','collection'].forEach(n=>{
+    document.getElementById('nav-'+n)?.classList.remove('active');
+  });
+  const navMap={dashboard:'nav-dashboard',browse:'nav-browse','my-collection':'nav-collection'};
+  if(navMap[page]) document.getElementById(navMap[page])?.classList.add('active');
+  const titleMap={dashboard:'nav_dashboard',browse:'nav_browse','my-collection':'nav_collection',cardlist:'nav_browse'};
+  document.getElementById('topbar-title').textContent = t(titleMap[page]||'nav_dashboard');
+  if(page==='dashboard') renderDashboard();
+  if(page==='browse'){ if(allSets.length===0) loadAllSets(); else renderSetGrid(); }
+  if(page==='my-collection') renderMyCollection();
+}
+
+function backToBrowse(){ currentSet=null; showPage('browse'); }
+
+// ─── API (pokemontcg.io) ─────────────────────────────────────────────────────
+const API_BASE = 'https://api.pokemontcg.io/v2';
+async function apiGet(path){
+  const headers = APIKEY ? {'X-Api-Key': APIKEY} : {};
+  try{
+    const r = await fetch(API_BASE+path, {headers});
+    if(!r.ok) return null;
+    return await r.json();
+  }catch{ return null; }
+}
+
+// ─── SETS ────────────────────────────────────────────────────────────────────
+// pokemontcg.io doesn't have language filter in sets API — we infer language from set ID/name
+// Language codes used by pokemontcg.io are in set IDs:
+// English sets: sv1, sv2, swsh1...
+// Japanese: Not in main API — pokemontcg.io is primarily English
+// We'll detect language from series name patterns and ptcgoCode
+
+const KNOWN_SERIES_ORDER = [
+  'Scarlet & Violet','Sword & Shield','Sun & Moon','XY','Black & White',
+  'HeartGold & SoulSilver','Platinum','Diamond & Pearl','EX','e-Card',
+  'Neo','Gym','Base','Other'
+];
+
+async function loadAllSets(){
+  document.getElementById('expansion-grid-wrap').innerHTML = `<div class="loading-state"><div class="spinner"></div><span>${t('loading')}</span></div>`;
+  const data = await apiGet('/sets?orderBy=-releaseDate&pageSize=250');
+  if(data && data.data && data.data.length > 0){
+    allSets = data.data;
   } else {
-    searchLang = lang;
-    document.querySelectorAll('[id^="slang-"]').forEach(c => c.classList.remove('active'));
-    document.getElementById('slang-' + lang).classList.add('active');
-    const ph = {ko:'한국어 카드 이름...',ja:'일본어 카드 이름...',en:'영어 카드 이름...'};
-    document.getElementById('search-input').placeholder = ph[lang];
+    allSets = getDemoSets();
+    showToast('API 연결 실패 — 데모 데이터 표시 중','info');
   }
+  renderSetGrid();
 }
 
-// ═══════════════════════════════════════════════
-// API HELPERS
-// ═══════════════════════════════════════════════
-async function apiFetch(url) {
-  const r = await fetch(url);
-  if (!r.ok) throw new Error(`HTTP ${r.status}: ${url}`);
-  return r.json();
+// Infer language from set properties (pokemontcg.io is mostly English)
+function inferSetLanguage(set){
+  const name = (set.name||'').toLowerCase();
+  const id = (set.id||'').toLowerCase();
+  // pokemontcg.io has some non-English sets
+  if(id.includes('_ko') || name.includes('korean')) return 'KO';
+  if(id.includes('_jp') || id.includes('_ja') || name.includes('japanese') || name.includes('japan')) return 'JA';
+  if(id.includes('_zhtw') || name.includes('traditional chinese')) return 'ZH-HANT';
+  if(id.includes('_zhcn') || name.includes('simplified chinese')) return 'ZH-HANS';
+  if(id.includes('_de') || name.includes('german')) return 'DE';
+  if(id.includes('_fr') || name.includes('french')) return 'FR';
+  if(id.includes('_it') || name.includes('italian')) return 'IT';
+  if(id.includes('_pt') || name.includes('portuguese')) return 'PT';
+  return 'EN'; // default
 }
 
-function getPrices(card) {
-  const out = {};
-  const tcg = card.tcgplayer?.prices;
-  if (tcg) {
-    for (const t of ['normal','holofoil','reverseHolofoil','1stEditionNormal','1stEditionHolofoil','unlimitedHolofoil']) {
-      if (tcg[t]?.market) {
-        out.market = tcg[t].market; out.low = tcg[t].low; out.high = tcg[t].high;
-        out.type = t; out.src = 'TCGPlayer'; out.cur = 'USD'; break;
-      }
-    }
-  }
-  const cm = card.cardmarket?.prices;
-  if (cm?.averageSellPrice) {
-    out.cmAvg = cm.averageSellPrice; out.cmLow = cm.lowPrice;
-    if (!out.market) { out.market = cm.averageSellPrice; out.cur = 'EUR'; out.src = 'Cardmarket'; }
-  }
-  return Object.keys(out).length ? out : null;
+function filterByLang(lang){
+  langFilter = lang;
+  document.querySelectorAll('#lang-filter-bar .lang-tag').forEach(el=>{
+    el.classList.toggle('active', el.dataset.lang === lang);
+  });
+  renderSetGrid();
 }
 
-// ═══════════════════════════════════════════════
-// SERIES LOADING (TCGdex for ko/ja, PTCG for en)
-// ═══════════════════════════════════════════════
-async function loadSeries(lang) {
-  // Use cache if available
-  if (seriesCache[lang]) { renderSeriesAccordion(seriesCache[lang]); return; }
+function renderSetGrid(){
+  let sets = allSets;
+  const search = document.getElementById('search-input').value.toLowerCase();
 
-  document.getElementById('series-body').innerHTML =
-    '<div class="series-loading"><div class="spinner"></div><span>시리즈 불러오는 중...</span></div>';
-  document.getElementById('series-total-label').textContent = '';
-
-  try {
-    let groups;
-    if (lang === 'en') {
-      groups = await loadPTCGSeries();
-    } else {
-      groups = await loadTCGdexSeries(lang);
-    }
-    seriesCache[lang] = groups;
-    renderSeriesAccordion(groups);
-  } catch (e) {
-    document.getElementById('series-body').innerHTML =
-      `<div class="series-error">⚠️ 시리즈를 불러올 수 없습니다<br><small>${e.message}</small></div>`;
+  if(langFilter !== 'ALL'){
+    sets = sets.filter(s => inferSetLanguage(s) === langFilter);
   }
-}
+  if(search && document.getElementById('page-browse').style.display !== 'none'){
+    sets = sets.filter(s => s.name.toLowerCase().includes(search) || (s.series||'').toLowerCase().includes(search));
+  }
 
-async function loadTCGdexSeries(lang) {
-  // GET /v2/{lang}/sets → group by serie
-  const sets = await apiFetch(`https://api.tcgdex.net/v2/${lang}/sets`);
-  if (!Array.isArray(sets)) throw new Error('Invalid response');
+  const userData = getUserData(currentUser.email);
+  const favs = userData.favorites || [];
+  const coll = userData.collection || {};
 
-  // Group by serie id
-  const map = new Map();
+  // Group by series
+  const bySeries = {};
   sets.forEach(s => {
-    const sid   = s.serie?.id   || 'other';
-    const sname = s.serie?.name || '기타';
-    if (!map.has(sid)) map.set(sid, { id: sid, name: sname, sets: [], maxDate: '' });
-    const grp = map.get(sid);
-    grp.sets.push({ id: s.id, name: s.name, count: s.cardCount?.official || s.cardCount?.total || '?' });
-    if (s.releaseDate && s.releaseDate > grp.maxDate) grp.maxDate = s.releaseDate;
+    const series = s.series || 'Other';
+    if(!bySeries[series]) bySeries[series] = [];
+    bySeries[series].push(s);
   });
 
-  // Sort: newest series first, sets within series by release date (oldest→newest)
-  const groups = [...map.values()].sort((a, b) => (b.maxDate||'').localeCompare(a.maxDate||''));
-  groups.forEach(g => {
-    const matching = sets.filter(s => (s.serie?.id||'other') === g.id);
-    matching.sort((a,b) => (a.releaseDate||'').localeCompare(b.releaseDate||''));
-    g.sets = matching.map(s => ({ id: s.id, name: s.name, count: s.cardCount?.official || s.cardCount?.total || '?' }));
-  });
-  return groups;
-}
-
-async function loadPTCGSeries() {
-  // pokemontcg.io sets
-  const data = await apiFetch('https://api.pokemontcg.io/v2/sets?orderBy=-releaseDate&pageSize=500');
-  const sets  = data.data || [];
-
-  const map = new Map();
-  sets.forEach(s => {
-    const sname = s.series || '기타';
-    if (!map.has(sname)) map.set(sname, { id: sname, name: sname, sets: [], maxDate: '' });
-    const grp = map.get(sname);
-    grp.sets.push({ id: s.id, name: s.name, count: s.total || '?' });
-    if (s.releaseDate && s.releaseDate > grp.maxDate) grp.maxDate = s.releaseDate;
+  // Sort series
+  const sortedSeries = Object.keys(bySeries).sort((a,b)=>{
+    const ai = KNOWN_SERIES_ORDER.indexOf(a);
+    const bi = KNOWN_SERIES_ORDER.indexOf(b);
+    if(ai===-1 && bi===-1) return a.localeCompare(b);
+    if(ai===-1) return 1;
+    if(bi===-1) return -1;
+    return ai - bi;
   });
 
-  const groups = [...map.values()].sort((a, b) => (b.maxDate||'').localeCompare(a.maxDate||''));
-  groups.forEach(g => {
-    // Within each series, order oldest→newest
-    g.sets.sort((a, b) => {
-      const sa = sets.find(x => x.id === a.id);
-      const sb = sets.find(x => x.id === b.id);
-      return ((sa?.releaseDate||'') < (sb?.releaseDate||'') ? -1 : 1);
-    });
-  });
-  return groups;
-}
-
-// ═══════════════════════════════════════════════
-// RENDER SERIES ACCORDION
-// ═══════════════════════════════════════════════
-function renderSeriesAccordion(groups) {
-  const totalSets = groups.reduce((s, g) => s + g.sets.length, 0);
-  document.getElementById('series-total-label').textContent = `${groups.length}개 시리즈 · ${totalSets}개 세트`;
+  if(sortedSeries.length === 0){
+    document.getElementById('expansion-grid-wrap').innerHTML = `<div class="empty-state"><div class="empty-icon">📭</div><div class="empty-title">해당 언어 팩 없음</div><div class="empty-sub">pokemontcg.io는 주로 영어판을 제공합니다</div></div>`;
+    return;
+  }
 
   let html = '';
-  groups.forEach((g, gi) => {
-    const open = gi === 0; // first series open by default
-    html += `<div class="series-group">
-      <div class="series-group-hd" onclick="toggleSeries('${esc(g.id)}')">
-        <span class="series-arrow${open?' open':''}" id="arr-${esc(g.id)}">▶</span>
-        <span class="series-gname">${esc(g.name)}</span>
-        <span class="series-gcnt">${g.sets.length}세트</span>
+  sortedSeries.forEach(series => {
+    const items = bySeries[series];
+    html += `<div style="margin-bottom:8px">
+      <div class="section-header" style="margin-top:24px;margin-bottom:12px">
+        <div class="section-title" style="font-size:15px">${series}</div>
+        <div class="section-subtitle">${items.length}개 세트</div>
       </div>
-      <div class="series-sets${open?'':' collapsed'}" id="sets-${esc(g.id)}">
-        ${g.sets.map(s => `<button class="set-chip" id="chip-${esc(s.id)}" onclick="selectSet('${esc(s.id)}','${esc(s.name)}',this)">${esc(s.name)}</button>`).join('')}
-      </div>
-    </div>`;
-  });
-  document.getElementById('series-body').innerHTML = html;
-}
+      <div class="expansion-grid">`;
 
-function toggleSeries(id) {
-  const sets = document.getElementById('sets-' + id);
-  const arr  = document.getElementById('arr-'  + id);
-  if (!sets) return;
-  sets.classList.toggle('collapsed');
-  arr.classList.toggle('open');
-}
+    items.forEach(set => {
+      const ownedCount = Object.keys(coll).filter(k=>k.startsWith(set.id+'_')).length;
+      const pct = set.total ? Math.round(ownedCount/set.total*100) : 0;
+      const lang = inferSetLanguage(set);
+      const langClass = {EN:'lang-en',JA:'lang-ja',KO:'lang-ko','ZH-HANT':'lang-zh','ZH-HANS':'lang-zh'}[lang]||'';
+      const langLabel = {EN:'ENG',JA:'JPN',KO:'KOR','ZH-HANT':'CHT','ZH-HANS':'CHS',DE:'DEU',FR:'FRA',IT:'ITA',PT:'POR'}[lang]||lang;
+      const isFav = favs.includes(set.id);
 
-// ═══════════════════════════════════════════════
-// LOAD SET CARDS
-// ═══════════════════════════════════════════════
-async function selectSet(setId, setName, chipEl) {
-  // Toggle active chip
-  if (activeSetChip) activeSetChip.classList.remove('active');
-  chipEl.classList.add('active');
-  activeSetChip = chipEl;
-  activeSetId = setId;
-
-  const sect = document.getElementById('cards-section');
-  sect.innerHTML = '<div class="loading"><div class="spinner"></div><div>카드 불러오는 중...</div></div>';
-  sect.scrollIntoView({ behavior: 'smooth', block: 'start' });
-
-  const cacheKey = `${exploreLang}:${setId}`;
-  if (setCardCache[cacheKey]) {
-    renderSetCards(setCardCache[cacheKey], setName, sect);
-    return;
-  }
-
-  try {
-    let cards;
-    if (exploreLang === 'en') {
-      cards = await loadPTCGSetCards(setId);
-    } else {
-      cards = await loadTCGdexSetCards(exploreLang, setId);
-    }
-    setCardCache[cacheKey] = cards;
-    renderSetCards(cards, setName, sect);
-  } catch (e) {
-    sect.innerHTML = `<div class="empty"><div class="empty-icon">⚠️</div><h3>불러오기 실패</h3><p>${e.message}</p></div>`;
-  }
-}
-
-async function loadTCGdexSetCards(lang, setId) {
-  const data = await apiFetch(`https://api.tcgdex.net/v2/${lang}/sets/${setId}`);
-  const raw  = data.cards || [];
-  return raw.map(c => ({
-    id:     `td_${lang}_${c.id}`,
-    apiId:  c.id,
-    name:   c.name,
-    number: c.localId || '',
-    image:  c.image ? `${c.image}/high.webp` : null,
-    imageLow: c.image ? `${c.image}/low.webp` : null,
-    set:    data.name || '',
-    setId:  setId,
-    lang:   lang,
-    src:    'tcgdex',
-    prices: null,
-  }));
-}
-
-async function loadPTCGSetCards(setId) {
-  // May need multiple pages for large sets
-  let page = 1;
-  const all = [];
-  while (true) {
-    const data = await apiFetch(
-      `https://api.pokemontcg.io/v2/cards?q=set.id:${setId}&pageSize=250&orderBy=number&page=${page}`
-    );
-    const cards = data.data || [];
-    all.push(...cards);
-    if (all.length >= (data.totalCount || all.length) || cards.length < 250) break;
-    page++;
-  }
-  return all.map(c => ({
-    id:     `ptcg_${c.id}`,
-    apiId:  c.id,
-    name:   c.name,
-    number: c.number || '',
-    image:  c.images?.large || c.images?.small || null,
-    set:    c.set?.name || '',
-    setId:  c.set?.id   || '',
-    lang:   'en',
-    src:    'ptcg',
-    prices: getPrices(c),
-  }));
-}
-
-function renderSetCards(cards, setName, sect) {
-  if (!cards.length) {
-    sect.innerHTML = '<div class="empty"><div class="empty-icon">🃏</div><h3>카드가 없습니다</h3><p>이 세트에 카드 정보가 없습니다</p></div>';
-    return;
-  }
-  const lbl = {ko:'한국',ja:'일본',en:'영문'}[exploreLang] || exploreLang;
-  let html = `<div class="set-header">
-    <div>
-      <div class="set-header-name">${esc(setName)}</div>
-      <div class="set-header-cnt">${cards.length}장 · ${lbl}판</div>
-    </div>
-    <button class="btn btn-gray btn-sm set-header-close" onclick="clearSetView()">✕ 닫기</button>
-  </div><div class="grid">`;
-
-  cards.forEach((card, i) => {
-    const owned = collection.find(c => c.id === card.id);
-    const priceStr = card.prices?.market
-      ? `${card.prices.cur==='USD'?'$':'€'}${card.prices.market.toFixed(2)}`
-      : '';
-    html += `<div class="card-item" onclick="openAdd(${i},'explore')">
-      <div class="card-img-wrap">
-        ${card.image
-          ? `<img class="card-img" src="${card.image}" alt="${esc(card.name)}" loading="lazy" onerror="this.parentNode.innerHTML=noImg()">`
-          : noImg()}
-        ${owned ? `<div class="qty-badge">${owned.quantity}</div>` : ''}
-      </div>
-      <div class="card-info">
-        <div class="card-name">${esc(card.name)}</div>
-        ${card.number ? `<div class="card-number">No. ${esc(card.number)}</div>` : ''}
-        ${priceStr ? `<div class="card-price">${priceStr}</div>` : ''}
-      </div>
-    </div>`;
-  });
-  html += '</div>';
-  sect.innerHTML = html;
-
-  // Store cards for openAdd reference
-  window._setCards = cards;
-}
-
-function clearSetView() {
-  if (activeSetChip) activeSetChip.classList.remove('active');
-  activeSetChip = null; activeSetId = null;
-  document.getElementById('cards-section').innerHTML = `<div class="empty" style="padding:36px 18px"><div class="empty-icon">👆</div><h3>세트를 선택하세요</h3><p>위 시리즈 목록에서 세트를 클릭하면<br>카드 목록이 여기에 표시됩니다</p></div>`;
-}
-
-// ═══════════════════════════════════════════════
-// SEARCH
-// ═══════════════════════════════════════════════
-async function doSearch() {
-  const q = document.getElementById('search-input').value.trim();
-  if (!q) { toast('검색어를 입력해주세요', 'err'); return; }
-  const cont = document.getElementById('search-content');
-  cont.innerHTML = '<div class="loading"><div class="spinner"></div><div>검색 중...</div></div>';
-  try {
-    if (searchLang === 'en') {
-      const data = await apiFetch(`https://api.pokemontcg.io/v2/cards?q=name:*${encodeURIComponent(q)}*&pageSize=36&orderBy=name`);
-      searchResults = (data.data || []).map(c => ({
-        id: `ptcg_${c.id}`, apiId: c.id, name: c.name, number: c.number||'',
-        image: c.images?.large || c.images?.small || null,
-        set: c.set?.name||'', setId: c.set?.id||'',
-        lang: 'en', src: 'ptcg', prices: getPrices(c),
-      }));
-    } else {
-      const data = await apiFetch(`https://api.tcgdex.net/v2/${searchLang}/cards?name=${encodeURIComponent(q)}`);
-      const arr = Array.isArray(data) ? data : [];
-      const ql = q.toLowerCase();
-      searchResults = arr
-        .filter(c => c.name && c.name.toLowerCase().includes(ql))
-        .slice(0, 48)
-        .map(c => ({
-          id: `td_${searchLang}_${c.id}`, apiId: c.id, name: c.name, number: c.localId||'',
-          image: c.image ? c.image+'/high.webp' : null,
-          set: c.set?.name||'', setId: c.set?.id||'',
-          lang: searchLang, src: 'tcgdex', prices: null,
-        }));
-    }
-    renderSearchResults(cont);
-  } catch (e) {
-    cont.innerHTML = `<div class="empty"><div class="empty-icon">⚠️</div><h3>검색 오류</h3><p>${e.message}</p></div>`;
-  }
-}
-
-function renderSearchResults(cont) {
-  if (!searchResults.length) {
-    cont.innerHTML = '<div class="empty"><div class="empty-icon">🔎</div><h3>검색 결과 없음</h3><p>다른 키워드로 검색해보세요</p></div>';
-    return;
-  }
-  let html = `<div style="padding:11px 18px 0;font-size:13px;color:var(--g400);font-weight:500">${searchResults.length}개 카드</div><div class="grid">`;
-  searchResults.forEach((card, i) => {
-    const owned = collection.find(c => c.id === card.id);
-    const lbl = {ko:'한국',ja:'일본',en:'영문'}[card.lang]||card.lang;
-    const prStr = card.prices?.market ? `${card.prices.cur==='USD'?'$':'€'}${card.prices.market.toFixed(2)}` : '';
-    html += `<div class="card-item" onclick="openAdd(${i},'search')">
-      <div class="card-img-wrap">
-        ${card.image ? `<img class="card-img" src="${card.image}" alt="${esc(card.name)}" loading="lazy" onerror="this.parentNode.innerHTML=noImg()">` : noImg()}
-        <div class="lang-badge">${lbl}</div>
-        ${owned ? `<div class="qty-badge">${owned.quantity}</div>` : ''}
-      </div>
-      <div class="card-info">
-        <div class="card-name">${esc(card.name)}</div>
-        <div class="card-number">${esc(card.set||'')}</div>
-        ${prStr ? `<div class="card-price">${prStr}</div>` : ''}
-      </div>
-    </div>`;
-  });
-  html += '</div>';
-  cont.innerHTML = html;
-}
-
-// ═══════════════════════════════════════════════
-// ADD MODAL
-// ═══════════════════════════════════════════════
-function openAdd(idx, context) {
-  const card = context === 'explore' ? window._setCards[idx] : searchResults[idx];
-  if (!card) return;
-  pendCard = card; pendImg = null;
-
-  document.getElementById('add-qty').value = 1;
-  document.getElementById('add-cond').value = 'near-mint';
-  document.getElementById('add-note').value = '';
-  document.getElementById('upload-prev').classList.add('hidden');
-  document.getElementById('upload-ph').classList.remove('hidden');
-  document.getElementById('upload-clear').classList.add('hidden');
-  document.getElementById('upload-area').classList.remove('has-img');
-  document.getElementById('img-file').value = '';
-
-  const owned = collection.find(c => c.id === card.id);
-  const lbl   = {ko:'한국판',ja:'일본판',en:'영문판'}[card.lang]||card.lang;
-  const prHtml = card.prices?.market
-    ? `<div class="price-tag">💰 ${card.prices.cur==='USD'?'$':'€'}${card.prices.market.toFixed(2)} <span style="font-weight:400;opacity:.7">${card.prices.src||''}</span></div>${card.prices.low&&card.prices.high?`<div class="text-muted" style="margin-top:2px">$${card.prices.low.toFixed(2)} ~ $${card.prices.high.toFixed(2)}</div>`:''}`
-    : '<div class="text-muted">시세 정보 없음</div>';
-
-  document.getElementById('add-preview').innerHTML = `
-    <img class="m-card-img" src="${card.image||''}" alt="${esc(card.name)}" onerror="this.style.background='var(--g100)';this.src=''">
-    <div class="m-card-info">
-      <h3>${esc(card.name)}</h3>
-      <div class="m-set">${esc(card.set||'세트 미상')} ${card.number?'· No.'+esc(card.number):''}</div>
-      <div class="chips">
-        <span class="chip chip-blue">${lbl}</span>
-        ${owned ? `<span class="chip chip-green">보유 ${owned.quantity}장</span>` : ''}
-      </div>
-      ${prHtml}
-    </div>`;
-
-  document.getElementById('add-modal').classList.remove('hidden');
-}
-
-function closeAdd() { document.getElementById('add-modal').classList.add('hidden'); pendCard = null; pendImg = null; }
-
-function adjQty(d) {
-  const el = document.getElementById('add-qty');
-  el.value = Math.max(1, Math.min(99, (parseInt(el.value)||1) + d));
-}
-
-async function handleImg(input) {
-  const file = input.files[0]; if (!file) return;
-  try {
-    pendImg = await resizeImg(file, 420);
-    const prev = document.getElementById('upload-prev');
-    prev.src = pendImg; prev.classList.remove('hidden');
-    document.getElementById('upload-ph').classList.add('hidden');
-    document.getElementById('upload-clear').classList.remove('hidden');
-    document.getElementById('upload-area').classList.add('has-img');
-  } catch { toast('이미지 처리 오류', 'err'); }
-}
-
-function clearImg(e) {
-  e.stopPropagation(); pendImg = null;
-  document.getElementById('upload-prev').classList.add('hidden');
-  document.getElementById('upload-ph').classList.remove('hidden');
-  document.getElementById('upload-clear').classList.add('hidden');
-  document.getElementById('upload-area').classList.remove('has-img');
-  document.getElementById('img-file').value = '';
-}
-
-function resizeImg(file, max) {
-  return new Promise((res, rej) => {
-    const fr = new FileReader();
-    fr.onload = e => {
-      const img = new Image();
-      img.onload = () => {
-        const ratio = Math.min(max/img.width, max/img.height, 1);
-        const c = document.createElement('canvas');
-        c.width = Math.round(img.width*ratio); c.height = Math.round(img.height*ratio);
-        c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
-        res(c.toDataURL('image/jpeg', 0.82));
-      };
-      img.onerror = rej; img.src = e.target.result;
-    };
-    fr.onerror = rej; fr.readAsDataURL(file);
-  });
-}
-
-function confirmAdd() {
-  if (!pendCard) return;
-  const qty  = Math.max(1, parseInt(document.getElementById('add-qty').value)||1);
-  const cond = document.getElementById('add-cond').value;
-  const note = document.getElementById('add-note').value.trim();
-  const existing = collection.find(c => c.id === pendCard.id);
-
-  if (existing) {
-    existing.quantity = (existing.quantity||0) + qty;
-    if (cond) existing.cond = cond;
-    if (note) existing.note = note;
-    if (pendImg) existing.customImg = pendImg;
-    toast(`${pendCard.name} 수량 업데이트 (${existing.quantity}장)`, 'ok');
-  } else {
-    collection.unshift({ ...pendCard, quantity: qty, cond, note, customImg: pendImg, addedAt: Date.now() });
-    toast(`${pendCard.name}을(를) 추가했습니다`, 'ok');
-  }
-  saveColl(); updateBadge(); closeAdd();
-  // Refresh qty badges in current view
-  refreshQtyBadges();
-}
-
-function refreshQtyBadges() {
-  // Refresh explore set view
-  document.querySelectorAll('#cards-section .card-item').forEach((el, i) => {
-    const cards = window._setCards || [];
-    const card = cards[i]; if (!card) return;
-    const owned = collection.find(c => c.id === card.id);
-    let badge = el.querySelector('.qty-badge');
-    if (owned) {
-      if (!badge) { badge = document.createElement('div'); badge.className = 'qty-badge'; el.querySelector('.card-img-wrap').appendChild(badge); }
-      badge.textContent = owned.quantity;
-    } else if (badge) badge.remove();
-  });
-  // Refresh search results view
-  document.querySelectorAll('#search-content .card-item').forEach((el, i) => {
-    const card = searchResults[i]; if (!card) return;
-    const owned = collection.find(c => c.id === card.id);
-    let badge = el.querySelector('.qty-badge');
-    if (owned) {
-      if (!badge) { badge = document.createElement('div'); badge.className = 'qty-badge'; el.querySelector('.card-img-wrap').appendChild(badge); }
-      badge.textContent = owned.quantity;
-    } else if (badge) badge.remove();
-  });
-}
-
-// ═══════════════════════════════════════════════
-// COLLECTION RENDER
-// ═══════════════════════════════════════════════
-function updateBadge() {
-  const total = collection.reduce((s,c) => s+(c.quantity||1), 0);
-  document.getElementById('coll-badge').textContent = total;
-}
-
-function renderColl() {
-  updateStats();
-  const cont = document.getElementById('coll-content');
-  if (!collection.length) {
-    cont.innerHTML = '<div class="empty"><div class="empty-icon">📦</div><h3>컬렉션이 비어있어요</h3><p>시리즈를 탐색하거나 검색해서 카드를 추가하세요!</p></div>';
-    return;
-  }
-  const sv = document.querySelector('.sort-sel').value;
-  let cards = [...collection];
-  const sorters = {
-    'date-d': (a,b)=>(b.addedAt||0)-(a.addedAt||0),
-    'date-a': (a,b)=>(a.addedAt||0)-(b.addedAt||0),
-    'name-a': (a,b)=>a.name.localeCompare(b.name),
-    'name-d': (a,b)=>b.name.localeCompare(a.name),
-    'price-d':(a,b)=>(b.prices?.market||0)-(a.prices?.market||0),
-    'qty-d':  (a,b)=>(b.quantity||1)-(a.quantity||1),
-  };
-  if (sorters[sv]) cards.sort(sorters[sv]);
-
-  const lbl = c => ({ko:'한국',ja:'일본',en:'영문'}[c.lang]||c.lang);
-  let html = '<div class="grid">';
-  cards.forEach(card => {
-    const img = card.customImg || card.image || null;
-    const pr  = card.prices?.market ? `${card.prices.cur==='USD'?'$':'€'}${card.prices.market.toFixed(2)}` : '시세 조회 필요';
-    const prc = card.prices?.market ? 'var(--green)' : 'var(--g400)';
-    html += `<div class="card-item" onclick="openDetail('${esc2(card.id)}')">
-      <div class="card-img-wrap">
-        ${img ? `<img class="card-img" src="${img}" alt="${esc(card.name)}" loading="lazy" onerror="this.parentNode.innerHTML=noImg()">` : noImg()}
-        <div class="lang-badge">${lbl(card)}</div>
-        <div class="qty-badge">${card.quantity||1}</div>
-      </div>
-      <div class="card-info">
-        <div class="card-name">${esc(card.name)}</div>
-        <div class="card-number">${esc(card.set||'')}</div>
-        <div class="card-price" style="color:${prc}">${pr}</div>
-      </div>
-    </div>`;
-  });
-  html += '</div>';
-  cont.innerHTML = html;
-}
-
-function updateStats() {
-  const total = collection.reduce((s,c)=>s+(c.quantity||1),0);
-  const unique = collection.length;
-  let val = 0; let hasP = false;
-  collection.forEach(c => { if(c.prices?.market && c.prices.cur==='USD'){val+=c.prices.market*(c.quantity||1);hasP=true;} });
-  document.getElementById('st-total').textContent = total;
-  document.getElementById('st-unique').textContent = unique;
-  document.getElementById('st-val').textContent = hasP ? `$${val.toFixed(2)}` : '-';
-}
-
-// ═══════════════════════════════════════════════
-// DETAIL MODAL
-// ═══════════════════════════════════════════════
-function openDetail(id) {
-  const card = collection.find(c => c.id === id);
-  if (!card) return;
-  detailId = id;
-  const img = card.customImg || card.image || null;
-  const lbl = {ko:'한국판',ja:'일본판',en:'영문판'}[card.lang]||card.lang;
-  const condLbl = {mint:'완벽','near-mint':'거의 완벽',excellent:'우수',good:'좋음',poor:'나쁨'};
-  document.getElementById('detail-title').textContent = card.name;
-
-  let priceHtml;
-  if (card.prices) {
-    const sym = card.prices.cur==='USD'?'$':'€';
-    priceHtml = `<div class="sec-title">시세 (${card.prices.src||''})</div>
-      <div class="price-grid">
-        ${card.prices.market?`<div class="p-cell"><div class="p-cell-l">시세가</div><div class="p-cell-v">${sym}${card.prices.market.toFixed(2)}</div></div>`:''}
-        ${card.prices.low?`<div class="p-cell"><div class="p-cell-l">최저가</div><div class="p-cell-v">${sym}${card.prices.low.toFixed(2)}</div></div>`:''}
-        ${card.prices.high?`<div class="p-cell"><div class="p-cell-l">최고가</div><div class="p-cell-v">${sym}${card.prices.high.toFixed(2)}</div></div>`:''}
-        ${card.prices.cmAvg?`<div class="p-cell"><div class="p-cell-l">Cardmarket</div><div class="p-cell-v">€${card.prices.cmAvg.toFixed(2)}</div></div>`:''}
-      </div><div class="divider"></div>`;
-  } else {
-    priceHtml = `<div class="sec-title">시세</div>
-      <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
-        <span class="text-muted">시세 정보 없음</span>
-        <button class="btn btn-gray btn-sm" id="price-btn" onclick="lookupPrice()">🔍 시세 조회</button>
-      </div><div id="price-result"></div><div class="divider"></div>`;
-  }
-
-  document.getElementById('detail-body').innerHTML = `
-    ${img ? `<img class="detail-img" src="${img}" alt="${esc(card.name)}">` : ''}
-    <div class="chips" style="margin-bottom:13px">
-      <span class="chip chip-blue">${lbl}</span>
-      <span class="chip chip-gray">${esc(card.set||'세트 미상')}</span>
-      ${card.number ? `<span class="chip chip-gray">No. ${esc(card.number)}</span>` : ''}
-      ${card.cond ? `<span class="chip chip-yellow">${condLbl[card.cond]||card.cond}</span>` : ''}
-    </div>
-    <div class="sec-title">수량</div>
-    <div class="qty-ctrl" style="margin-bottom:13px">
-      <button class="qty-btn" onclick="adjDetailQty(-1)">−</button>
-      <input type="number" class="qty-val" id="detail-qty" value="${card.quantity||1}" min="1" max="99" onchange="setDetailQty(this.value)">
-      <button class="qty-btn" onclick="adjDetailQty(1)">+</button>
-    </div>
-    <div class="divider"></div>
-    ${priceHtml}
-    ${card.note ? `<div class="sec-title">메모</div><div class="note-box">${esc(card.note)}</div>` : ''}`;
-
-  document.getElementById('detail-foot').innerHTML = `
-    <button class="btn btn-gray btn-sm" onclick="changeDetailImg()">📷 이미지 변경</button>
-    <button class="btn btn-red" onclick="removeCard()">🗑 삭제</button>
-    <button class="btn btn-gray" onclick="closeDetail()">닫기</button>`;
-
-  document.getElementById('detail-modal').classList.remove('hidden');
-}
-
-function closeDetail() { document.getElementById('detail-modal').classList.add('hidden'); detailId = null; }
-
-function adjDetailQty(d) {
-  const card = collection.find(c => c.id === detailId); if (!card) return;
-  card.quantity = Math.max(1, Math.min(99, (card.quantity||1)+d));
-  document.getElementById('detail-qty').value = card.quantity;
-  saveColl(); updateBadge(); renderColl();
-}
-
-function setDetailQty(v) {
-  const card = collection.find(c => c.id === detailId); if (!card) return;
-  card.quantity = Math.max(1, Math.min(99, parseInt(v)||1));
-  saveColl(); updateBadge(); renderColl();
-}
-
-function removeCard() {
-  const card = collection.find(c => c.id === detailId); if (!card) return;
-  if (!confirm(`"${card.name}" 을(를) 삭제할까요?`)) return;
-  collection = collection.filter(c => c.id !== detailId);
-  saveColl(); updateBadge(); closeDetail(); renderColl();
-  toast(`${card.name}을(를) 삭제했습니다`, 'ok');
-}
-
-async function lookupPrice() {
-  const card = collection.find(c => c.id === detailId); if (!card) return;
-  const btn = document.getElementById('price-btn');
-  if (btn) { btn.textContent = '조회 중...'; btn.disabled = true; }
-  try {
-    let prices = null;
-    // Try direct ID lookup on pokemontcg.io
-    for (const id of [...new Set([card.apiId, (card.apiId||'').replace(/-0+(\d)/,'-$1')])]) {
-      try {
-        const r = await fetch(`https://api.pokemontcg.io/v2/cards/${id}`);
-        if (r.ok) { const d = await r.json(); prices = getPrices(d.data); if (prices) break; }
-      } catch {}
-    }
-    const resultEl = document.getElementById('price-result');
-    if (prices?.market) {
-      card.prices = prices; saveColl();
-      const sym = prices.cur==='USD'?'$':'€';
-      if (resultEl) resultEl.innerHTML = `
-        <div class="price-grid" style="margin-bottom:9px">
-          <div class="p-cell"><div class="p-cell-l">시세가</div><div class="p-cell-v">${sym}${prices.market.toFixed(2)}</div></div>
-          ${prices.low?`<div class="p-cell"><div class="p-cell-l">최저가</div><div class="p-cell-v">${sym}${prices.low.toFixed(2)}</div></div>`:''}
+      html += `<div class="expansion-card ${isFav?'favorited':''}" onclick="openSet('${set.id}')">
+        <div class="exp-starred" onclick="event.stopPropagation();toggleFav('${set.id}')">${isFav?'⭐':'☆'}</div>
+        <div class="exp-logo">
+          ${set.images?.logo
+            ? `<img src="${set.images.logo}" alt="${set.name}" onerror="this.style.display='none'">`
+            : `<div class="exp-placeholder">📦</div>`}
         </div>
-        <div class="text-muted" style="margin-bottom:10px">출처: ${prices.src||'pokemontcg.io'} · 영문판 기준 참고가</div>`;
-      if (btn) btn.remove();
-      renderColl();
-    } else {
-      if (resultEl) resultEl.innerHTML = '<div class="text-muted" style="margin-bottom:10px">시세 정보를 찾을 수 없습니다</div>';
-      if (btn) { btn.textContent = '🔍 시세 조회'; btn.disabled = false; }
-    }
-  } catch { if (btn) { btn.textContent = '🔍 시세 조회'; btn.disabled = false; } toast('시세 조회 실패', 'err'); }
+        <div class="exp-name">${set.name}</div>
+        <div class="exp-meta">
+          <span class="exp-badge ${langClass}">${langLabel}</span>
+          <span class="exp-badge">${set.printedTotal||set.total||'?'}종</span>
+          ${set.releaseDate ? `<span class="exp-badge">${set.releaseDate.substring(0,7)}</span>` : ''}
+        </div>
+        ${ownedCount > 0 ? `
+        <div class="exp-progress"><div class="exp-progress-bar" style="width:${pct}%"></div></div>
+        <div class="exp-progress-text">${ownedCount}/${set.total||'?'} (${pct}%)</div>` : ''}
+      </div>`;
+    });
+    html += '</div></div>';
+  });
+
+  document.getElementById('expansion-grid-wrap').innerHTML = html;
 }
 
-function changeDetailImg() {
-  const input = document.createElement('input'); input.type='file'; input.accept='image/*';
-  input.onchange = async () => {
-    const file = input.files[0]; if (!file) return;
-    try {
-      const b64 = await resizeImg(file, 420);
-      const card = collection.find(c => c.id === detailId);
-      if (card) { card.customImg = b64; saveColl(); closeDetail(); renderColl(); toast('이미지 업데이트됨', 'ok'); }
-    } catch { toast('이미지 처리 오류', 'err'); }
-  };
-  input.click();
+function toggleFav(setId){
+  const ud = getUserData(currentUser.email);
+  const favs = ud.favorites || [];
+  const idx = favs.indexOf(setId);
+  if(idx>=0){ favs.splice(idx,1); showToast(t('toast_fav_rm'),'info'); }
+  else { favs.push(setId); showToast(t('toast_fav_add'),'success'); }
+  ud.favorites = favs;
+  saveUserData(currentUser.email, ud);
+  renderSetGrid();
 }
 
-// ═══════════════════════════════════════════════
-// IMPORT / EXPORT
-// ═══════════════════════════════════════════════
-function exportColl() {
-  const blob = new Blob([JSON.stringify({version:3,date:new Date().toISOString(),collection},null,2)],{type:'application/json'});
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = `pokemon-collection-${new Date().toISOString().slice(0,10)}.json`;
-  a.click(); URL.revokeObjectURL(a.href);
-  toast('컬렉션을 내보냈습니다', 'ok');
+// ─── CARD LIST ────────────────────────────────────────────────────────────────
+async function openSet(setId){
+  currentSet = allSets.find(s=>s.id===setId) || {id:setId,name:setId};
+  showPage('cardlist');
+  ownedFilter = 'ALL';
+  rarityFilter = 'ALL';
+
+  const ud = getUserData(currentUser.email);
+  const coll = ud.collection || {};
+  const ownedCount = Object.keys(coll).filter(k=>k.startsWith(setId+'_')).length;
+
+  document.getElementById('exp-info-wrap').innerHTML = `
+    <div class="expansion-info-header">
+      ${currentSet.images?.logo ? `<img class="exp-info-logo" src="${currentSet.images.logo}" alt="${currentSet.name}" onerror="this.style.display='none'">` : ''}
+      <div class="exp-info-details">
+        <div class="exp-info-name">${currentSet.name}</div>
+        <div class="exp-info-series">${currentSet.series||''} ${currentSet.releaseDate?'· '+currentSet.releaseDate.substring(0,7):''}</div>
+      </div>
+      <div class="exp-stats">
+        <div class="stat-item"><div class="stat-num" id="owned-stat">${ownedCount}</div><div class="stat-label">${t('collected')}</div></div>
+        <div class="stat-item"><div class="stat-num">${currentSet.total||'?'}</div><div class="stat-label">${t('total_c')}</div></div>
+      </div>
+    </div>`;
+
+  document.getElementById('card-grid-wrap').innerHTML = `<div class="loading-state"><div class="spinner"></div><span>${t('loading')}</span></div>`;
+
+  // Load cards paginated
+  let page=1, all=[];
+  while(true){
+    const data = await apiGet(`/cards?q=set.id:${setId}&orderBy=number&page=${page}&pageSize=250`);
+    if(!data||!data.data||data.data.length===0) break;
+    all = all.concat(data.data);
+    if(all.length >= (data.totalCount||all.length)) break;
+    page++;
+    if(page>10) break;
+  }
+  currentCards = all.length > 0 ? all : getDemoCards(setId);
+
+  // Build rarity filter
+  const rarities = [...new Set(currentCards.map(c=>c.rarity||'Unknown').filter(Boolean))];
+  const sel = document.getElementById('rarity-filter');
+  sel.innerHTML = `<option value="ALL">${t('all_rarity')}</option>`;
+  rarities.forEach(r=>{ const o=document.createElement('option'); o.value=r; o.textContent=r; sel.appendChild(o); });
+
+  renderCardGrid();
 }
 
-function importColl(input) {
-  const file = input.files[0]; if (!file) return;
-  const fr = new FileReader();
-  fr.onload = e => {
-    try {
-      const data = JSON.parse(e.target.result);
-      const arr = data.collection || data;
-      if (!Array.isArray(arr)) { toast('올바른 형식이 아닙니다', 'err'); return; }
-      if (!confirm(`${arr.length}개 카드를 가져올까요? 기존 컬렉션에 병합됩니다.`)) return;
-      arr.forEach(card => {
-        const ex = collection.find(c => c.id === card.id);
-        if (ex) ex.quantity = (ex.quantity||1)+(card.quantity||1);
-        else collection.push(card);
-      });
-      saveColl(); updateBadge(); renderColl();
-      toast(`${arr.length}개 카드를 가져왔습니다`, 'ok');
-    } catch { toast('파일 읽기 오류', 'err'); }
-  };
-  fr.readAsText(file); input.value = '';
+function applyCardFilter(){
+  rarityFilter = document.getElementById('rarity-filter').value;
+  renderCardGrid();
 }
 
-// ═══════════════════════════════════════════════
-// UTILS
-// ═══════════════════════════════════════════════
-function noImg() {
-  return `<div class="no-img"><svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg><span>이미지 없음</span></div>`;
+function setOwnedFilter(f){
+  ownedFilter = f;
+  document.querySelectorAll('[data-owned]').forEach(el=>el.classList.toggle('active',el.dataset.owned===f));
+  renderCardGrid();
 }
 
-function esc(s) {
-  return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+function renderCardGrid(){
+  const ud = getUserData(currentUser.email);
+  const coll = ud.collection || {};
+  let cards = currentCards;
+
+  if(rarityFilter !== 'ALL') cards = cards.filter(c=>c.rarity===rarityFilter);
+  if(ownedFilter === 'OWNED') cards = cards.filter(c=>(coll[(currentSet?.id||'')+'_'+c.id]||0)>0);
+  if(ownedFilter === 'MISSING') cards = cards.filter(c=>!(coll[(currentSet?.id||'')+'_'+c.id]||0));
+
+  const search = document.getElementById('search-input').value.toLowerCase();
+  if(search) cards = cards.filter(c=>c.name.toLowerCase().includes(search)||(c.number||'').includes(search));
+
+  if(cards.length===0){
+    document.getElementById('card-grid-wrap').innerHTML=`<div class="empty-state"><div class="empty-icon">🃏</div><div class="empty-title">카드 없음</div></div>`;
+    return;
+  }
+
+  document.getElementById('card-grid-wrap').innerHTML =
+    `<div class="card-grid">${cards.map(c=>cardItemHTML(c,coll)).join('')}</div>`;
 }
 
-// For use in onclick attributes (simpler quoting)
-function esc2(s) {
-  return String(s||'').replace(/'/g,"\\'");
+function cardItemHTML(card, coll){
+  const key = (currentSet?.id||'')+'_'+card.id;
+  const count = coll[key]||0;
+  const owned = count>0;
+  const img = card.images?.small || '';
+  const price = getPrice(card);
+  const priceStr = price ? `$${price.toFixed(2)}` : '-';
+  const rc = rarityCode(card.rarity);
+  return `<div class="card-item ${owned?'owned':''} rarity-${rc}" onclick="openCard('${card.id}')">
+    <div class="rarity-bar"></div>
+    <div class="card-img-wrap">
+      ${img?`<img src="${img}" alt="${card.name}" loading="lazy">`:'<div class="card-img-placeholder">🃏</div>'}
+      ${owned?`<div class="card-owned-badge">✓</div>`:''}
+      ${count>1?`<div class="card-count-badge">×${count}</div>`:''}
+    </div>
+    <div class="card-info">
+      <div class="card-number">#${card.number||'?'}</div>
+      <div class="card-name">${card.name}</div>
+      <div class="card-price">${priceStr}</div>
+      <div class="card-rarity">${card.rarity||''}</div>
+    </div>
+    <div class="card-actions">
+      <button class="count-btn" onclick="event.stopPropagation();changeCount('${card.id}',-1)">−</button>
+      <div class="count-display">${count}</div>
+      <button class="count-btn" onclick="event.stopPropagation();changeCount('${card.id}',1)">+</button>
+    </div>
+  </div>`;
 }
 
-function toast(msg, type='') {
-  const wrap = document.getElementById('toast-wrap');
-  const el = document.createElement('div');
-  el.className = `toast${type==='ok'?' toast-ok':type==='err'?' toast-err':''}`;
-  el.textContent = msg; wrap.appendChild(el);
-  setTimeout(() => el.remove(), 3200);
+function getPrice(card){
+  const p = card.tcgplayer?.prices;
+  if(!p) return null;
+  return p.holofoil?.market || p.normal?.market || p.reverseHolofoil?.market || p['1stEditionHolofoil']?.market || null;
 }
 
-// ═══════════════════════════════════════════════
-// INIT
-// ═══════════════════════════════════════════════
-document.addEventListener('keydown', e => {
-  if (e.key === 'Escape') { closeAdd(); closeDetail(); }
+function rarityCode(r){
+  if(!r) return 'C';
+  const rl = r.toLowerCase();
+  if(rl.includes('hyper')||rl.includes('secret')) return 'HyperRare';
+  if(rl.includes('ultra')) return 'UR';
+  if(rl.includes('special art')) return 'SAR';
+  if(rl.includes('illustration')) return 'SIR';
+  if(rl.includes('double')) return 'RR';
+  if(rl.includes('rare holo')||rl==='rare') return 'R';
+  if(rl.includes('uncommon')) return 'U';
+  return 'C';
+}
+
+function changeCount(cardId, delta){
+  const ud = getUserData(currentUser.email);
+  const coll = ud.collection || {};
+  const key = (currentSet?.id||'')+'_'+cardId;
+  const nv = Math.max(0,(coll[key]||0)+delta);
+  if(nv===0) delete coll[key]; else coll[key]=nv;
+  ud.collection = coll;
+  saveUserData(currentUser.email, ud);
+  renderCardGrid();
+  // Update owned count in header
+  const oc = Object.keys(coll).filter(k=>k.startsWith((currentSet?.id||'')+'_')).length;
+  const stat = document.getElementById('owned-stat');
+  if(stat) stat.textContent = oc;
+}
+
+// ─── CARD MODAL ───────────────────────────────────────────────────────────────
+function openCard(cardId){
+  const card = currentCards.find(c=>c.id===cardId);
+  if(!card) return;
+  const ud = getUserData(currentUser.email);
+  const coll = ud.collection||{};
+  const key = (currentSet?.id||'')+'_'+card.id;
+  const count = coll[key]||0;
+  const img = card.images?.large || card.images?.small || '';
+  const rc = rarityCode(card.rarity);
+
+  document.getElementById('modal-hdr').innerHTML = `
+    <div class="modal-card-img">
+      ${img?`<img src="${img}" alt="${card.name}">`:'<div style="aspect-ratio:.717;background:var(--surface2);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:40px">🃏</div>'}
+    </div>
+    <div class="modal-card-details">
+      <div class="modal-card-number">#${card.number||'?'} · ${currentSet?.name||''}</div>
+      <div class="modal-card-name">${card.name}</div>
+      <div class="modal-badges">
+        <span class="badge">${card.rarity||'Common'}</span>
+        ${card.supertype?`<span class="badge">${card.supertype}</span>`:''}
+        ${(card.subtypes||[]).map(s=>`<span class="badge">${s}</span>`).join('')}
+        ${card.hp?`<span class="badge">HP ${card.hp}</span>`:''}
+        ${(card.types||[]).map(tp=>`<span class="badge">${tp}</span>`).join('')}
+      </div>
+      ${card.artist?`<div style="font-size:11px;color:var(--text3)">🎨 ${card.artist}</div>`:''}
+    </div>`;
+
+  // Prices
+  let priceHTML = '';
+  const tcp = card.tcgplayer;
+  const cm = card.cardmarket;
+
+  if(tcp?.prices && Object.keys(tcp.prices).length > 0){
+    priceHTML += `<div class="price-label">${t('price_usd')}</div><div class="price-grid">`;
+    Object.entries(tcp.prices).forEach(([variant, prices])=>{
+      if(!prices) return;
+      const varName = {normal:'일반',holofoil:'홀로',reverseHolofoil:'리버스홀로','1stEditionHolofoil':'1st홀로','1stEditionNormal':'1st일반'}[variant]||variant;
+      priceHTML += `<div class="price-cell">
+        <div class="price-condition">${varName}</div>
+        ${prices.market?`<div class="price-val market">$${prices.market.toFixed(2)}</div>`:''}
+        ${prices.low?`<div style="font-size:10px;color:var(--text3)">${t('low')} $${prices.low.toFixed(2)}</div>`:''}
+      </div>`;
+    });
+    priceHTML += `</div>`;
+    if(tcp.updatedAt) priceHTML += `<div style="font-size:10px;color:var(--text3);margin-top:6px">Updated: ${tcp.updatedAt}</div>`;
+  }
+
+  if(cm?.prices){
+    const cp = cm.prices;
+    priceHTML += `<div class="price-label" style="margin-top:14px">${t('price_eur')}</div><div class="price-grid">`;
+    if(cp.averageSellPrice) priceHTML += `<div class="price-cell"><div class="price-condition">${t('market')}</div><div class="price-val market">€${cp.averageSellPrice.toFixed(2)}</div></div>`;
+    if(cp.lowPrice) priceHTML += `<div class="price-cell"><div class="price-condition">${t('low')}</div><div class="price-val">€${cp.lowPrice.toFixed(2)}</div></div>`;
+    if(cp.trendPrice) priceHTML += `<div class="price-cell"><div class="price-condition">트렌드</div><div class="price-val">€${cp.trendPrice.toFixed(2)}</div></div>`;
+    if(cp.avg7) priceHTML += `<div class="price-cell"><div class="price-condition">7일 평균</div><div class="price-val">€${cp.avg7.toFixed(2)}</div></div>`;
+    priceHTML += `</div>`;
+  }
+
+  if(!priceHTML) priceHTML = `<div style="color:var(--text3);font-size:13px">${t('no_price')}</div>`;
+  document.getElementById('modal-price').innerHTML = priceHTML;
+
+  document.getElementById('modal-own').innerHTML = `
+    <div class="own-label">${t('own_qty')}</div>
+    <div class="own-controls">
+      <button class="own-btn" onclick="modalCount('${card.id}',-1)">−</button>
+      <div class="own-count" id="modal-count">${count}</div>
+      <button class="own-btn" onclick="modalCount('${card.id}',1)">+</button>
+    </div>`;
+
+  document.getElementById('card-modal').classList.add('open');
+  document.body.style.overflow='hidden';
+}
+
+function modalCount(cardId, delta){
+  const ud = getUserData(currentUser.email);
+  const coll = ud.collection||{};
+  const key = (currentSet?.id||'')+'_'+cardId;
+  const nv = Math.max(0,(coll[key]||0)+delta);
+  if(nv===0) delete coll[key]; else coll[key]=nv;
+  ud.collection=coll;
+  saveUserData(currentUser.email, ud);
+  document.getElementById('modal-count').textContent=nv;
+  renderCardGrid();
+  const oc = Object.keys(coll).filter(k=>k.startsWith((currentSet?.id||'')+'_')).length;
+  const stat = document.getElementById('owned-stat');
+  if(stat) stat.textContent=oc;
+}
+
+function closeModal(){
+  document.getElementById('card-modal').classList.remove('open');
+  document.body.style.overflow='';
+}
+
+// ─── DASHBOARD ────────────────────────────────────────────────────────────────
+function renderDashboard(){
+  const ud = getUserData(currentUser.email);
+  const coll = ud.collection||{};
+  const favs = ud.favorites||[];
+  const totalQty = Object.values(coll).reduce((s,v)=>s+v,0);
+  const uniqueCards = Object.keys(coll).length;
+
+  // Estimate value from loaded cards
+  let estVal = 0;
+  Object.entries(coll).forEach(([key,qty])=>{
+    const parts = key.split('_');
+    const cardId = parts.slice(1).join('_');
+    const card = currentCards.find(c=>c.id===cardId);
+    const p = card ? getPrice(card) : 0;
+    if(p) estVal += p*qty;
+  });
+
+  document.getElementById('dash-stats').innerHTML = `
+    <div class="stat-card"><div class="stat-card-icon">🃏</div><div class="stat-card-num">${totalQty}</div><div class="stat-card-label">${t('stat_owned')}</div></div>
+    <div class="stat-card"><div class="stat-card-icon">✨</div><div class="stat-card-num">${uniqueCards}</div><div class="stat-card-label">${t('stat_unique')}</div></div>
+    <div class="stat-card"><div class="stat-card-icon">📦</div><div class="stat-card-num">${favs.length}</div><div class="stat-card-label">${t('stat_packs')}</div></div>
+    <div class="stat-card"><div class="stat-card-icon">💰</div><div class="stat-card-num">$${estVal.toFixed(0)}</div><div class="stat-card-label">${t('stat_val')}</div></div>`;
+
+  if(favs.length===0){
+    document.getElementById('dash-packs').innerHTML=`<div class="empty-state"><div class="empty-icon">📦</div><div class="empty-title">${t('empty_packs')}</div><div class="empty-sub">${t('empty_packs_sub')}</div></div>`;
+    return;
+  }
+
+  document.getElementById('dash-packs').innerHTML = `<div class="my-packs-grid">${favs.map(sid=>{
+    const set = allSets.find(s=>s.id===sid);
+    if(!set) return '';
+    const oc = Object.keys(coll).filter(k=>k.startsWith(sid+'_')).length;
+    const pct = set.total ? Math.round(oc/set.total*100) : 0;
+    return `<div class="my-pack-card" onclick="openSet('${sid}')">
+      ${set.images?.logo?`<img class="my-pack-logo" src="${set.images.logo}" alt="${set.name}" onerror="this.style.display='none'">`:`<div class="my-pack-logo-placeholder">📦</div>`}
+      <div class="my-pack-info">
+        <div class="my-pack-name">${set.name}</div>
+        <div style="font-size:11px;color:var(--text2);margin-bottom:4px">${set.series||''}</div>
+        <div class="exp-progress"><div class="exp-progress-bar" style="width:${pct}%"></div></div>
+        <div class="exp-progress-text">${oc}/${set.total||'?'} (${pct}%)</div>
+      </div>
+    </div>`;
+  }).join('')}</div>`;
+}
+
+// ─── MY COLLECTION ────────────────────────────────────────────────────────────
+function renderMyCollection(){
+  const ud = getUserData(currentUser.email);
+  const coll = ud.collection||{};
+  if(Object.keys(coll).length===0){
+    document.getElementById('my-coll-content').innerHTML=`<div class="empty-state"><div class="empty-icon">🃏</div><div class="empty-title">컬렉션이 비어있어요</div><div class="empty-sub">팩 탐색에서 카드를 추가해보세요</div></div>`;
+    document.getElementById('coll-sub').textContent='';
+    return;
+  }
+  // Group by set
+  const bySet={};
+  Object.entries(coll).forEach(([key,qty])=>{
+    const idx = key.indexOf('_');
+    const setId = key.substring(0,idx);
+    const cardId = key.substring(idx+1);
+    if(!bySet[setId]) bySet[setId]={};
+    bySet[setId][cardId]=qty;
+  });
+  const totalQty = Object.values(coll).reduce((s,v)=>s+v,0);
+  document.getElementById('coll-sub').textContent = `총 ${totalQty}장 · ${Object.keys(coll).length}종류`;
+  let html='';
+  Object.entries(bySet).forEach(([setId,cards])=>{
+    const set = allSets.find(s=>s.id===setId);
+    const setName = set?set.name:setId;
+    const total = Object.values(cards).reduce((s,v)=>s+v,0);
+    html += `<div style="margin-bottom:28px">
+      <div class="section-header" style="margin-bottom:12px">
+        <div class="section-title" style="font-size:15px;display:flex;align-items:center;gap:10px">
+          ${set?.images?.logo?`<img src="${set.images.logo}" style="height:32px;object-fit:contain">`:'📦'}
+          ${setName}
+        </div>
+        <div class="section-subtitle">${total}장</div>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:8px">
+        ${Object.entries(cards).map(([cid,qty])=>`
+          <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:10px;text-align:center;cursor:pointer" onclick="openSetAndCard('${setId}','${setId+'_'+cid}')">
+            <div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--text3)">${cid.split('-').pop()}</div>
+            <div style="font-size:20px;font-weight:900;color:var(--accent)">×${qty}</div>
+          </div>`).join('')}
+      </div>
+    </div>`;
+  });
+  document.getElementById('my-coll-content').innerHTML=html;
+}
+
+async function openSetAndCard(setId, key){
+  if(!allSets.find(s=>s.id===setId)) return;
+  await openSet(setId);
+}
+
+// ─── SEARCH ───────────────────────────────────────────────────────────────────
+function onSearch(v){
+  if(document.getElementById('page-browse').style.display!=='none') renderSetGrid();
+  if(document.getElementById('page-cardlist').style.display!=='none') renderCardGrid();
+}
+
+// ─── TOAST ───────────────────────────────────────────────────────────────────
+function showToast(msg,type='info'){
+  const el=document.getElementById('toast');
+  el.textContent=msg; el.className='toast '+type+' show';
+  setTimeout(()=>el.classList.remove('show'),2500);
+}
+
+// ─── DEMO DATA ────────────────────────────────────────────────────────────────
+function getDemoSets(){
+  return [
+    {id:'sv8',name:'Surging Sparks',series:'Scarlet & Violet',printedTotal:191,total:252,releaseDate:'2024/11/08',images:{logo:'https://images.pokemontcg.io/sv8/logo.png',symbol:'https://images.pokemontcg.io/sv8/symbol.png'}},
+    {id:'sv7',name:'Stellar Crown',series:'Scarlet & Violet',printedTotal:142,total:175,releaseDate:'2024/09/13',images:{logo:'https://images.pokemontcg.io/sv7/logo.png'}},
+    {id:'sv6pt5',name:'Shrouded Fable',series:'Scarlet & Violet',printedTotal:64,total:99,releaseDate:'2024/08/02',images:{logo:'https://images.pokemontcg.io/sv6pt5/logo.png'}},
+    {id:'sv6',name:'Twilight Masquerade',series:'Scarlet & Violet',printedTotal:162,total:226,releaseDate:'2024/05/24',images:{logo:'https://images.pokemontcg.io/sv6/logo.png'}},
+    {id:'sv5',name:'Temporal Forces',series:'Scarlet & Violet',printedTotal:162,total:218,releaseDate:'2024/03/22',images:{logo:'https://images.pokemontcg.io/sv5/logo.png'}},
+    {id:'sv4pt5',name:'Paldean Fates',series:'Scarlet & Violet',printedTotal:91,total:245,releaseDate:'2024/01/26',images:{logo:'https://images.pokemontcg.io/sv4pt5/logo.png'}},
+    {id:'sv4',name:'Paradox Rift',series:'Scarlet & Violet',printedTotal:182,total:266,releaseDate:'2023/11/03',images:{logo:'https://images.pokemontcg.io/sv4/logo.png'}},
+    {id:'sv3pt5',name:'Pokemon 151',series:'Scarlet & Violet',printedTotal:165,total:207,releaseDate:'2023/09/22',images:{logo:'https://images.pokemontcg.io/sv3pt5/logo.png'}},
+    {id:'sv3',name:'Obsidian Flames',series:'Scarlet & Violet',printedTotal:197,total:230,releaseDate:'2023/08/11',images:{logo:'https://images.pokemontcg.io/sv3/logo.png'}},
+    {id:'sv2',name:'Paldea Evolved',series:'Scarlet & Violet',printedTotal:193,total:279,releaseDate:'2023/06/09',images:{logo:'https://images.pokemontcg.io/sv2/logo.png'}},
+    {id:'sv1',name:'Scarlet & Violet Base',series:'Scarlet & Violet',printedTotal:198,total:258,releaseDate:'2023/03/31',images:{logo:'https://images.pokemontcg.io/sv1/logo.png'}},
+    {id:'swsh12pt5',name:'Crown Zenith',series:'Sword & Shield',printedTotal:160,total:230,releaseDate:'2023/01/20',images:{logo:'https://images.pokemontcg.io/swsh12pt5/logo.png'}},
+    {id:'swsh12',name:'Silver Tempest',series:'Sword & Shield',printedTotal:195,total:245,releaseDate:'2022/11/11',images:{logo:'https://images.pokemontcg.io/swsh12/logo.png'}},
+    {id:'swsh11',name:'Lost Origin',series:'Sword & Shield',printedTotal:196,total:246,releaseDate:'2022/09/09',images:{logo:'https://images.pokemontcg.io/swsh11/logo.png'}},
+    {id:'swsh1',name:'Sword & Shield',series:'Sword & Shield',printedTotal:202,total:216,releaseDate:'2020/02/07',images:{logo:'https://images.pokemontcg.io/swsh1/logo.png'}},
+  ];
+}
+
+function getDemoCards(setId){
+  const names=['Charizard ex','Pikachu','Mewtwo ex','Gengar ex','Eevee','Snorlax','Mew ex','Gardevoir ex','Rayquaza ex','Giratina ex','Lugia ex','Ho-Oh ex'];
+  const rarities=['Common','Uncommon','Rare','Rare Holo','Double Rare','Ultra Rare','Illustration Rare','Special Illustration Rare','Hyper Rare'];
+  return names.map((name,i)=>({
+    id:`${setId}-${i+1}`,
+    name,
+    number:String(i+1).padStart(3,'0'),
+    rarity:rarities[i%rarities.length],
+    supertype:'Pokémon',
+    subtypes:[i%3===0?'Basic':i%3===1?'Stage 1':'Stage 2'],
+    hp:String((i+1)*20+100),
+    types:[['Fire','Water','Grass','Electric','Psychic','Dark','Dragon'][i%7]],
+    images:{small:`https://images.pokemontcg.io/${setId}/${i+1}.png`},
+    tcgplayer:{prices:{holofoil:{market:(i+1)*3.5,low:(i+1)*2,high:(i+1)*8}}},
+    cardmarket:null,
+    artist:'Demo Artist',
+  }));
+}
+
+// ─── INIT ────────────────────────────────────────────────────────────────────
+window.addEventListener('DOMContentLoaded',()=>{
+  const sess = localStorage.getItem('pdx_session');
+  if(sess){ try{ currentUser=JSON.parse(sess); APIKEY=localStorage.getItem('pdx_apikey_'+currentUser.email)||''; bootApp(); }catch{ localStorage.removeItem('pdx_session'); } }
+  setUILang(uiLang);
+  updateAuthUI();
 });
-
-updateBadge();
-loadSeries('ko'); // Load Korean series on startup
 </script>
 </body>
 </html>
