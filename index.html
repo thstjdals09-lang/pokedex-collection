@@ -710,6 +710,8 @@ function saveApiKey(){
 let APIKEY = '';
 let allSets = [];
 let tcgdexSets = { ko: [], ja: [] }; // sets from TCGdex per language
+const tcgdexSetCache = {};  // 'lang:setId' → full set data (cards included)
+const ptcgCardCache = {};   // ptcgSetId → cards array
 let currentSet = null;
 let currentSetSource = 'ptcg'; // 'ptcg' or 'tcgdex'
 let currentSetLang = 'en';
@@ -873,6 +875,16 @@ function getSetLogo(tcgdexSetId) {
   return logoPath ? `https://assets.tcgdex.net/en/${logoPath}/logo.webp` : null;
 }
 
+async function fetchTCGdexSet(lang, setId) {
+  const key = `${lang}:${setId}`;
+  if(tcgdexSetCache[key]) return tcgdexSetCache[key];
+  try {
+    const r = await fetch(`https://api.tcgdex.net/v2/${lang}/sets/${setId}`);
+    if(r.ok) { const d = await r.json(); tcgdexSetCache[key] = d; return d; }
+  } catch {}
+  return {};
+}
+
 async function loadTCGdexSets(lang) {
   try {
     const r = await fetch(`https://api.tcgdex.net/v2/${lang}/sets`);
@@ -1004,25 +1016,18 @@ async function openTCGdexSet(lang, setId) {
   const ptcgId = TCGDEX_TO_PTCG[setId]; // pokemontcg.io equivalent (used for logo + image fallback)
 
   try {
-    // Step 1: fetch set metadata in target language
-    const metaR = await fetch(`https://api.tcgdex.net/v2/${lang}/sets/${setId}`);
-    const setData = metaR.ok ? await metaR.json() : {};
+    // Step 1: fetch set metadata in target language (cached after first load)
+    const setData = await fetchTCGdexSet(lang, setId);
     const serieId = setData.serie?.id || setId.replace(/[0-9].*$/, '').toUpperCase();
     const setName = setData.name || setId;
     const serieName = setData.serie?.name || '';
 
-    // Step 2: fetch card list — Korean sets have empty cards[], use Japanese as proxy (same IDs/art)
+    // Step 2: card list — Korean sets have empty cards[], fetch Japanese as proxy (same IDs/art)
     let cards = setData.cards || [];
     let cardLang = lang;
     if(cards.length === 0) {
-      // Korean sets have no card data; Japanese sets use same artwork
-      try {
-        const jaR = await fetch(`https://api.tcgdex.net/v2/ja/sets/${setId}`);
-        if(jaR.ok) {
-          const jaD = await jaR.json();
-          if((jaD.cards||[]).length > 0) { cards = jaD.cards; cardLang = 'ja'; }
-        }
-      } catch {}
+      const jaData = await fetchTCGdexSet('ja', setId); // cached after first load
+      if((jaData.cards||[]).length > 0) { cards = jaData.cards; cardLang = 'ja'; }
     }
 
     // Step 3: build card objects with TCGdex JA image URL + pokemontcg.io as fallback
@@ -1114,17 +1119,22 @@ async function openSet(setId){
 
   document.getElementById('card-grid-wrap').innerHTML = `<div class="loading-state"><div class="spinner"></div><span>${t('loading')}</span></div>`;
 
-  // Load cards paginated
-  let page=1, all=[];
-  while(true){
-    const data = await apiGet(`/cards?q=set.id:${setId}&orderBy=number&page=${page}&pageSize=250`);
-    if(!data||!data.data||data.data.length===0) break;
-    all = all.concat(data.data);
-    if(all.length >= (data.totalCount||all.length)) break;
-    page++;
-    if(page>10) break;
+  // Load cards — use cache if available
+  if(ptcgCardCache[setId]) {
+    currentCards = ptcgCardCache[setId];
+  } else {
+    let page=1, all=[];
+    while(true){
+      const data = await apiGet(`/cards?q=set.id:${setId}&orderBy=number&page=${page}&pageSize=250`);
+      if(!data||!data.data||data.data.length===0) break;
+      all = all.concat(data.data);
+      if(all.length >= (data.totalCount||all.length)) break;
+      page++;
+      if(page>10) break;
+    }
+    currentCards = all.length > 0 ? all : getDemoCards(setId);
+    if(all.length > 0) ptcgCardCache[setId] = currentCards;
   }
-  currentCards = all.length > 0 ? all : getDemoCards(setId);
 
   // Build rarity filter
   const rarities = [...new Set(currentCards.map(c=>c.rarity||'Unknown').filter(Boolean))];
