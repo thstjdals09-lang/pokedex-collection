@@ -1200,19 +1200,19 @@ function tcgdexCardItemHTML(card, coll) {
   const owned = count>0;
   // card.image = TCGdex base URL (set in openTCGdexSet); append quality suffix
   const imgBase = card.image || (card.localId ? `https://assets.tcgdex.net/ja/${serieId}/${setId}/${card.localId}` : '');
-  const imgHigh = imgBase ? imgBase+'/high.webp' : '';
+  const imgLow = imgBase ? imgBase+'/low.webp' : '';
   // card.ptcgImg = pokemontcg.io fallback (same art, different lang text — shown if TCGdex CDN fails)
   const ptcgImg = card.ptcgImg || '';
   const safeId = (card.id||'').replace(/\W/g,'_');
   const nameEsc = (card.name||'').replace(/'/g,'&#39;');
-  // onerror: TCGdex high.webp fails → try pokemontcg.io → hide
+  // onerror: TCGdex low.webp fails → pokemontcg.io → hide
   const onerr = ptcgImg
     ? `if(this.src!=='${ptcgImg}'){this.src='${ptcgImg}';}else{this.style.display='none'}`
     : `this.style.display='none'`;
   return `<div class="card-item ${owned?'owned':''}" onclick="openTCGdexCard('${lang}','${card.id}')">
     <div class="card-img-wrap">
-      ${imgHigh
-        ? `<img src="${imgHigh}" alt="${nameEsc}" onerror="${onerr}">`
+      ${imgLow
+        ? `<img src="${imgLow}" alt="${nameEsc}" loading="lazy" decoding="async" onerror="${onerr}">`
         : '<div class="card-img-placeholder">🃏</div>'}
       ${owned?`<div class="card-owned-badge">✓</div>`:''}
       ${count>1?`<div class="card-count-badge">×${count}</div>`:''}
