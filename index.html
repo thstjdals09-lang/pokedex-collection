@@ -811,8 +811,48 @@ async function filterByLang(lang){
   renderSetGrid();
 }
 
+// Maps TCGdex KO/JA set IDs → pokemontcg.io set IDs for logo images
+// pokemontcg.io logos: https://images.pokemontcg.io/{ptcgId}/logo.png
+const TCGDEX_TO_PTCG = {
+  'SV1S':'sv1','SV1V':'sv1','SV1a':'sv1',
+  'SV2D':'sv2','SV2P':'sv2','SV2a':'sv3pt5',
+  'SV3':'sv3','SV3a':'sv3',
+  'SV4K':'sv4','SV4M':'sv4','SV4a':'sv4pt5',
+  'SV5K':'sv5','SV5M':'sv5','SV5a':'sv5',
+  'SV6':'sv6','SV6a':'sv6',
+  'SV7':'sv7','SV7a':'sv7',
+  'SV8':'sv8','SV8a':'sv8',
+  'SV9':'sv9','SV9a':'sv9',
+  'SV10':'sv10','SV11B':'sv10pt5','SV11W':'sv10pt5',
+  'S1W':'swsh1','S1H':'swsh1','S1a':'swsh2',
+  'S2':'swsh3','S3':'swsh5','S3a':'swsh4',
+  'S4':'swsh4','S4a':'swsh4pt5',
+  'S5R':'swsh6','S5I':'swsh6','S5a':'swsh6',
+  'S6K':'swsh7','S6H':'swsh7','S6a':'swsh7',
+  'S7R':'swsh8','S7D':'swsh8',
+  'S8':'swsh9','S8a':'swsh9','S8b':'swsh12pt5',
+  'S9':'swsh10','S9a':'swsh10',
+  'S10D':'swsh11','S10P':'swsh11','S10b':'swsh11','S10a':'swsh11',
+  'S11':'swsh12','S11a':'swsh12','S12':'swsh12','S12a':'swsh12pt5',
+  'SM1M':'sm1','SM1S':'sm1','SM1+':'sm1',
+  'SM2L':'sm2','SM2K':'sm2',
+  'SM3N':'sm3','SM3H':'sm3','SM3+':'sm35',
+  'SM4A':'sm4','SM4S':'sm4','SM4+':'sm4',
+  'SM5M':'sm5','SM5S':'sm5','SM5+':'sm5',
+  'SM6':'sm6','SM6a':'sm6','SM6b':'sm6',
+  'SM7':'sm7','SM7a':'sm7','SM7b':'sm7',
+  'SM8':'sm8','SM8a':'sm8','SM8b':'sm8pt5',
+  'SM9':'sm9','SM9a':'sm9','SM9b':'sm9',
+  'SM10':'sm10','SM10b':'sm10','SM11a':'sm11','SM11b':'sm11',
+  'SM12':'sm12','SM12a':'sm12pt5',
+};
+
+function getPTCGLogo(tcgdexSetId) {
+  const ptcgId = TCGDEX_TO_PTCG[tcgdexSetId];
+  return ptcgId ? `https://images.pokemontcg.io/${ptcgId}/logo.png` : null;
+}
+
 async function loadTCGdexSets(lang) {
-  // Do not cache — old cached data used wrong set IDs; always fetch fresh
   try {
     const r = await fetch(`https://api.tcgdex.net/v2/${lang}/sets`);
     if(r.ok) {
@@ -839,18 +879,18 @@ function renderSetGrid(){
   let sets;
   if(useTCGdex) {
     sets = tcgdexSets[tcgLang].map(s => {
-      // serie.id is the uppercase path component used in TCGdex asset URLs (e.g. "SV", "S", "SM")
       const serieId = s.serie?.id || s.id.replace(/[0-9].*$/, '').toUpperCase();
-      // TCGdex asset logo URL pattern: {lang}/{SERIE}/{SET_ID}/logo.{ext}
-      const logoBase = `https://assets.tcgdex.net/${tcgLang}/${serieId}/${s.id}/logo`;
+      // Use pokemontcg.io logo (confirmed working) as primary; TCGdex as fallback
+      const ptcgLogo = getPTCGLogo(s.id);
+      const tcgdexLogoBase = `https://assets.tcgdex.net/${tcgLang}/${serieId}/${s.id}/logo`;
       return {
         id: s.id,
         name: s.name,
         series: s.serie?.name || 'Other',
         total: s.cardCount?.total || s.cardCount?.official || null,
         releaseDate: s.releaseDate || '',
-        logo: logoBase + '.webp',
-        logofallback: logoBase + '.png',
+        logo: ptcgLogo || (tcgdexLogoBase + '.webp'),
+        logofallback: ptcgLogo ? (tcgdexLogoBase + '.webp') : (tcgdexLogoBase + '.png'),
         source: 'tcgdex',
         lang: tcgLang,
         serieId,
@@ -950,56 +990,53 @@ async function openTCGdexSet(lang, setId) {
     const setName = setData.name || setId;
     const serieName = setData.serie?.name || '';
 
-    // Logo URL: TCGdex assets follow {lang}/{SERIE}/{SET_ID}/logo.webp
-    const logoBase = `https://assets.tcgdex.net/${lang}/${serieId}/${setId}/logo`;
+    // Logo: pokemontcg.io has confirmed-working logos for international-equivalent sets
+    const ptcgLogo = getPTCGLogo(setId);
+    const tcgdexLogoBase = `https://assets.tcgdex.net/${lang}/${serieId}/${setId}/logo`;
+    const logoUrl  = ptcgLogo || (tcgdexLogoBase + '.webp');
+    const logo2Url = ptcgLogo ? (tcgdexLogoBase + '.webp') : (tcgdexLogoBase + '.png');
 
     currentSet = {
-      id: setId,
-      name: setName,
-      series: serieName,
-      source: 'tcgdex',
-      lang,
-      logo: logoBase + '.webp',
-      logopng: logoBase + '.png',
-      serieId,
+      id: setId, name: setName, series: serieName,
+      source: 'tcgdex', lang, serieId,
+      logo: logoUrl, logopng: logo2Url,
     };
 
-    // Step 2: get card list — try target lang first, fall back to 'ja' (same set IDs, has card images)
+    // Step 2: card list — try target lang, then Japanese proxy (same IDs, has images for SV era)
     let cards = (setData.cards || []);
     let cardLang = lang;
 
     if(cards.length === 0 && lang !== 'ja') {
-      // Korean TCGdex has metadata only; fetch Japanese cards as proxy (same set, same art)
+      // Try Japanese proxy (same set IDs, TCGdex JA has SV-era card images)
       try {
         const jaR = await fetch(`https://api.tcgdex.net/v2/ja/sets/${setId}`);
         if(jaR.ok) {
           const jaData = await jaR.json();
-          cards = jaData.cards || [];
-          cardLang = 'ja';
+          if((jaData.cards||[]).length > 0) { cards = jaData.cards; cardLang = 'ja'; }
         }
       } catch {}
     }
 
-    // Build card objects with correct image URLs
+    // Ensure each card has an image URL (TCGdex returns base URL; append /high.webp later)
     currentCards = cards.map(c => {
-      // TCGdex returns image as base URL (e.g. "https://assets.tcgdex.net/ja/SV/SV2a/001")
-      // If missing, construct it from known pattern
-      const imgBase = c.image || `https://assets.tcgdex.net/${cardLang}/${serieId}/${setId}/${c.localId}`;
+      const imgBase = c.image
+        || `https://assets.tcgdex.net/${cardLang}/${serieId}/${setId}/${c.localId}`;
       return { ...c, image: imgBase, source: 'tcgdex', lang };
     });
 
     const ud = getUserData(currentUser.email);
     const coll = ud.collection || {};
     const ownedCount = Object.keys(coll).filter(k => k.startsWith(`${lang}_${setId}_`)).length;
-    const proxyNote = (lang === 'ko' && cardLang === 'ja') ? ' · <small style="opacity:.7">카드 이미지: 일본판 기준</small>' : '';
+    const proxyNote = (cardLang === 'ja' && lang !== 'ja')
+      ? ' <small style="opacity:.65;font-size:11px">· 일본판 이미지</small>' : '';
 
     document.getElementById('exp-info-wrap').innerHTML = `
       <div class="expansion-info-header">
-        <img class="exp-info-logo" src="${currentSet.logo}" alt="${currentSet.name}"
-          onerror="this.src='${currentSet.logopng}';this.onerror=function(){this.style.display='none'}">
+        <img class="exp-info-logo" src="${logoUrl}" alt="${setName}"
+          onerror="this.src='${logo2Url}';this.onerror=function(){this.style.display='none'}">
         <div class="exp-info-details">
-          <div class="exp-info-name">${currentSet.name}</div>
-          <div class="exp-info-series">${currentSet.series}${proxyNote} · <span class="exp-badge ${lang==='ko'?'lang-ko':'lang-ja'}">${lang==='ko'?'한국판':'일본판'}</span></div>
+          <div class="exp-info-name">${setName}</div>
+          <div class="exp-info-series">${serieName}${proxyNote} · <span class="exp-badge ${lang==='ko'?'lang-ko':'lang-ja'}">${lang==='ko'?'한국판':'일본판'}</span></div>
         </div>
         <div class="exp-stats">
           <div class="stat-item"><div class="stat-num" id="owned-stat">${ownedCount}</div><div class="stat-label">${t('collected')}</div></div>
@@ -1008,7 +1045,17 @@ async function openTCGdexSet(lang, setId) {
       </div>`;
 
     if(currentCards.length === 0) {
-      document.getElementById('card-grid-wrap').innerHTML = `<div class="empty-state"><div class="empty-icon">📭</div><div class="empty-title">카드 데이터 없음</div><div class="empty-sub">이 팩의 카드 이미지는 TCGdex에 아직 없습니다</div></div>`;
+      const ptcgFallback = TCGDEX_TO_PTCG[setId];
+      if(ptcgFallback) {
+        // TCGdex has no card data — fall back to pokemontcg.io (same art, guaranteed images)
+        await openSet(ptcgFallback);
+        const nameEl = document.getElementById('exp-info-wrap')?.querySelector('.exp-info-name');
+        if(nameEl && setName) nameEl.textContent = setName;
+        const seriesEl = document.getElementById('exp-info-wrap')?.querySelector('.exp-info-series');
+        if(seriesEl) seriesEl.innerHTML += ` · <span class="exp-badge ${lang==='ko'?'lang-ko':'lang-ja'}">${lang==='ko'?'한국판':'일본판'}</span>`;
+        return;
+      }
+      document.getElementById('card-grid-wrap').innerHTML = `<div class="empty-state"><div class="empty-icon">📭</div><div class="empty-title">카드 데이터 없음</div><div class="empty-sub">TCGdex에 아직 카드 이미지가 없는 팩입니다</div></div>`;
     } else {
       renderCardGrid();
     }
