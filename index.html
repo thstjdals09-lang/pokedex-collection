@@ -405,16 +405,9 @@
           <div><div class="section-title" data-i18n="browse_title">확장팩 탐색</div><div class="section-subtitle" data-i18n="browse_sub">언어·시리즈별로 팩을 선택하세요</div></div>
         </div>
         <div class="lang-filter" id="lang-filter-bar">
-          <div class="lang-tag active" onclick="filterByLang('ALL')" data-lang="ALL">🌍 <span data-i18n="lang_all">전체</span></div>
-          <div class="lang-tag" onclick="filterByLang('EN')" data-lang="EN">🇺🇸 <span data-i18n="lang_en">영어판</span></div>
+          <div class="lang-tag active" onclick="filterByLang('KO')" data-lang="KO">🇰🇷 <span data-i18n="lang_ko">한국판</span></div>
           <div class="lang-tag" onclick="filterByLang('JA')" data-lang="JA">🇯🇵 <span data-i18n="lang_ja">일본판</span></div>
-          <div class="lang-tag" onclick="filterByLang('KO')" data-lang="KO">🇰🇷 <span data-i18n="lang_ko">한국판</span></div>
-          <div class="lang-tag" onclick="filterByLang('ZH-HANT')" data-lang="ZH-HANT">🇹🇼 <span data-i18n="lang_zhtw">번체 중문</span></div>
-          <div class="lang-tag" onclick="filterByLang('ZH-HANS')" data-lang="ZH-HANS">🇨🇳 <span data-i18n="lang_zhcn">간체 중문</span></div>
-          <div class="lang-tag" onclick="filterByLang('DE')" data-lang="DE">🇩🇪 독일판</div>
-          <div class="lang-tag" onclick="filterByLang('FR')" data-lang="FR">🇫🇷 프랑스판</div>
-          <div class="lang-tag" onclick="filterByLang('IT')" data-lang="IT">🇮🇹 이탈리아판</div>
-          <div class="lang-tag" onclick="filterByLang('PT')" data-lang="PT">🇵🇹 포르투갈판</div>
+          <div class="lang-tag" onclick="filterByLang('EN')" data-lang="EN">🇺🇸 <span data-i18n="lang_en">영어판</span></div>
         </div>
         <div id="expansion-grid-wrap"><div class="loading-state"><div class="spinner"></div><span data-i18n="loading">불러오는 중...</span></div></div>
       </div>
@@ -716,7 +709,7 @@ let currentSet = null;
 let currentSetSource = 'ptcg'; // 'ptcg' or 'tcgdex'
 let currentSetLang = 'en';
 let currentCards = [];
-let langFilter = 'ALL';
+let langFilter = 'KO';
 let ownedFilter = 'ALL';
 let rarityFilter = 'ALL';
 
@@ -739,7 +732,12 @@ function showPage(page){
   document.getElementById('topbar-title').textContent = t(titleMap[page]||'nav_dashboard');
   if(page==='admin') document.getElementById('topbar-title').textContent = '광고 관리';
   if(page==='dashboard') renderDashboard();
-  if(page==='browse'){ if(allSets.length===0) loadAllSets(); else renderSetGrid(); }
+  if(page==='browse'){
+    if(allSets.length===0) loadAllSets();
+    const browseLang = langFilter.toLowerCase();
+    if((langFilter==='KO'||langFilter==='JA') && tcgdexSets[browseLang].length===0) filterByLang(langFilter);
+    else renderSetGrid();
+  }
   if(page==='my-collection') renderMyCollection();
   if(page==='admin') renderAdminPage();
   // Close mobile sidebar on nav
@@ -846,6 +844,8 @@ const TCGDEX_TO_PTCG = {
   'SM9':'sm9','SM9a':'sm9','SM9b':'sm9',
   'SM10':'sm10','SM10b':'sm10','SM11a':'sm11','SM11b':'sm11',
   'SM12':'sm12','SM12a':'sm12pt5',
+  'SM10a':'sm10','SM11':'sm11',
+  'sn10a':'sm10','sn11':'sm11',
 };
 
 // Maps pokemontcg.io set IDs → EN TCGdex logo path (confirmed working CDN)
@@ -874,6 +874,11 @@ function getSetLogo(tcgdexSetId) {
   const logoPath = PTCG_TO_TCGDEX_LOGO[ptcgId];
   return logoPath ? `https://assets.tcgdex.net/en/${logoPath}/logo.webp` : null;
 }
+
+// Korean-specific set IDs that differ from standard JA IDs (for image fallback)
+const KO_TO_JA_ID = {
+  'sn10a': 'SM10a', 'sn11': 'SM11',
+};
 
 async function fetchTCGdexSet(lang, setId) {
   const key = `${lang}:${setId}`;
@@ -1026,7 +1031,8 @@ async function openTCGdexSet(lang, setId) {
     let cards = setData.cards || [];
     let cardLang = lang;
     if(cards.length === 0) {
-      const jaData = await fetchTCGdexSet('ja', setId); // cached after first load
+      const jaSetId = (lang === 'ko' && KO_TO_JA_ID[setId]) ? KO_TO_JA_ID[setId] : setId;
+      const jaData = await fetchTCGdexSet('ja', jaSetId); // cached after first load
       if((jaData.cards||[]).length > 0) { cards = jaData.cards; cardLang = 'ja'; }
     }
 
@@ -1549,25 +1555,184 @@ function getDemoCards(setId){
 }
 
 function getDemoTCGdexSets(lang) {
-  // TCGdex uses uppercase series IDs: SV, S (SWSH era), SM
-  // Korean and Japanese share the same set IDs in the SV/S era
   if(lang === 'ko') return [
-    {id:'SV2a',name:'포켓몬 카드 151',serie:{id:'SV',name:'스칼렛・바이올렛'},cardCount:{total:165},releaseDate:'2023-06-16'},
-    {id:'SV1S',name:'스칼렛ex',serie:{id:'SV',name:'스칼렛・바이올렛'},cardCount:{total:78},releaseDate:'2023-01-20'},
-    {id:'SV1V',name:'바이올렛ex',serie:{id:'SV',name:'스칼렛・바이올렛'},cardCount:{total:78},releaseDate:'2023-01-20'},
-    {id:'SV3',name:'흑염의 지배자',serie:{id:'SV',name:'스칼렛・바이올렛'},cardCount:{total:108},releaseDate:'2023-07-28'},
-    {id:'SV4a',name:'샤이니트레저 ex',serie:{id:'SV',name:'스칼렛・바이올렛'},cardCount:{total:190},releaseDate:'2023-12-01'},
-    {id:'S1W',name:'소드',serie:{id:'S',name:'소드・실드'},cardCount:{total:60},releaseDate:'2020-04-17'},
-    {id:'S1H',name:'실드',serie:{id:'S',name:'소드・실드'},cardCount:{total:60},releaseDate:'2020-04-17'},
+    // ── 스칼렛&바이올렛 (SV) ──
+    {id:'SV1S',name:'스칼렛ex',serie:{id:'SV',name:'스칼렛・바이올렛'},cardCount:{total:78}},
+    {id:'SV1V',name:'바이올렛ex',serie:{id:'SV',name:'스칼렛・바이올렛'},cardCount:{total:78}},
+    {id:'SV1a',name:'트리플렛비트',serie:{id:'SV',name:'스칼렛・바이올렛'},cardCount:{total:73}},
+    {id:'SV2D',name:'클레이버스트',serie:{id:'SV',name:'스칼렛・바이올렛'},cardCount:{total:71}},
+    {id:'SV2P',name:'스노해저드',serie:{id:'SV',name:'스칼렛・바이올렛'},cardCount:{total:71}},
+    {id:'SV2a',name:'포켓몬 카드 151',serie:{id:'SV',name:'스칼렛・바이올렛'},cardCount:{total:165}},
+    {id:'SV3',name:'흑염의 지배자',serie:{id:'SV',name:'스칼렛・바이올렛'},cardCount:{total:108}},
+    {id:'SV3a',name:'레이징서프',serie:{id:'SV',name:'스칼렛・바이올렛'},cardCount:{total:62}},
+    {id:'SV4K',name:'고대의 포효',serie:{id:'SV',name:'스칼렛・바이올렛'},cardCount:{total:95}},
+    {id:'SV4M',name:'미래의 일섬',serie:{id:'SV',name:'스칼렛・바이올렛'},cardCount:{total:95}},
+    {id:'SV4a',name:'샤이니트레저 ex',serie:{id:'SV',name:'스칼렛・바이올렛'},cardCount:{total:190}},
+    {id:'SV5K',name:'와일드포스',serie:{id:'SV',name:'스칼렛・바이올렛'},cardCount:{total:71}},
+    {id:'SV5M',name:'사이버저지',serie:{id:'SV',name:'스칼렛・바이올렛'},cardCount:{total:71}},
+    {id:'SV5a',name:'크림슨헤이즈',serie:{id:'SV',name:'스칼렛・바이올렛'},cardCount:{total:66}},
+    {id:'SV6',name:'변환의 가면',serie:{id:'SV',name:'스칼렛・바이올렛'},cardCount:{total:101}},
+    // ── 소드&실드 (S) ──
+    {id:'S12a',name:'VSTAR 유니버스',serie:{id:'S',name:'소드&실드'},cardCount:{total:172}},
+    {id:'S12',name:'패러다임트리거',serie:{id:'S',name:'소드&실드'},cardCount:{total:98}},
+    {id:'S11a',name:'백열의 아르카나',serie:{id:'S',name:'소드&실드'},cardCount:{total:68}},
+    {id:'S11',name:'로스트어비스',serie:{id:'S',name:'소드&실드'},cardCount:{total:100}},
+    {id:'S10a',name:'다크판타스마',serie:{id:'S',name:'소드&실드'},cardCount:{total:71}},
+    {id:'S10b',name:'Pokémon GO',serie:{id:'S',name:'소드&실드'},cardCount:{total:71}},
+    {id:'S10P',name:'스페이스저글러',serie:{id:'S',name:'소드&실드'},cardCount:{total:67}},
+    {id:'S10D',name:'타임게이저',serie:{id:'S',name:'소드&실드'},cardCount:{total:67}},
+    {id:'S9a',name:'배틀리전',serie:{id:'S',name:'소드&실드'},cardCount:{total:67}},
+    {id:'S9',name:'스타버스',serie:{id:'S',name:'소드&실드'},cardCount:{total:100}},
+    {id:'S8b',name:'VMAX 클라이맥스',serie:{id:'S',name:'소드&실드'},cardCount:{total:184}},
+    {id:'S8a',name:'25th Anniversary',serie:{id:'S',name:'소드&실드'},cardCount:{total:28}},
+    {id:'S8',name:'퓨전아츠',serie:{id:'S',name:'소드&실드'},cardCount:{total:100}},
+    {id:'S7D',name:'마천퍼펙트',serie:{id:'S',name:'소드&실드'},cardCount:{total:67}},
+    {id:'S7R',name:'창공의스트림',serie:{id:'S',name:'소드&실드'},cardCount:{total:67}},
+    {id:'S6a',name:'이브이 히어로즈',serie:{id:'S',name:'소드&실드'},cardCount:{total:69}},
+    {id:'S6H',name:'백은의 랜스',serie:{id:'S',name:'소드&실드'},cardCount:{total:70}},
+    {id:'S6K',name:'칠흑의 가이스트',serie:{id:'S',name:'소드&실드'},cardCount:{total:70}},
+    {id:'S5a',name:'쌍벽의 파이터',serie:{id:'S',name:'소드&실드'},cardCount:{total:70}},
+    {id:'S5I',name:'일격마스터',serie:{id:'S',name:'소드&실드'},cardCount:{total:70}},
+    {id:'S5R',name:'연격마스터',serie:{id:'S',name:'소드&실드'},cardCount:{total:70}},
+    {id:'S4a',name:'샤이니스타V',serie:{id:'S',name:'소드&실드'},cardCount:{total:190}},
+    {id:'S4',name:'앙천의 볼트태클',serie:{id:'S',name:'소드&실드'},cardCount:{total:100}},
+    {id:'S3a',name:'전설의 고동',serie:{id:'S',name:'소드&실드'},cardCount:{total:76}},
+    {id:'S3',name:'무한존',serie:{id:'S',name:'소드&실드'},cardCount:{total:100}},
+    {id:'S2a',name:'폭염워커',serie:{id:'S',name:'소드&실드'},cardCount:{total:70}},
+    {id:'S2',name:'반역크래시',serie:{id:'S',name:'소드&실드'},cardCount:{total:96}},
+    {id:'S1a',name:'VMAX라이징',serie:{id:'S',name:'소드&실드'},cardCount:{total:70}},
+    {id:'S1H',name:'실드',serie:{id:'S',name:'소드&실드'},cardCount:{total:60}},
+    {id:'S1W',name:'소드',serie:{id:'S',name:'소드&실드'},cardCount:{total:60}},
+    // ── 썬&문 (SM) ──
+    {id:'SM12a',name:'TAG TEAM GX 태그올스타즈',serie:{id:'SM',name:'썬&문'},cardCount:{total:173}},
+    {id:'SM12',name:'얼터제네시스',serie:{id:'SM',name:'썬&문'},cardCount:{total:95}},
+    {id:'SM11b',name:'드림리그',serie:{id:'SM',name:'썬&문'},cardCount:{total:49}},
+    {id:'SM11a',name:'리믹스바우트',serie:{id:'SM',name:'썬&문'},cardCount:{total:64}},
+    {id:'sn11',name:'미라클트윈',serie:{id:'SM',name:'썬&문'},cardCount:{total:94}},
+    {id:'SM10b',name:'스카이레전드',serie:{id:'SM',name:'썬&문'},cardCount:{total:56}},
+    {id:'SMP2',name:'명탐정 피카츄',serie:{id:'SM',name:'썬&문'},cardCount:{total:24}},
+    {id:'sn10a',name:'GG엔드',serie:{id:'SM',name:'썬&문'},cardCount:{total:54}},
+    {id:'SM10',name:'더블블레이즈',serie:{id:'SM',name:'썬&문'},cardCount:{total:95}},
+    {id:'SM9b',name:'풀메탈월',serie:{id:'SM',name:'썬&문'},cardCount:{total:54}},
+    {id:'SM9a',name:'나이트유니슨',serie:{id:'SM',name:'썬&문'},cardCount:{total:55}},
+    {id:'SM9',name:'태그볼트',serie:{id:'SM',name:'썬&문'},cardCount:{total:95}},
+    {id:'SM8b',name:'GX 울트라샤이니 ULTIMATE',serie:{id:'SM',name:'썬&문'},cardCount:{total:150}},
+    {id:'SM8a',name:'다크오더',serie:{id:'SM',name:'썬&문'},cardCount:{total:52}},
+    {id:'SM8',name:'버스트임팩트',serie:{id:'SM',name:'썬&문'},cardCount:{total:95}},
+    {id:'SM7b',name:'페어리라이즈',serie:{id:'SM',name:'썬&문'},cardCount:{total:50}},
+    {id:'SM7a',name:'플라스마 스파크',serie:{id:'SM',name:'썬&문'},cardCount:{total:50}},
+    {id:'SM7',name:'창공의 카리스마',serie:{id:'SM',name:'썬&문'},cardCount:{total:96}},
+    {id:'SM6b',name:'챔피언로드',serie:{id:'SM',name:'썬&문'},cardCount:{total:66}},
+    {id:'SM6a',name:'드래곤스톰',serie:{id:'SM',name:'썬&문'},cardCount:{total:53}},
+    {id:'SM6',name:'금단의 빛',serie:{id:'SM',name:'썬&문'},cardCount:{total:94}},
+    {id:'SM5+',name:'울트라포스',serie:{id:'SM',name:'썬&문'},cardCount:{total:50}},
+    {id:'SM5S',name:'울트라썬',serie:{id:'SM',name:'썬&문'},cardCount:{total:66}},
+    {id:'SM5M',name:'울트라문',serie:{id:'SM',name:'썬&문'},cardCount:{total:66}},
+    {id:'SM4+',name:'GX 배틀부스트',serie:{id:'SM',name:'썬&문'},cardCount:{total:114}},
+    {id:'SM4S',name:'각성의 용사',serie:{id:'SM',name:'썬&문'},cardCount:{total:50}},
+    {id:'SM4A',name:'초차원의 침략자',serie:{id:'SM',name:'썬&문'},cardCount:{total:50}},
+    {id:'SM3+',name:'빛나는 전설',serie:{id:'SM',name:'썬&문'},cardCount:{total:72}},
+    {id:'SM3H',name:'어둠을 밝힌 무지개',serie:{id:'SM',name:'썬&문'},cardCount:{total:51}},
+    {id:'SM3N',name:'빛을 삼킨 어둠',serie:{id:'SM',name:'썬&문'},cardCount:{total:51}},
+    {id:'SM2K',name:'알로라의 햇빛',serie:{id:'SM',name:'썬&문'},cardCount:{total:50}},
+    {id:'SM2L',name:'알로라의 달빛',serie:{id:'SM',name:'썬&문'},cardCount:{total:50}},
+    {id:'SM1+',name:'썬&문',serie:{id:'SM',name:'썬&문'},cardCount:{total:51}},
+    {id:'SM1S',name:'썬 컬렉션',serie:{id:'SM',name:'썬&문'},cardCount:{total:60}},
+    {id:'SM1M',name:'문 컬렉션',serie:{id:'SM',name:'썬&문'},cardCount:{total:60}},
   ];
   if(lang === 'ja') return [
-    {id:'SV2a',name:'ポケモンカード151',serie:{id:'SV',name:'スカーレット&バイオレット'},cardCount:{total:210},releaseDate:'2023-07-28'},
-    {id:'SV1S',name:'スカーレットex',serie:{id:'SV',name:'スカーレット&バイオレット'},cardCount:{total:108},releaseDate:'2023-01-20'},
-    {id:'SV1V',name:'バイオレットex',serie:{id:'SV',name:'スカーレット&バイオレット'},cardCount:{total:108},releaseDate:'2023-01-20'},
-    {id:'SV3',name:'黒炎の支配者',serie:{id:'SV',name:'スカーレット&バイオレット'},cardCount:{total:141},releaseDate:'2023-07-28'},
-    {id:'SV4a',name:'シャイニートレジャーex',serie:{id:'SV',name:'スカーレット&バイオレット'},cardCount:{total:320},releaseDate:'2023-12-22'},
-    {id:'SV5a',name:'クリムゾンヘイズ',serie:{id:'SV',name:'スカーレット&バイオレット'},cardCount:{total:96},releaseDate:'2024-01-26'},
-    {id:'SV6',name:'変幻の仮面',serie:{id:'SV',name:'スカーレット&バイオレット'},cardCount:{total:101},releaseDate:'2024-04-26'},
+    // ── スカーレット&バイオレット (SV) ──
+    {id:'SV11W',name:'ステラミラクル',serie:{id:'SV',name:'スカーレット&バイオレット'},cardCount:{total:102}},
+    {id:'SV11B',name:'ステラミラクル',serie:{id:'SV',name:'スカーレット&バイオレット'},cardCount:{total:102}},
+    {id:'SV10',name:'テラスタルフェスex',serie:{id:'SV',name:'スカーレット&バイオレット'},cardCount:{total:190}},
+    {id:'SV9a',name:'バトルパートナーズ',serie:{id:'SV',name:'スカーレット&バイオレット'},cardCount:{total:68}},
+    {id:'SV9',name:'ジャンボマーク',serie:{id:'SV',name:'スカーレット&バイオレット'},cardCount:{total:108}},
+    {id:'SV8a',name:'夜のタングロウ',serie:{id:'SV',name:'スカーレット&バイオレット'},cardCount:{total:68}},
+    {id:'SV8',name:'超電ブレイカー',serie:{id:'SV',name:'スカーレット&バイオレット'},cardCount:{total:96}},
+    {id:'SV7a',name:'楽園ドラゴーナ',serie:{id:'SV',name:'スカーレット&バイオレット'},cardCount:{total:68}},
+    {id:'SV7',name:'ステラワンダー',serie:{id:'SV',name:'スカーレット&バイオレット'},cardCount:{total:108}},
+    {id:'SV6a',name:'ナイトワンダラー',serie:{id:'SV',name:'スカーレット&バイオレット'},cardCount:{total:68}},
+    {id:'SV6',name:'変幻の仮面',serie:{id:'SV',name:'スカーレット&バイオレット'},cardCount:{total:101}},
+    {id:'SV5a',name:'クリムゾンヘイズ',serie:{id:'SV',name:'スカーレット&バイオレット'},cardCount:{total:96}},
+    {id:'SV5M',name:'サイバージャッジ',serie:{id:'SV',name:'スカーレット&バイオレット'},cardCount:{total:71}},
+    {id:'SV5K',name:'ワイルドフォース',serie:{id:'SV',name:'スカーレット&バイオレット'},cardCount:{total:71}},
+    {id:'SV4a',name:'シャイニートレジャーex',serie:{id:'SV',name:'スカーレット&バイオレット'},cardCount:{total:320}},
+    {id:'SV4M',name:'未来の一閃',serie:{id:'SV',name:'スカーレット&バイオレット'},cardCount:{total:95}},
+    {id:'SV4K',name:'古代の咆哮',serie:{id:'SV',name:'スカーレット&バイオレット'},cardCount:{total:95}},
+    {id:'SV3a',name:'レイジングサーフ',serie:{id:'SV',name:'スカーレット&バイオレット'},cardCount:{total:62}},
+    {id:'SV3',name:'黒炎の支配者',serie:{id:'SV',name:'スカーレット&バイオレット'},cardCount:{total:141}},
+    {id:'SV2a',name:'ポケモンカード151',serie:{id:'SV',name:'スカーレット&バイオレット'},cardCount:{total:207}},
+    {id:'SV2P',name:'スノーハザード',serie:{id:'SV',name:'スカーレット&バイオレット'},cardCount:{total:71}},
+    {id:'SV2D',name:'クレイバースト',serie:{id:'SV',name:'スカーレット&バイオレット'},cardCount:{total:71}},
+    {id:'SV1a',name:'トリプレットビート',serie:{id:'SV',name:'スカーレット&バイオレット'},cardCount:{total:73}},
+    {id:'SV1V',name:'バイオレットex',serie:{id:'SV',name:'スカーレット&バイオレット'},cardCount:{total:108}},
+    {id:'SV1S',name:'スカーレットex',serie:{id:'SV',name:'スカーレット&バイオレット'},cardCount:{total:108}},
+    // ── ソード&シールド (S) ──
+    {id:'S12a',name:'VSTARユニバース',serie:{id:'S',name:'ソード&シールド'},cardCount:{total:172}},
+    {id:'S12',name:'パラダイムトリガー',serie:{id:'S',name:'ソード&シールド'},cardCount:{total:98}},
+    {id:'S11a',name:'白熱のアルカナ',serie:{id:'S',name:'ソード&シールド'},cardCount:{total:68}},
+    {id:'S11',name:'ロストアビス',serie:{id:'S',name:'ソード&シールド'},cardCount:{total:100}},
+    {id:'S10a',name:'ダークファンタズマ',serie:{id:'S',name:'ソード&シールド'},cardCount:{total:71}},
+    {id:'S10b',name:'Pokémon GO',serie:{id:'S',name:'ソード&シールド'},cardCount:{total:71}},
+    {id:'S10P',name:'スペースジャグラー',serie:{id:'S',name:'ソード&シールド'},cardCount:{total:67}},
+    {id:'S10D',name:'タイムゲイザー',serie:{id:'S',name:'ソード&シールド'},cardCount:{total:67}},
+    {id:'S9a',name:'バトルリージョン',serie:{id:'S',name:'ソード&シールド'},cardCount:{total:67}},
+    {id:'S9',name:'スターバース',serie:{id:'S',name:'ソード&シールド'},cardCount:{total:100}},
+    {id:'S8b',name:'VMAXクライマックス',serie:{id:'S',name:'ソード&シールド'},cardCount:{total:184}},
+    {id:'S8a',name:'25thAnniversaryCollection',serie:{id:'S',name:'ソード&シールド'},cardCount:{total:28}},
+    {id:'S8',name:'フュージョンアーツ',serie:{id:'S',name:'ソード&シールド'},cardCount:{total:100}},
+    {id:'S7D',name:'摩天パーフェクト',serie:{id:'S',name:'ソード&シールド'},cardCount:{total:67}},
+    {id:'S7R',name:'蒼空ストリーム',serie:{id:'S',name:'ソード&シールド'},cardCount:{total:67}},
+    {id:'S6a',name:'イーブイヒーローズ',serie:{id:'S',name:'ソード&シールド'},cardCount:{total:69}},
+    {id:'S6H',name:'白銀のランス',serie:{id:'S',name:'ソード&シールド'},cardCount:{total:70}},
+    {id:'S6K',name:'漆黒のガイスト',serie:{id:'S',name:'ソード&シールド'},cardCount:{total:70}},
+    {id:'S5a',name:'双璧のファイター',serie:{id:'S',name:'ソード&シールド'},cardCount:{total:70}},
+    {id:'S5I',name:'一撃マスター',serie:{id:'S',name:'ソード&シールド'},cardCount:{total:70}},
+    {id:'S5R',name:'連撃マスター',serie:{id:'S',name:'ソード&シールド'},cardCount:{total:70}},
+    {id:'S4a',name:'シャイニースターV',serie:{id:'S',name:'ソード&シールド'},cardCount:{total:190}},
+    {id:'S4',name:'仰天のボルテッカー',serie:{id:'S',name:'ソード&シールド'},cardCount:{total:100}},
+    {id:'S3a',name:'伝説の鼓動',serie:{id:'S',name:'ソード&シールド'},cardCount:{total:76}},
+    {id:'S3',name:'無限の暗黒',serie:{id:'S',name:'ソード&シールド'},cardCount:{total:100}},
+    {id:'S2a',name:'爆炎ウォーカー',serie:{id:'S',name:'ソード&シールド'},cardCount:{total:70}},
+    {id:'S2',name:'反乱クラッシュ',serie:{id:'S',name:'ソード&シールド'},cardCount:{total:96}},
+    {id:'S1a',name:'VMAXライジング',serie:{id:'S',name:'ソード&シールド'},cardCount:{total:70}},
+    {id:'S1H',name:'シールド',serie:{id:'S',name:'ソード&シールド'},cardCount:{total:60}},
+    {id:'S1W',name:'ソード',serie:{id:'S',name:'ソード&シールド'},cardCount:{total:60}},
+    // ── サン&ムーン (SM) ──
+    {id:'SM12a',name:'TAG TEAM GX タッグオールスターズ',serie:{id:'SM',name:'サン&ムーン'},cardCount:{total:173}},
+    {id:'SM12',name:'オルタージェネシス',serie:{id:'SM',name:'サン&ムーン'},cardCount:{total:95}},
+    {id:'SM11b',name:'ドリームリーグ',serie:{id:'SM',name:'サン&ムーン'},cardCount:{total:49}},
+    {id:'SM11a',name:'リミックスバウト',serie:{id:'SM',name:'サン&ムーン'},cardCount:{total:64}},
+    {id:'SM11',name:'ミラクルツイン',serie:{id:'SM',name:'サン&ムーン'},cardCount:{total:94}},
+    {id:'SM10b',name:'スカイレジェンド',serie:{id:'SM',name:'サン&ムーン'},cardCount:{total:56}},
+    {id:'SM10a',name:'GGエンド',serie:{id:'SM',name:'サン&ムーン'},cardCount:{total:54}},
+    {id:'SM10',name:'ダブルブレイズ',serie:{id:'SM',name:'サン&ムーン'},cardCount:{total:95}},
+    {id:'SM9b',name:'フルメタルウォール',serie:{id:'SM',name:'サン&ムーン'},cardCount:{total:54}},
+    {id:'SM9a',name:'ナイトユニゾン',serie:{id:'SM',name:'サン&ムーン'},cardCount:{total:55}},
+    {id:'SM9',name:'タッグボルト',serie:{id:'SM',name:'サン&ムーン'},cardCount:{total:95}},
+    {id:'SM8b',name:'GXウルトラシャイニー',serie:{id:'SM',name:'サン&ムーン'},cardCount:{total:150}},
+    {id:'SM8a',name:'ダークオーダー',serie:{id:'SM',name:'サン&ムーン'},cardCount:{total:52}},
+    {id:'SM8',name:'バーストインパクト',serie:{id:'SM',name:'サン&ムーン'},cardCount:{total:95}},
+    {id:'SM7b',name:'フェアリーライズ',serie:{id:'SM',name:'サン&ムーン'},cardCount:{total:50}},
+    {id:'SM7a',name:'プラズマゲイル',serie:{id:'SM',name:'サン&ムーン'},cardCount:{total:50}},
+    {id:'SM7',name:'迅雷スパーク',serie:{id:'SM',name:'サン&ムーン'},cardCount:{total:96}},
+    {id:'SM6b',name:'チャンピオンロード',serie:{id:'SM',name:'サン&ムーン'},cardCount:{total:66}},
+    {id:'SM6a',name:'ドラゴンストーム',serie:{id:'SM',name:'サン&ムーン'},cardCount:{total:53}},
+    {id:'SM6',name:'禁断の光',serie:{id:'SM',name:'サン&ムーン'},cardCount:{total:94}},
+    {id:'SM5+',name:'ウルトラフォース',serie:{id:'SM',name:'サン&ムーン'},cardCount:{total:50}},
+    {id:'SM5S',name:'ウルトラサン',serie:{id:'SM',name:'サン&ムーン'},cardCount:{total:66}},
+    {id:'SM5M',name:'ウルトラムーン',serie:{id:'SM',name:'サン&ムーン'},cardCount:{total:66}},
+    {id:'SM4+',name:'GXバトルブースト',serie:{id:'SM',name:'サン&ムーン'},cardCount:{total:114}},
+    {id:'SM4S',name:'覚醒の勇者',serie:{id:'SM',name:'サン&ムーン'},cardCount:{total:50}},
+    {id:'SM4A',name:'超次元の暴獣',serie:{id:'SM',name:'サン&ムーン'},cardCount:{total:50}},
+    {id:'SM3+',name:'輝くレジェンド',serie:{id:'SM',name:'サン&ムーン'},cardCount:{total:72}},
+    {id:'SM3H',name:'光を喰らう闇',serie:{id:'SM',name:'サン&ムーン'},cardCount:{total:51}},
+    {id:'SM3N',name:'影を統べる者',serie:{id:'SM',name:'サン&ムーン'},cardCount:{total:51}},
+    {id:'SM2K',name:'アロラの陽ざし',serie:{id:'SM',name:'サン&ムーン'},cardCount:{total:50}},
+    {id:'SM2L',name:'アロラの月明かり',serie:{id:'SM',name:'サン&ムーン'},cardCount:{total:50}},
+    {id:'SM1+',name:'サン&ムーン',serie:{id:'SM',name:'サン&ムーン'},cardCount:{total:51}},
+    {id:'SM1S',name:'サンコレクション',serie:{id:'SM',name:'サン&ムーン'},cardCount:{total:60}},
+    {id:'SM1M',name:'ムーンコレクション',serie:{id:'SM',name:'サン&ムーン'},cardCount:{total:60}},
   ];
   return [];
 }
