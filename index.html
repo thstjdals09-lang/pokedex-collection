@@ -990,8 +990,10 @@ function renderSetGrid(){
   document.getElementById('expansion-grid-wrap').innerHTML = html;
 }
 
-// Open a TCGdex set (Korean/Japanese) — load card list page
+// Open a TCGdex set (Korean/Japanese) — load KO/JA card data with JA card images
 async function openTCGdexSet(lang, setId) {
+  currentSetSource = 'tcgdex';
+  currentSetLang = lang;
   showPage('cardlist');
   ownedFilter = 'ALL'; rarityFilter = 'ALL';
   document.getElementById('search-input').value = '';
@@ -999,84 +1001,69 @@ async function openTCGdexSet(lang, setId) {
   document.getElementById('card-grid-wrap').innerHTML = `<div class="loading-state"><div class="spinner"></div><span>${lang==='ko'?'한국판':'일본판'} 카드 불러오는 중...</span></div>`;
   document.getElementById('exp-info-wrap').innerHTML = '';
 
-  const ptcgId = TCGDEX_TO_PTCG[setId];
+  const ptcgId = TCGDEX_TO_PTCG[setId]; // pokemontcg.io equivalent (used for logo + image fallback)
 
-  // Fetch KO/JA set metadata (name for display, full data for no-PTCG fallback)
-  let setName = setId;
-  let setDataCache = {};
   try {
+    // Step 1: fetch set metadata in target language
     const metaR = await fetch(`https://api.tcgdex.net/v2/${lang}/sets/${setId}`);
-    if(metaR.ok) { setDataCache = await metaR.json(); setName = setDataCache.name || setId; }
-  } catch {}
-
-  if(ptcgId) {
-    // Use pokemontcg.io for cards: TCGdex CDN can be unreliable in East Asia
-    await openSet(ptcgId);
-    // Overlay KO/JA name, working logo, and language badge on openSet's header
-    const nameEl = document.getElementById('exp-info-wrap')?.querySelector('.exp-info-name');
-    if(nameEl && setName !== setId) nameEl.textContent = setName;
-    const logoUrl = getSetLogo(setId);
-    if(logoUrl) {
-      let logoEl = document.getElementById('exp-info-wrap')?.querySelector('.exp-info-logo');
-      if(!logoEl) {
-        // openSet didn't render a logo (set not in allSets cache) — insert one
-        const hdr = document.getElementById('exp-info-wrap')?.querySelector('.expansion-info-header');
-        if(hdr) {
-          logoEl = document.createElement('img');
-          logoEl.className = 'exp-info-logo';
-          hdr.insertBefore(logoEl, hdr.firstChild);
-        }
-      }
-      if(logoEl) {
-        logoEl.style.display = '';
-        logoEl.src = logoUrl;
-        logoEl.onerror = function(){ this.style.display='none'; };
-      }
-    }
-    const seriesEl = document.getElementById('exp-info-wrap')?.querySelector('.exp-info-series');
-    if(seriesEl) seriesEl.innerHTML += ` · <span class="exp-badge ${lang==='ko'?'lang-ko':'lang-ja'}">${lang==='ko'?'한국판':'일본판'}</span>`;
-    return;
-  }
-
-  // No pokemontcg.io mapping — try TCGdex directly (Japan-exclusive sets)
-  currentSetSource = 'tcgdex';
-  currentSetLang = lang;
-  try {
-    const setData = setDataCache;
+    const setData = metaR.ok ? await metaR.json() : {};
     const serieId = setData.serie?.id || setId.replace(/[0-9].*$/, '').toUpperCase();
+    const setName = setData.name || setId;
     const serieName = setData.serie?.name || '';
-    const logoBase = `https://assets.tcgdex.net/${lang}/${serieId}/${setId}/logo`;
-    currentSet = { id: setId, name: setName, series: serieName, source: 'tcgdex', lang, serieId };
 
-    let cards = (setData.cards || []);
-    if(cards.length === 0 && lang !== 'ja') {
+    // Step 2: fetch card list — Korean sets have empty cards[], use Japanese as proxy (same IDs/art)
+    let cards = setData.cards || [];
+    let cardLang = lang;
+    if(cards.length === 0) {
+      // Korean sets have no card data; Japanese sets use same artwork
       try {
         const jaR = await fetch(`https://api.tcgdex.net/v2/ja/sets/${setId}`);
-        if(jaR.ok) { const jaD = await jaR.json(); if((jaD.cards||[]).length>0) cards = jaD.cards; }
+        if(jaR.ok) {
+          const jaD = await jaR.json();
+          if((jaD.cards||[]).length > 0) { cards = jaD.cards; cardLang = 'ja'; }
+        }
       } catch {}
     }
-    currentCards = cards.map(c => ({
-      ...c,
-      image: c.image || `https://assets.tcgdex.net/ja/${serieId}/${setId}/${c.localId}`,
-      source: 'tcgdex', lang,
-    }));
+
+    // Step 3: build card objects with TCGdex JA image URL + pokemontcg.io as fallback
+    currentCards = cards.map(c => {
+      const imgBase = c.image || `https://assets.tcgdex.net/ja/${serieId}/${setId}/${c.localId}`;
+      const localNum = parseInt(c.localId, 10);
+      const ptcgImg = ptcgId && !isNaN(localNum)
+        ? `https://images.pokemontcg.io/${ptcgId}/${localNum}.png` : '';
+      return { ...c, image: imgBase, ptcgImg, source: 'tcgdex', lang };
+    });
+
+    // Logo: EN TCGdex logo (confirmed working; falls back to tcgdex logo path)
+    const logoUrl = getSetLogo(setId) || `https://assets.tcgdex.net/ja/${serieId}/${setId}/logo.webp`;
+    const logo2Url = getSetLogo(setId)
+      ? `https://assets.tcgdex.net/ja/${serieId}/${setId}/logo.webp`
+      : `https://assets.tcgdex.net/ja/${serieId}/${setId}/logo.png`;
+
+    currentSet = { id: setId, name: setName, series: serieName, source: 'tcgdex', lang, serieId, ptcgId };
 
     const ud = getUserData(currentUser.email);
     const coll = ud.collection || {};
     const ownedCount = Object.keys(coll).filter(k=>k.startsWith(`${lang}_${setId}_`)).length;
+    const langBadge = lang === 'ko' ? '한국판' : '일본판';
+    const langClass = lang === 'ko' ? 'lang-ko' : 'lang-ja';
+    const proxyNote = cardLang === 'ja' && lang === 'ko'
+      ? ' <small style="opacity:.6;font-size:11px">· 일본판 이미지</small>' : '';
+
     document.getElementById('exp-info-wrap').innerHTML = `
       <div class="expansion-info-header">
-        <img class="exp-info-logo" src="${logoBase}.webp" alt="${setName}"
-          onerror="this.src='${logoBase}.png';this.onerror=function(){this.style.display='none'}">
+        <img class="exp-info-logo" src="${logoUrl}" alt="${setName}"
+          onerror="this.src='${logo2Url}';this.onerror=function(){this.style.display='none'}">
         <div class="exp-info-details">
           <div class="exp-info-name">${setName}</div>
-          <div class="exp-info-series">${serieName} · <span class="exp-badge ${lang==='ko'?'lang-ko':'lang-ja'}">${lang==='ko'?'한국판':'일본판'}</span></div>
+          <div class="exp-info-series">${serieName}${proxyNote} · <span class="exp-badge ${langClass}">${langBadge}</span></div>
         </div>
         <div class="exp-stats">
           <div class="stat-item"><div class="stat-num" id="owned-stat">${ownedCount}</div><div class="stat-label">${t('collected')}</div></div>
           <div class="stat-item"><div class="stat-num">${currentCards.length}</div><div class="stat-label">${t('total_c')}</div></div>
         </div>
       </div>`;
+
     if(currentCards.length === 0) {
       document.getElementById('card-grid-wrap').innerHTML = `<div class="empty-state"><div class="empty-icon">📭</div><div class="empty-title">카드 데이터 없음</div><div class="empty-sub">이 팩은 아직 카드 이미지가 지원되지 않습니다</div></div>`;
     } else {
@@ -1191,20 +1178,25 @@ function renderCardGrid(){
 function tcgdexCardItemHTML(card, coll) {
   const lang = currentSetLang;
   const setId = currentSet?.id || '';
-  const serieId = currentSet?.serieId || setId.replace(/\d.*$/, '');
+  const serieId = currentSet?.serieId || setId.replace(/\d.*$/, '').toUpperCase();
   const key = `${lang}_${setId}_${card.id}`;
   const count = coll[key]||0;
   const owned = count>0;
-  // card.image is the base URL (set when loading via openTCGdexSet); fallback to constructed URL
-  const imgBase = card.image || (card.localId ? `https://assets.tcgdex.net/${lang}/${serieId}/${setId}/${card.localId}` : '');
+  // card.image = TCGdex base URL (set in openTCGdexSet); append quality suffix
+  const imgBase = card.image || (card.localId ? `https://assets.tcgdex.net/ja/${serieId}/${setId}/${card.localId}` : '');
   const imgHigh = imgBase ? imgBase+'/high.webp' : '';
-  const imgLow  = imgBase ? imgBase+'/low.webp'  : '';
+  // card.ptcgImg = pokemontcg.io fallback (same art, different lang text — shown if TCGdex CDN fails)
+  const ptcgImg = card.ptcgImg || '';
   const safeId = (card.id||'').replace(/\W/g,'_');
   const nameEsc = (card.name||'').replace(/'/g,'&#39;');
+  // onerror: TCGdex high.webp fails → try pokemontcg.io → hide
+  const onerr = ptcgImg
+    ? `if(this.src!=='${ptcgImg}'){this.src='${ptcgImg}';}else{this.style.display='none'}`
+    : `this.style.display='none'`;
   return `<div class="card-item ${owned?'owned':''}" onclick="openTCGdexCard('${lang}','${card.id}')">
     <div class="card-img-wrap">
       ${imgHigh
-        ? `<img src="${imgHigh}" alt="${nameEsc}" loading="lazy" onerror="this.src='${imgLow}';this.onerror=function(){this.style.display='none'}">`
+        ? `<img src="${imgHigh}" alt="${nameEsc}" onerror="${onerr}">`
         : '<div class="card-img-placeholder">🃏</div>'}
       ${owned?`<div class="card-owned-badge">✓</div>`:''}
       ${count>1?`<div class="card-count-badge">×${count}</div>`:''}
